@@ -1,0 +1,52 @@
+/*
+ *  CUSTOM FUNCTION
+ *    SQLGetColumn1Where ( returnField ; whereField ; whereValue; andSearch )
+ *
+ *  DESCRIPTION
+ *    Does a simple SQL Statement with where query(ies). If the whereField is left blank, will return all of the values in returnField
+ *
+ *  PARAMS
+ *    returnField: The field you want to return the value of
+ *    whereField: The field that contains the value to filter for
+ *    whereValue: A list of values to filter for
+ *    andSearch: Set to true to do an and search with each value in where value. Otherwise will be or
+ *
+ *  RETURNS
+ *    A list of values
+ *
+ *  DEPENDENCIES
+ *    SQLGetField: (https://www.briandunning.com/cf/2546)
+ *    SQLGetTable: (https://www.briandunning.com/cf/2547)
+ *
+ *  CHANGELOG
+ *    2019-10-16: Paul McCudden (paul@peak14.solutions): Created
+ *    2021-11-03: Paul McCudden (paul@peak14.solutions): Added the ability to pass a list into whereValue
+*/
+
+While (
+  // initialVariable
+  [
+    ~querry = "SELECT " & SQL.GetField ( returnField ) & " FROM " & SQL.GetTable ( returnField );
+    ~params = "";
+    ~i = 0;
+    ~count = ValueCount ( whereValue )
+  ];
+
+  // condition
+  ~i < ~count;
+
+  // logic
+  [
+    ~i = ~i + 1;
+    ~querry = ~querry &"¶  "& If ( ~i > 1; If ( andSearch; "AND "; "OR " ); "WHERE " ) & SQL.GetField ( whereField ) & " = ?";
+    ~params = ~params & "; " & GetValue ( whereValue ; ~i )
+  ];
+
+  // result
+  Evaluate (
+    "ExecuteSQL (¶" &
+    "  \"" & Substitute ( ~querry; "\""; "\\\"" ) & "\"¶" &
+    "  ; \"\"; \"\"" & ~params &¶&
+    ")" 
+  )
+)

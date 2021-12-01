@@ -1,0 +1,54 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetBaseTableName ( fieldOrTO )
+ *
+ *  DESCRIPTION
+ *    Lists the base table name for the passed field or table occurrence
+ *
+ *  PARAMS
+ *    fieldOrTO: A field's name, reference to a field, or a table occurrence name. If blank, will use the current table name.
+ *
+ *  RETURNS
+ *    The base table name as text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2021-09-17: Paul McCudden (paul@peak14.solutions): Created
+ *    2021-10-19: Paul McCudden (paul@peak14.solutions): Fixed bug that happened when the fieldOrTO wasn't a related field
+*/
+
+Let (
+    [
+        ~fn = Case (
+            not EvaluationError ( GetFieldName ( fieldOrTO ) );
+                GetFieldName ( fieldOrTO );
+            not EvaluationError ( GetField ( fieldOrTO ) ) or EvaluationError ( Evaluate ( fieldOrTO ) ) = 103;
+                fieldOrTO
+        );
+        ~tn = Case (
+            IsEmpty ( ~fn ) and IsEmpty ( fieldOrTO ); Get ( LayoutTableName );
+            IsEmpty ( ~fn ); fieldOrTO;
+            If (
+                Position ( ~fn ; "::" ; 1 ; 1 );
+                GetValue ( Substitute ( ~fn ; "::" ; ¶ ) ; 1 );
+                ~fn
+            )
+        )
+    ];
+
+    ExecuteSQL (
+        "SELECT DISTINCT BaseTableName " &
+		    "FROM FileMaker_Tables " &
+            "WHERE TableName = '" &
+
+                // Use filter values instead of SQL to allow for inconsistent letter cases.
+                GetValue ( FilterValues ( ExecuteSQL ( "SELECT DISTINCT TableName FROM FileMaker_Tables "; ""; "" ); ~tn ); 1 )
+
+            & "'"; 
+		""; 
+		"" 
+	)
+
+)

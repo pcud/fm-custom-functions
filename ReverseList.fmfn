@@ -1,0 +1,40 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ReverseList ( myList )
+ *
+ *  DESCRIPTION
+ *    Reverses the order of a list
+ *
+ *  PARAMS
+ *    myList: The list that you want to reverse the order of
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2021-06-17: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+
+  // initialVariable
+  [
+    ~newList = "";
+    ~i = 0
+  ];
+
+  // condition
+  ~i < ValueCount ( myList );
+
+  // logic
+  [
+    ~newList = If ( not IsEmpty ( ~newList ); ~newList & ¶ ) & GetValue ( myList ; ValueCount ( myList ) - ~i );
+    ~i = ~i + 1
+  ];
+
+  // result
+    ~newList
+)

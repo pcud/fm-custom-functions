@@ -1,0 +1,44 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetLayoutIDorName ( layout )
+ *
+ *  DESCRIPTION
+ *    Get the corresponding ID or layout name of the passed layout
+ *
+ *  PARAMS
+ *    layout: The layout name or ID to convert
+ *
+ *  RETURNS
+ *    Returns a string
+ *
+ *  DEPENDENCIES
+ *    ValuePosition CF: https://filemakerhacks.com/2011/06/12/valueposition-the-function-filemaker-forgot/
+ *
+ *  CHANGELOG
+ *    2018-04-19: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let ( 
+   [ 
+      //Lists of all layouts
+      ~currentLayout = Get ( LayoutName ) ;
+      ~ids = LayoutIDs ( Get ( FileName ) ) ; 
+      ~names = LayoutNames ( Get ( FileName ) ) ;
+      
+      //New Variable 
+      ~newLayout =
+         If ( Length ( GetAsNumber ( ~currentLayout ) ) = Length ( ~currentLayout ) ;
+            
+            //Entered Value is a Number
+            GetValue ( ~names ; ValuePosition ( ~ids ; ~currentLayout ) ) ;
+
+            //Entered Value is not a Number (text)
+            GetValue ( ~ids ; ValuePosition ( ~names ; ~currentLayout ) ) 
+         )
+   ];
+
+   If ( FilterValues ( ~ids ; ~currentLayout ) <> "" or FilterValues ( ~names ; ~currentLayout ) <> "" ;
+      Substitute ( ~newLayout ; ¶ ; "" ) ;
+      ""
+   )
+)

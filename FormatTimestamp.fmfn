@@ -1,0 +1,130 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FormatTimestamp ( theTimestamp; format )
+ *
+ *  DESCRIPTION
+ *    Formats a timestamp, date or time using the standard excel/google sheet function formatting
+ *
+ *  PARAMS
+ *    timestamp: The timestamp, date or time to format
+ *    format: The format as a text string. Key character:
+ *      Year Codes:
+ *          yy: The year as 2 digits
+ *          yyyy: The year as 4 digits
+ *      Month Codes:
+ *          m: The month as a 1 or 2 digits
+ *          mm: The month as 2 digits
+ *          mmm: The short name of the month
+ *          mmmm: The full name of the month
+ *          mmmmm: The first letter of the month name
+ *      Day Codes:
+ *          d: The day as 1 or 2 digits
+ *          dd: The day as 2 digits
+ *          ddd: The short name of the day of the week
+ *          dddd: The full name of the day of the week
+ *      Hour Codes:
+ *          HH: The hours on a 24-hour clock
+ *          hh: The hours on a 12-hour clock
+ *      Other Time Codes:
+ *          ii: The minutes
+ *          ss: The seconds
+ *          .000: The milliseconds as a fraction (to the same number of digits)
+ *          ap: For displaying hours based on a 12-hour clock and showing am or pm
+ *          AP: For displaying hours based on a 12-hour clock and showing AM or PM
+ *      Escaped Values:
+ *          Any value can be enclosed in "\" to be escaped
+ *          Note that two "\\" will need to be included in text strings
+ *      Help:
+ *          If format is "?", this function will output help text
+ *
+ *  EXAMPLES
+ *    DisplayTimestamp ( GetAsTimestamp ( "12/01/2000 1:00PM" ); "ddd, dd mm yyyy - hh:nn")
+ *      "Sat, 01 12 2000 - 13:00"
+ *    DisplayTimestamp ( GetAsTimestamp ( "01/01/2011 4:05PM" ); "d/m/yy h:nn ap")
+ *      "1/1/11 4:05 pm"
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2021-09-17: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+    [
+        theTimestamp = If ( IsEmpty ( theTimestamp ); Get ( CurrentTimestamp ); theTimestamp ); 
+        ~date = GetAsDate ( theTimestamp );
+        ~time = GetAsTime ( theTimestamp );
+        format = If ( IsEmpty ( format ); "?"; format);
+        ~keys = "ymdhns";
+
+        // Avoid loop if they want help text
+        ~toProcess = If ( format <> "?"; format );
+        ~formatted = If ( format = "?";
+            "FormatTimestamp ( theTimestamp; format ):¶"&
+            "Formats theTimestamp using the excel/google sheet conventions¶¶"&
+            "Year Codes:¶"&
+            "    yy: The year as 2 digits¶"&
+            "    yyyy: The year as 4 digits¶"&
+            "Month Codes:¶"&
+            "    m: The month as a 1 or 2 digits¶"&
+            "    mm: The month as 2 digits¶"&
+            "    mmm: The short name of the month¶"&
+            "    mmmm: The full name of the month¶"&
+            "    mmmmm: The first letter of the month name¶"&
+            "Day Codes:¶"&
+            "    d: The day as 1 or 2 digits¶"&
+            "    dd: The day as 2 digits¶"&
+            "    ddd: The short name of the day of the week¶"&
+            "    dddd: The full name of the day of the week¶"&
+            "Hour Codes:¶"&
+            "    HH: The hours on a 24-hour clock¶"&
+            "    hh: The hours on a 12-hour clock¶"&
+            "Other Time Codes:¶"&
+            "    ii: The minutes¶"&
+            "    ss: The seconds¶"&
+            "    .000: The milliseconds as a fraction (to the same number of digits)¶"&
+            "    ap: For displaying hours based on a 12-hour clock and showing am or pm¶"&
+            "    AP: For displaying hours based on a 12-hour clock and showing AM or PM¶"&
+            "Escaped Values:¶"&
+            "    Any value can be enclosed in \ to be escaped¶"&
+            "    Note that two \\ will need to be included in text strings¶"&
+            "Help:¶"&
+            "    If format is ?, this function will output help text"
+        )
+    ];
+
+    not IsEmpty ( ~toProcess);
+    
+    [
+        ~processing = Left ( ~toProcess; 1 );
+
+        // Grab full escaped value if we're processing the start of an escape
+        ~processing = If ( ~processing = "\\"; Middle ( format; 1; Position ( format; "\\"; 2; 1 ) ); ~processing );
+
+        // If there are multiple of the same character in a row, grab all of that character
+        ~processing = If ( Right ( Left ( ~toProcess; 2 ); 1) = ~processing; Middle ( format; 1; Position ( format; ~processing; 2; 1 ) ); ~processing);
+        
+        // We have the full processing section. Cut it out of what's left to process
+        ~toProcess = Right ( ~toProcess; Length ( ~toProcess) - Length ( ~processing ) );
+
+        // Format the processing section we have
+        ~formatted = ~formatted & Case (
+            ~processing = "\\\\"; "\\";
+            Left ( ~processing; 1) = "\\"; Right ( Left ( ~processing; Length ( ~processing ) - 1 ); Length ( ~processing ) - 2 );
+            ~processing = "yy"; Right ( GetAsText ( Year ( ~date ) ); 2 );
+            ~processing = "yyyy"; GetAsText ( Year ( ~date ) );
+            ~processing = "m"; GetAsText ( Month ( ~date ) );
+            ~processing = "mm"; Right ( "0" & GetAsText ( Month ( ~date ) ); 2 );
+            ~processing = "mmm"; Left ( MonthName ( ~date ); 3 );
+            ~processing = "mmmm"; MonthName ( ~date );
+
+
+            // If there is no match, output what they entered
+            ~processing
+        )
+
+    ];
+    
+    ~formatted
+)

@@ -1,0 +1,70 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ConvertExcelColToNum ( letter )
+ *
+ *  DESCRIPTION
+ *    Converts the letter of an excel column to its corresponding number
+ *
+ *  PARAMS
+ *    letter: The letter that corresponds to the excel column
+ *
+ *  RETURNS
+ *    Number
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2021-06-23: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+
+  // initialVariable
+  [
+    ~length = length ( letter );
+    ~i = 0;
+    ~number = 0
+  ];
+
+  // condition
+  ~i < ~length;
+
+  // logic
+  [
+    ~i = ~i + 1;
+    ~thisLetter = Lower ( Middle ( letter ; ~i ; 1 ) );
+    ~number = ~number + ( If ( ~i = ~length; 1; 26 ) * Case (
+      ~thisLetter = "a"; 1;
+      ~thisLetter = "b"; 2;
+      ~thisLetter = "c"; 3;
+      ~thisLetter = "d"; 4;
+      ~thisLetter = "e"; 5;
+      ~thisLetter = "f"; 6;
+      ~thisLetter = "g"; 7;
+      ~thisLetter = "h"; 8;
+      ~thisLetter = "i"; 9;
+      ~thisLetter = "j"; 10;
+      ~thisLetter = "k"; 11;
+      ~thisLetter = "l"; 12;
+      ~thisLetter = "m"; 13;
+      ~thisLetter = "n"; 14;
+      ~thisLetter = "o"; 15;
+      ~thisLetter = "p"; 16;
+      ~thisLetter = "q"; 17;
+      ~thisLetter = "r"; 18;
+      ~thisLetter = "s"; 19;
+      ~thisLetter = "t"; 20;
+      ~thisLetter = "u"; 21;
+      ~thisLetter = "v"; 22;
+      ~thisLetter = "w"; 23;
+      ~thisLetter = "x"; 24;
+      ~thisLetter = "y"; 25;
+      ~thisLetter = "z"; 26;
+      0
+    ) )
+  ];
+
+  // result
+    ~number
+)

@@ -1,0 +1,37 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONArray.appendList ( json ; path ; appendList ; jsonType )
+ *
+ *  DESCRIPTION
+ *    Appends a list of values onto a JSON Array. Maintains existing null values. This version uses recursion instead of the while loop for FM versions 17 and older.
+ *
+ *  PARAMS
+ *    json: The JSON to append the list to
+ *    path: The path where the list is in the JSON
+ *    appendList: The list to append to the list current at path
+ *    jsonType: The type of JSON, same as in JSONSetElement.
+ *
+ *  RETURNS
+ *    The JSON with the newly appended list. If there's a JSON error, returns "?"
+ *
+ *  CHANGELOG
+ *    2019-10-21: Paul McCudden (paul@peak14.solutions): Created
+ *    2020-05-20: Paul McCudden (paul@peak14.solutions): Changed While to to recursive for better backwards compatability
+ *    2021-07-12: Paul McCudden (paul@peak14.solutions): Fixed issue where if appendList was empty, would cause FM to crash
+*/
+
+Let (
+    [
+        ~json = json;
+        ~array = If ( not isEmpty ( ~json ) ; JSONListKeys ( ~json ; path ) );
+        ~isValidJSON = not ( Left ( ~array ; 1 ) = "?" ) or IsEmpty ( ~json );
+        ~newJSON = JSONSetElement ( ~json ; path & "[" & ValueCount ( ~array ) & "]"; GetValue ( appendList ; 1 ) ; jsonType )
+    ];
+
+    Case ( 
+        not ~isValidJSON ; "?" ;
+        ValueCount ( appendList ) <= 1 ; ~newJSON ;
+        JSONArray.appendList ( ~newJSON ; path ; RightValues ( appendList ; ValueCount ( appendList ) -1 ) ; jsonType )
+    )
+
+)

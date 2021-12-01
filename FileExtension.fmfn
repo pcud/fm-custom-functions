@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetFileExtension ( theFileName )
+ *
+ *  DESCRIPTION
+ *    Returns the extension of the passed fileName excluding the "."
+ *
+ *  PARAMS
+ *    theFile: The name of the file
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2020-07-20: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Right ( theFileName ; Length ( theFileName ) - Position ( theFileName ; "." ; Length ( theFileName ) ; -1 ) )

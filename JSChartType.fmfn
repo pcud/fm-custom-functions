@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSChartType ( number )
+ *
+ *  DESCRIPTION
+ *    Used to return the JSON Type for JSON charts
+ *
+ *  PARAMS
+ *    number: The number base the type off of
+ *
+ *  RETURNS
+ *    JSONNumber of JSONNull
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-10-05: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+If ( number > 0 ; "JSONNumber" ; "JSONNull" )

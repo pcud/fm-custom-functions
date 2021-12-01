@@ -1,0 +1,27 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isMac ()
+ *
+ *  DESCRIPTION
+ *    Use when you want to know if they're on a mac or not
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2021-07-20: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~platform = Get ( SystemPlatform )
+    ];
+
+    ~platform = 1
+)

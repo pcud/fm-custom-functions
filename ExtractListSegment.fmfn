@@ -1,0 +1,45 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ExtractListSegment ( theList ; divider ; segmentNum )
+ *
+ *  DESCRIPTION
+ *    Use when you have a list that contains multiple values per list item and you only want a single value.
+ *
+ *  PARAMS
+ *    theList: The list to extract from
+ *    divider: The value that divides each segment in the list
+ *    segmentNum: The segment of each list item you want to extract
+ *
+ *  RETURNS
+ *    Returns a list of values
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-06-24: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+
+  // initialVariable
+  [
+    ~count = ValueCount ( theList );
+    ~i = 0;
+    ~newList = ""
+  ];
+
+  // condition
+  ~i < ~count;
+
+  // logic
+  [
+    ~i = ~i + 1;
+    ~thisItem = GetValue ( theList ; ~i );
+    ~add = Position ( ~thisItem ; divider ; 1 ; 1 );
+    ~newList = If ( ~add ; List ( ~newList ; GetValue ( Substitute ( ~thisItem ; divider ; ¶ ) ; segmentNum ) ) ; ~newList )
+  ];
+
+  // result
+    ~newList
+)

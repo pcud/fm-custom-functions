@@ -1,0 +1,30 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetParameter ( var )
+ *
+ *  DESCRIPTION
+ *    Grabs a value from Get ( ScriptParameter ) and if it doesn't exist in the parameter, sets it to it's current value
+ *
+ *  PARAMS
+ *    var: The name of the variable
+ *    convertArrayToList: Set to true if you want to return an array as a list
+ *
+ *  RETURNS
+ *    Returns the parameter
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2020-04-04: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    ~json = Get ( ScriptParameter ) ;
+    ~value = JSONGetElement ( ~json ; var )
+  ];
+
+  If ( IsEmpty ( ~value ) or IsEmpty ( ~json ) ; Evaluate ( "$" & var ) ; ~value )
+
+)

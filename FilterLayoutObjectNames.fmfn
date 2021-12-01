@@ -1,0 +1,46 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FilterLayoutObjectNames ( searchString )
+ *
+ *  DESCRIPTION
+ *    Use to get a list of all object names on the current layout that contain the searchString
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    Returns a list of all layout objects that contain searchString
+ *
+ *  DEPENDENCIES
+ *    Custom Function: CullNulls (https://www.briandunning.com/cf/897)
+ *
+ *  CHANGELOG
+ *    2020-03-03: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+  //initialVariable
+  [
+    ~objectList = CullNulls ( Substitute ( LayoutObjectNames ( Get ( FileName ) ; Get ( LayoutName ) ) ; 
+      ["<" ; ""];
+      [">" ; ""]
+    ) );
+    ~i = 0;
+    ~count = ValueCount ( ~objectList );
+    ~newList = ""
+  ]; 
+
+  //condition
+  ~i < ~count;
+
+  //logic
+  [
+    ~i = ~i + 1;
+    ~thisObject = GetValue ( ~objectList ; ~i );
+    ~newList = List ( ~newList ; If ( PatternCount ( ~thisObject ; searchString ) ; ~thisObject ) )
+  ]; 
+
+  //result
+  SortValues ( ~newList )
+
+)

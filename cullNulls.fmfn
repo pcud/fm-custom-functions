@@ -1,0 +1,33 @@
+/*
+CUSTOM FUNCTION: CullNulls ( listOfValues )
+by Debi Fuchs of Aptworks Consulting, debi@aptworks.com
+
+Speedily (and with no recursion) remove empty items from a list.
+     e.g. CullNulls("¶9¶2¶4¶¶7¶¶¶") -> "9¶2¶4¶7"
+
+LAST MODIFIED: 13-AUG-2008 by Debi Fuchs of Aptworks Consulting
+*/
+
+Let(
+
+  s = Get ( UUID ); //very unlikely string
+
+  If(
+
+    //Check if unlikely string rears its head
+    Position( listOfValues; s; 0; 1 );
+
+    //If so, simulate an out-of-range error.
+    Evaluate( "Factorial( -1 )" ); 
+
+    // Otherwise, proceed to get rid of nulls
+    Substitute(
+      s & listOfValues & s;
+      [ "¶¶"; ¶ & s & ¶ ];
+      [ "¶¶"; ¶ & s & ¶ ];
+      [ s & ¶; "" ];
+      [ ¶ & s; "" ];
+      [ s; "" ]
+    )
+  )
+)

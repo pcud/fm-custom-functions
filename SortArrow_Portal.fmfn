@@ -1,0 +1,48 @@
+/*
+ *  CUSTOM FUNCTION
+ *    SortArrow_Portal ( field ; isAsc ; portal )
+ *
+ *  DESCRIPTION
+ *    Used to find out if this specific arrow should be shown given the passed params
+ *
+ *  PARAMS
+ *    field: The field this arrow represents
+ *    isAsc: True if this arrow represents ascending, false if descending
+ *    portal: The name of the portal where the field resides
+ *
+ *  RETURNS
+ *    Boolean
+ *
+ *  DEPENDENCIES
+ *    Global Variable: $$PortalSortInfo
+ *    Script: Portal Sort (Sets the above global variable) - if the name is changed in the script, has to be changed here
+ *
+ *  CHANGELOG
+ *    2020-06-19: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    ~globalVarName = "$$PortalSortInfo";
+    ~table =	ExecuteSQL (	"SELECT BaseTableName FROM FileMaker_Tables WHERE TableName='" & GetLayoutObjectAttribute ( portal ; "source" ) & "'" ; "" ; "" );
+    ~thisObject = JSONGetElement ( Evaluate ( ~globalVarName ) ; ~table & "." & Get ( LayoutName ) & ".currentSort" )
+  ];
+
+  Case ( 
+
+    // Is the global properly formated/exist? Hide if not
+    isEmpty ( Evaluate ( ~globalVarName ) ) or Left ( JSONFormatElements ( Evaluate ( ~globalVarName ) ); 1 ) = "?";
+    True;
+
+    // Is this current field the one being sorted?
+    JSONGetElement ( ~thisObject ; "field" ) = GetFieldName ( field );
+
+    // If so, is it ascending?
+    JSONGetElement ( ~thisObject ; "isAsc" ) <> isAsc ; 
+
+    // Otherwise hide
+    True
+
+  )
+
+)

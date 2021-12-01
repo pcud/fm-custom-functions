@@ -1,0 +1,28 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetOpenDataFileID (path)
+ *
+ *  DESCRIPTION
+ *    Finds the ID of the open file with the passed path. 
+ *
+ *  PARAMS
+ *    path: The exact path of the open file
+ *
+ *  RETURNS
+ *    Returns the ID of the file or an empty string
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-04-24: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    ~list = Substitute ( Get ( OpenDataFileInfo ) ; Char ( 9 ) ; ¶ )
+  ];
+
+  GetValue ( ~list ; ValueCount ( Left ( ~list ; Position ( ¶ & ~list & ¶ ; ¶ & path & ¶ ; 1 ; 1 ) ) ) - 1 )
+
+)

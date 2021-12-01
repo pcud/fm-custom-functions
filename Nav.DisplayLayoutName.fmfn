@@ -1,0 +1,39 @@
+/*
+ *  CUSTOM FUNCTION
+ *    Nav.DisplayLayoutName ( offset )
+ *
+ *  DESCRIPTION
+ *    Use to get the layout name of a specific layout from $$nav_history
+ *
+ *  PARAMS
+ *    offset: 0 is the current layout, -1 is the previous layout, 1 is the next layout, etc
+ *
+ *  RETURNS
+ *    The name of a layout
+ *
+ *  DEPENDENCIES
+ *    VAR: $$nav_history
+ *
+ *  CHANGELOG
+ *    2020-04-12: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    //Initial Variables
+    ~wName = Get ( WindowName );
+    ~thisHistory = JSONGetElement ( $$nav_history ; ~wName );
+    ~currentIndex = JSONGetElement ( ~thisHistory ; "currentIndex" );
+    ~minIndex = 0;
+    ~maxIndex = ValueCount ( JSONListKeys ( ~thisHistory ; "history" ) ) - 1;
+    ~displayIndex = ~currentIndex + offset
+  ];
+
+  Case (
+    ( ~displayIndex <= ~maxIndex ) and ( ~displayIndex >= ~minIndex ) ;
+    JSONGetElement ( ~thisHistory ; "history.[" & ~displayIndex & "].name" ) ;
+    //Out of range, simulate error
+    Evaluate ( Factorial ( -1 ) )
+  )
+
+)

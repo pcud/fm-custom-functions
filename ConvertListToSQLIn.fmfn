@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ConvertListToSQLIn ( theList )
+ *
+ *  DESCRIPTION
+ *    Converts a naitve FileMaker list into a list to be used for the SQL In function
+ *
+ *  PARAMS
+ *    theList: The list to convert
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    CullNulls Custom Function (https://www.briandunning.com/cf/897)
+ *
+ *  CHANGELOG
+ *    2020-09-30: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+"'" & Substitute ( CullNulls ( theList ) ; ¶ ; "', '" ) & "'"

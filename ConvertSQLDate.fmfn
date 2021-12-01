@@ -1,0 +1,35 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ConvertSQLDate ( SQLDate )
+ *
+ *  DESCRIPTION
+ *    Converts an SQL formatted date into a naitve FileMaker one
+ *
+ *  PARAMS
+ *    date: An SQL formatted date (YYYY-MM-DD hh:mm:ss.nnnnnnn)
+ *
+ *  RETURNS
+ *    A filemaker naitve date
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2021-07-14: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let(
+  [
+    ~dateList = Substitute ( GetValue ( Substitute ( SQLDate; " "; ¶ ); 1 ); "-"; ¶ )
+  ];
+
+  Timestamp (
+    Date (
+      GetValue ( ~dateList; 2 );
+      GetValue ( ~dateList; 3 );
+      GetValue ( ~dateList; 1 )
+    );
+    GetValue ( Substitute ( SQLDate; " "; ¶ ); 2 )
+  )
+
+)

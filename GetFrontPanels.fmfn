@@ -1,0 +1,46 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetFrontPanels ( objectNameList )
+ *
+ *  DESCRIPTION
+ *    Use to find the name(s) of the current front panels. If objectNameList is null, will use all object names on layout
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    A list of all objects that front panels
+ *
+ *  DEPENDENCIES
+ *    Custom Function: CullNulls (https://www.briandunning.com/cf/897)
+ *
+ *  CHANGELOG
+ *    2020-03-04: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+  //initialVariable
+  [
+    ~objectList = If ( IsEmpty ( objectNameList ) ; CullNulls ( Substitute ( LayoutObjectNames ( Get ( FileName ) ; Get ( LayoutName ) ) ; 
+      ["<" ; ""];
+      [">" ; ""]
+    ) ) ; objectNameList ) ;
+    ~i = 0;
+    ~count = ValueCount ( ~objectList );
+    ~frontList = ""
+  ]; 
+
+  //condition
+  ~i < ~count;
+
+  //logic
+  [
+    ~i = ~i + 1;
+    ~thisObject = GetValue ( ~objectList ; ~i );
+    ~frontList = List ( ~frontList ; If ( GetLayoutObjectAttribute ( ~thisObject ; "isFrontPanel" ) ; ~thisObject ) )
+  ]; 
+
+  //result
+  CullNulls ( ~frontList )
+
+)

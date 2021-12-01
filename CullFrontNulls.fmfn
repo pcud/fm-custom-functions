@@ -1,0 +1,39 @@
+/*
+ *  CUSTOM FUNCTION
+ *    CullNulls ( theList )
+ *
+ *  DESCRIPTION
+ *    Gets rid of all null at the front of a list
+ *
+ *  PARAMS
+ *    theList: A list of values
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-09-09: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+    // initial vars
+    [
+        ~list = theList
+    ];
+
+    // iterate when
+    IsEmpty ( GetValue ( ~list ; 1 ) );
+
+    // loop
+    [
+        ~thisItem = GetValue ( ~list ; 1 );
+        ~right = RightValues ( ~list ; ValueCount ( ~list ) );
+        ~list = If ( not IsEmpty ( ~thisItem ) ; ~thisItem ) & ~right
+    ];
+
+    // result
+    ~list
+)

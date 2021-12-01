@@ -1,0 +1,32 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetAccountUUID ()
+ *
+ *  DESCRIPTION
+ *    If you have an users table, use this instead of Get ( AccountName ) so you will get the proper casing of the account name.
+ *    Get ( AccountName ) returns the casing as the user entered it when they logged in.
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    The account UUID as entered in the users table
+ *
+ *  DEPENDENCIES
+ *    SQL.Get1ColumnWhere
+ *
+ *  CHANGELOG
+ *    2021-09-13: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+
+SQL.Get1ColumnWhere ( 
+   Users::PrimaryKey;
+   Users::UserName;
+   Trim (
+      FilterValues (
+         SQL.Get1ColumnWhere ( Users::Username ; "" ; "" );
+         Get ( AccountName )
+      )
+   )
+)

@@ -1,0 +1,39 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ModificationText ( text ; tstampFormat ; act ; tstamp )
+ *
+ *  DESCRIPTION
+ *    The text you want to display for modification text. In a CF for easy edit.
+ *
+ *  PARAMS
+ *    text: The text format you want to use (recommended to use a global field for easy editing). There are the following options:
+ *      <<act>> is replaced with act
+ *      <<tstamp>> is replaced with tstamp
+ *    tstampFormat: The format to display the timestamp in. Check the FormatTimestamp CF for options
+ *    act: The account name to display
+ *    tstamp: The timestamp to display
+ *
+ *  RETURNS
+ *    A string
+ *
+ *  DEPENDENCIES
+ *    CF: FormatTimestamp (https://www.briandunning.com/cf/629)
+ *
+ *  CHANGELOG
+ *    2020-05-22: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~text = If ( isEmpty ( text ) ; "Last updated by <<act>> on <<stamp>>." ; text );
+        ~tstampFormat = If ( isEmpty ( tstampFormat ) ; "[MM]/[DD]/[YY] at [h]:[mm][am]" ; tstampFormat );
+        ~tstamp = If ( isEmpty ( tstamp ) ; GetField ( Get ( LayoutTableName ) & "::ModificationTimeStamp" ) ; tstamp );
+        ~act = If ( isEmpty ( act ) ; GetField ( Get ( LayoutTableName ) & "::ModificationAccount" ) ; act )
+    ];
+
+    Substitute ( ~text ; 
+        ["<<act>>" ; ~act ];
+        ["<<tstamp>>" ; FormatTimestamp ( ~tstampFormat ; ~tstamp )]
+    )
+
+)

@@ -1,0 +1,47 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetHTTPResponseCode ( responseHeaders )
+ *
+ *  DESCRIPTION
+ *    Gets the last HHTP Response Code from the passed response headers
+ *
+ *  PARAMS
+ *    responseHeaders: the response header(s) returned by an API call
+ *
+ *  RETURNS
+ *    Number
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  NOTES
+ *    List of HTTP Reponse Codes: https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+ *
+ *  CHANGELOG
+ *    2021-07-17: Paul McCudden (paul@peak14.solutions): Created
+*/ 
+
+While (
+    [
+        ~stop = False;
+        ~lineCount = ValueCount ( responseHeaders );
+        ~i = 0;
+        ~responseCodeStart = "HTTP/1.1"
+
+    ];
+
+    not ~stop;
+
+    [
+        // Countfrom the bottom line up since we only want the last code
+        ~thisLine = GetValue ( responseHeaders; ~lineCount - ~i );
+        ~i = ~i + 1;
+        ~isResponseCode = Left ( ~thisLine; Length ( ~responseCodeStart ) ) = ~responseCodeStart;
+        ~responseCode = If ( ~isResponseCode; Middle ( ~thisLine ; Length ( ~responseCodeStart ) + 2 ; 3 ) );
+        ~responseDescription = If ( ~isResponseCode; Right ( ~thisLine ; Length ( ~thisLine ) - ( Length ( ~responseCodeStart ) + 5 ) ) );
+        ~stop = ~isResponseCode
+
+    ];
+
+    ~responseCode
+)

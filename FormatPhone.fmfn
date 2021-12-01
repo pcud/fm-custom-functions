@@ -1,0 +1,33 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FormatPhone ( phoneNumber )
+ *
+ *  DESCRIPTION
+ *    Formats the phone number to be the proper format. This currently only accounts for US area codes
+ *
+ *  PARAMS
+ *    phoneNumber: The phone number to format
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2021-11-09: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~numbers = Filter ( phoneNumber; "0123456789" );
+        ~countryCode = If ( Left ( ~numbers; 1 ) = 1 and Length ( ~numbers ) > 10 ; 1 )
+    ];
+
+    If ( not IsEmpty ( ~countryCode ); "+" & ~countryCode & " " ) &
+    "(" & Middle ( ~numbers; Length ( ~countryCode ) + 1; 3 ) & ") " &
+    Middle ( ~numbers ; Length ( ~countryCode ) + 4 ; 3 ) & "-" &
+    Middle ( ~numbers ; Length ( ~countryCode ) + 7 ; 4 ) &
+    If ( Length ( ~numbers ) + Length ( ~countryCode ) > 11 ; " ext: " & Right ( ~numbers ; Length ( ~numbers ) - 10 - Length ( ~countryCode ) ) )
+
+)

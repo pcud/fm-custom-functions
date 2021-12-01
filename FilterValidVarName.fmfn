@@ -1,0 +1,28 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FilterValidVarName ( varName )
+ *
+ *  DESCRIPTION
+ *    Filters only the characters that are allowed in variable names
+ *
+ *  PARAMS
+ *    varName: The variable name to return the filter of
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    Custom Function: Exclude (https://www.briandunning.com/cf/922)
+ *
+ *  CHANGELOG
+ *    2020-10-06: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~exclude = ",+-*/^&=≠><()[]{}\";:$"
+    ];
+
+    Exclude ( varName ; ~exclude )
+
+)

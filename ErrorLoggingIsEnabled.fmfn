@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorLoggingIsEnabled ()
+ *
+ *  DESCRIPTION
+ *    Checks to see if the error logging is enabled
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    ""
+ *
+ *  DEPENDENCIES
+ *    $$errorLoggingDisabled
+ *
+ *  CHANGELOG
+ *    2020-04-28: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+not $$errorLoggingDisabled or IsEmpty ( $$errorLoggingDisabled )

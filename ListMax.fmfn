@@ -1,0 +1,43 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ListMax ( theList )
+ *
+ *  DESCRIPTION
+ *    Finds the max value of a list
+ *
+ *  PARAMS
+ *    theList: the list the contains the values you want to find the max of
+ *
+ *  RETURNS
+ *    Number
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2021-11-04: Paul McCudden (paul@peak14.solutions): Created
+ *
+ *  CREDITS
+ *    Credit goes to Debi Fuchs of Aptworks Consulting, debi@aptworks.com for the strategy of getting rid of null list values
+*/
+
+Let(
+    [
+        ~unique = Get(UUID);
+        ~newList = Substitute( ~unique & Filter( theList; "0123456789¶.-" ) & ~unique;
+            [ "¶¶"; ¶ & ~unique & ¶ ];
+            [ "¶¶"; ¶ & ~unique & ¶ ];
+            [ ~unique & ¶; "" ];
+            [ ¶ & ~unique; "" ];
+            [ ~unique; "" ];
+            [ ¶ ; ";" ]
+        )
+    ];
+
+    Case ( 
+        IsEmpty ( ~newList ); 0;
+        PatternCount ( ~newList; ";" ) = 0; ~newList;
+        Evaluate ( "Max(" & ~newList & ")" )
+    )
+    
+)

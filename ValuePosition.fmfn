@@ -1,0 +1,34 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ValuePosition ( theList; theValue )
+ *
+ *  DESCRIPTION
+ *    Returns the position of theValue in theList
+ *
+ *  PARAMS
+ *    theList: the list the contains the values you want to know the position of
+ *    theValue: the value you want to know the position of
+ *
+ *  RETURNS
+ *    Number
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2011-06-25: Kevin Frank (filemaker hacks): Created (https://filemakerhacks.com/2011/06/12/valueposition-the-function-filemaker-forgot/)
+ *
+*/
+
+Let(
+    [
+        pLp = ¶ & theList & ¶ ;
+        pVp = ¶ & theValue & ¶ ;
+        thePos = Position ( pLp ; pVp ; 1 ; 1 ) ;
+        theSegment = Left ( pLp ; thePos ) ;
+        theValPos = PatternCount ( theSegment ; ¶ )
+    ];
+
+    theValPos
+
+)

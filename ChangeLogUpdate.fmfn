@@ -1,0 +1,88 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ChangeLogUpdate ( fieldList ; JSON )
+ *
+ *  DESCRIPTION
+ *    Takes the modified fields and sets their values. Be sure to modify the below variables to fit your solution:
+ *      ~changeLogExclusions: the field names you don't want to be included in the log
+ *      ~dotEscape: what replaces "." in the field name if encountered
+ *      ~UTCOffset: the UTC offset for what timezone you would like the timestamps to be in
+ *      ~observesDST: True or false if Day Light Savings time is observed
+ *
+ *  PARAMS
+ *    fieldList: A list of field names to check the values of
+ *    JSON: The current ChangeLog JSON created by this function
+ *
+ *  RETURNS
+ *    Updated JSON that includes the new values for the modified fields in the following format:
+ *      {
+ *          fieldName : {
+ *               timestamp as ISO : {
+ *                   acct: Who did the change
+ *                   val : What the field was changed to
+ *               }
+ *          }
+ *      }
+ *
+ *  DEPENDENCIES
+ *    ISOFromTimestamp: by Jeremy Bante
+ *    GetCurrentUTCTimestamp
+ *
+ *  CHANGELOG
+ *    2020-03-09: Paul McCudden (paul@peak14.solutions): Created
+ *    2020-03-11: Paul McCudden (paul@peak14.solutions): Now doesn't log the field if it's a calc field and escapes "." in the field name
+ *    2021-07-21: Paul McCudden (paul@peak14.solutions): Updated to use UTC timestamp
+*/
+
+While ( 
+    //initialVariable
+    [
+        
+        //--------------SETTINGS------------------
+        ~changeLogExclusions = List (
+            "zzChangeLog" ;
+		    "zzCreatedBy" ;
+		    "zzCreatedOnLocalTime" ;
+		    "zzCreatedOnUTC";
+            "zzLastModifiedBy";
+            "zzLastModifiedOn";
+            "zzLastModifiedOnLocalTime";
+            "zzLastModifiedOnUTC"
+	    );
+        ~dotEscape = "~dot~";
+        //------------END OF SETTINGS--------------
+
+        ~ISOTimestamp = ISOFromTimestamp ( GetCurrentUTCTimestamp () );
+        ~fieldCount = ValueCount ( fieldList );
+        ~i = 0;
+        ~account = Get ( AccountName );
+
+        //Start with a blank JSON if the passed JSON isn't a valid JSON
+        ~newjson = If ( Left ( JSONFormatElements ( JSON ) ; 1 ) = "?" ; "{}" ; JSON )
+    ];
+    
+    //condition
+    ~i < ~fieldCount;
+    
+    //logic
+    [
+        ~i = ~i + 1;
+        ~thisOriginalField = GetValue ( fieldList ; ~i );
+
+        //Add escape values on any field that might have a dot in it
+        ~thisEscapedField = Substitute ( ~thisOriginalField ; "." ; ~dotEscape );
+        
+        //Ignore this field if it's a calc field or in our exclusion list
+        ~newJSON = If ( ( IsEmpty ( FilterValues ( ~changeLogExclusions ; ~thisOriginalField ) ) and ( Right ( LeftWords ( FieldType ( Get ( FileName ) ; ~thisOriginalField ) ; 1 ) ; 4 ) <> "Calc" ) );
+            //Update
+            JSONSetElement ( ~newJSON ; ~thisEscapedField & "." & ~ISOTimestamp ; JSONSetElement ( "" ;
+                ["val" ; GetField ( ~thisOriginalField ) ; JSONString];
+                ["acct" ; ~account ; JSONString]
+            ) ; JSONObject ) ;
+            //Don't update
+            ~newJSON )
+    ];
+    
+    //result
+    ~newJSON
+)

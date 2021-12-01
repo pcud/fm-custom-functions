@@ -1,0 +1,92 @@
+/*
+ *  CUSTOM FUNCTION
+ *      PerformEquationOnList ( theList ; equation ; listItemKey ; option ; errorReplace )
+ *
+ *  DESCRIPTION
+ *      Performs a mathmatical calculation on each line item and returns the option chosen (default is to sum the list)
+ *           Usage Example 1:
+ *              PerformEquationOnList (
+ *                  theList: List ( 1 ; 2 ; 3);
+ *                  equation: "item ^ item";
+ *                  listItemKey: "item";
+ *                  option: "evalList";
+ *                  errorReplace: ""
+ *              ) = 1 ¶ 4 ¶ 27
+ *          Usage Example 2:
+ *              PerformEquationOnList (
+ *                  theList: List ( "1/1/2000" ; "1/1/2099" ; "1/1/2099");
+ *                  equation: "GetAsDate ( item ) > Get ( CurrentDate )";
+ *                  listItemKey: "item";
+ *                  option: "";
+ *                  errorReplace: ""
+ *              ) = 2
+ *          Usage Example 3:
+ *              PerformEquationOnList (
+ *                  theList: List ( -1 ; 1 ; 2);
+ *                  equation: "Factorial ( item )";
+ *                  listItemKey: "item";
+ *                  option: "";
+ *                  errorReplace: 0
+ *              ) = 3
+ *
+ *  PARAMS
+ *      theList: The list to perform the math on
+ *      equation: The math to perform on each item on the list
+ *      listItemKey: The key that represents the list item in the equation variable
+ *      errorReplace: If not empty, will replace any error that occurs with this value, or wise will use the error.
+ *      option: If one of the following values, will output those value(s), otherwise will output as normal.
+ *          displayList: Will display a list of all the values before evaluated
+ *          evalList: Will display a list of all the values after evaluated
+ *          +: Will add the list together (default)
+ *          *: Will multiply the list together
+ *          ^: Will raise each item in the list to the power of the sequential number
+ *
+ *  RETURNS
+ *      A number or list or error (if errorReplace = False)
+ *
+ *  DEPENDENCIES
+ *      --NONE--
+ *
+ *  CHANGELOG
+ *      2020-06-25: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+
+    // initialVariable
+    [
+        ~count = ValueCount ( theList );
+        ~i = 0;
+        ~result = "";
+        ~operator = Case (
+            option = "*" ; "*";
+            option = "^" ; "^";
+            "+"
+        )
+    ];
+
+    // condition
+        ~i < ~count;
+
+    // logic
+    [
+        ~i = ~i + 1;
+        ~thisItem = GetValue ( theList ; ~i );
+        ~thisEquation = Substitute ( equation ; listItemKey ; ~thisItem );
+        // Add quotes to the list item in attempt to make it a valid calculation
+        ~thisEquation =  If ( IsValid ( Evaluate ( ~thisEquation ) ) ; ~thisEquation ; Substitute ( equation ; listItemKey ; Quote ( ~thisItem ) ) );
+        ~calc = Case ( 
+            option = "displayList" ; ~thisEquation;
+            ( not IsEmpty ( errorReplace ) ) and ( not IsValidExpression ( Evaluate ( ~thisEquation ) ) ) ; errorReplace;
+            Evaluate ( ~thisEquation )
+        );
+        ~result = Case (
+            option = "displayList" or option = "evalList" ; List ( ~result ; ~calc );
+            Evaluate ( ~result & ~operator & ~calc )
+        )
+    ];
+
+    // result
+    ~result
+
+)

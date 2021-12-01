@@ -1,0 +1,27 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isDesktop ()
+ *
+ *  DESCRIPTION
+ *    Use when you want to know if the user is on a desktop device or not
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-02-26: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~device = Get ( Device )
+    ];
+
+    ~device < 3 and ~device <> 0
+)

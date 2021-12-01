@@ -1,0 +1,25 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ConvertToOSPath ( path )
+ *
+ *  DESCRIPTION
+ *    Converts the passed path to the appropiate path based on the current system platform
+ *
+ *  PARAMS
+ *    path: The list to convert
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2021-09-18: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+"file:" & Case (
+  Get ( SystemPlatform ) = 1; "/Volumes" & path;
+  Get ( SystemPlatform ) = -2; "/" & path;
+  path
+)

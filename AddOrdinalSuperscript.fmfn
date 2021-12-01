@@ -1,0 +1,35 @@
+/*
+ *  CUSTOM FUNCTION
+ *    AddOrdinalSuperscript ( number )
+ *
+ *  DESCRIPTION
+ *    Adds a superscripted ordinal text to the passed number
+ *
+ *  PARAMS
+ *    number: The number you'd like to add the text to
+ *
+ *  RETURNS
+ *    The passed number with superscrtiped ordinal text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-03-19: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~numRight = Right ( number ; 1 );
+        ~2numRight = If ( Length ( number ) > 1 ; Left ( Right ( number ; 2 ) ; 1 ) );
+        ~superscript = TextStyleAdd ( Case (
+            ~numRight = 1 and ~2numRight <> 1 ; "st" ;
+            ~numRight = 2 and ~2numRight <> 1 ; "nd" ;
+            ~numRight = 3 and ~2numRight <> 1 ; "rd" ;
+            "th"
+        ) ; Superscript )
+    ];
+
+    number & ~superscript
+
+)

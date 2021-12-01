@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorDisplayIsEnabled ()
+ *
+ *  DESCRIPTION
+ *    Checks to see if the error display is enabled
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    ""
+ *
+ *  DEPENDENCIES
+ *    $$errorDisplayDisabled
+ *
+ *  CHANGELOG
+ *    2020-04-28: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+not $$errorDisplayDisabled or IsEmpty ( $$errorDisplayDisabled )

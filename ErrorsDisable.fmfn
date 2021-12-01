@@ -1,0 +1,31 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorsDisable ()
+ *
+ *  DESCRIPTION
+ *    Disables error display and logging by setting $$errorLoggingDisabled and $$errorDisplayDisabled to False
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    ""
+ *
+ *  DEPENDENCIES
+ *    $$errorDisplayDisabled
+ *    $$errorLoggingDisabled
+ *
+ *  CHANGELOG
+ *    2020-04-28: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    ~varValue = True;
+    $$errorDisplayDisabled = ~varValue;
+    $$errorLoggingDisabled = ~varValue
+  ];
+
+True
+
+)

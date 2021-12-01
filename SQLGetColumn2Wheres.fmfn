@@ -1,0 +1,32 @@
+/*
+ *  CUSTOM FUNCTION
+ *    SQLGetColumn2Wheres ( returnField ; whereField1 ; whereValue2 ; whereField2 ; whereValue2 )
+ *
+ *  DESCRIPTION
+ *    Does a simple SQL Statement with two where queries
+ *  !!~~IMPORTANT~~!!
+ *    This function assums you enter valid fields for each variable. Will not work if you don't enter a value for each field
+ *
+ *  PARAMS
+ *    returnField: The field you want to return the value of
+ *    whereField1: The field that contains the value to filter for the first query
+ *    whereValue2: The value to filter for the first query
+ *    whereField1: The field that contains the value to filter for the second query
+ *    whereValue2: The value to filter for the second query
+ *
+ *  RETURNS
+ *    A list of values
+ *
+ *  CHANGELOG
+ *    2019-10-16: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+
+ExecuteSQL (
+  "SELECT " & SQL.GetField ( returnField ) & " FROM " & SQL.GetTable ( returnField ) &
+  "WHERE " & SQL.GetField ( whereField1 ) & " = ?" &
+  " AND " & SQL.GetField ( whereField2 ) & " = ?" ;
+  "" ;
+  "" ;
+  whereValue1 ; whereValue2
+)

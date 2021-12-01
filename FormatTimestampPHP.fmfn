@@ -1,0 +1,142 @@
+/*
+FormatTimestamp ( timestampValue , format )
+
+by Lewis C. Lorenz
+
+10/10/19 Updated
+
+NOTICE: This is a recursive function. If you change the function name then also change it in the function code.
+
+Returns the Timestamp date and/or time formatted as specified in format.
+Optionally use the backslash as an escape code to include text not intended to be formatted.
+Escaped \ is written \\, all other escaped text must be enclosed within an opening \ and a closing \.
+Formatting performed using PHP date() function format codes but with Filemaker conventions.
+
+Passing '?' as the whole value of format returns this help text and the following code explanations.
+
+Day -------
+d -	01-31
+D -	Mon-Sun
+j -	1-31
+l (lowercase 'L') -	Sunday-Saturday
+N -	1 (Monday) ... 7 (Sunday). (PHP convention: ISO-8601 representation of day of week.)
+S -	st, nd, rd or th (English ordinal suffix.)
+w -	1 (Sunday) ... 7 (Saturday). (PHP convention : 0 (for Sunday) through 6 (for Saturday).)
+z -	1-366. (PHP convention: 0-365.)
+Week -----
+W - 1-54, week of year Jan. 1. (PHP convention: ISO-8601 week number of year, weeks starting on Monday.)
+Month ----
+F -	January-December
+m -	01-12
+M -	Jan-Dec
+n -	1-12
+t -	28-31
+Year -----
+L -	Leap year (1/0)
+o - year number. ISO-8601 year number.
+Y -	4 digit year
+y - 2 digit year
+Time ----
+a - 	am/pm
+A - AM/PM
+g -	Hour 1-12
+G -	Hour 0-23
+h -	Hour 01-12
+H -	Hour 00-23
+i -	Min 00-59
+s -	Sec 00-59
+u -	Microseconds
+
+Examples:
+FormatTimestamp ( "9/21/2005 11:06:53", "Y-m-d His \zulu\")  = 2005-09-21 110653 zulu
+FormatTimestamp ( "10-3-2011" , "\today is the \jS\ day\")  = today is the 3rd day
+*/
+
+Let( 
+    [
+        ts = If ( IsEmpty ( timestampValue ) ; Get ( CurrentTimestamp ) ; GetAsTimestamp ( timeStampValue ) );
+        d = GetAsDate ( ts ) ; 
+        t = GetAsTime ( ts ) ; 
+        format = format & If ( Mod ( PatternCount ( format ; "\\" ) ; 2 ) ; "\\" ; "" ) ; // Append \ if count not even.
+        f = Left ( format ; 1 ) ;
+        f = If ( f = "\\" ; Middle ( format ; 1 ; Position ( format; "\\" ; 2 ; 1 ) ) ; f ) ; // Escape found, set to full escaped string.
+        c = Case (
+            f = "\\\\";  "\\"; // If a single blackslash has been escaped, make f a single backslash.
+            Length ( f ) > 1; Middle ( f; 2; Position ( f; "\\"; 2; 1 ) - 2); // Get the contents.
+            Exact ( f; "d" ) ; Right ( GetAsText ( 100 + Day ( d ) ); 2 ) ;
+            Exact ( f; "D" ) ; Left ( DayName ( d ) ; 3 ) ;
+            Exact ( f; "j" ) ; GetAsText ( Day ( d ) ) ;
+            Exact ( f; "l" ) ; DayName ( d ) ;
+            Exact ( f; "N" ) ; GetAsText ( If ( DayOfWeek ( d ) - 1 = 0; 7; DayOfWeek ( d ) - 1 ) ) ;
+            Exact ( f; "S" ) ; If ( PatternCount ( "11 12 13"; Right ( GetAsText ( 100 + Day ( d ) ); 2 ) ); "th"; Choose ( Mod ( Day ( d ) ; 10 ) ; "th"; "st"; "nd"; "rd"; "th"; "th"; "th"; "th"; "th"; "th" ) );
+            Exact ( f; "w" ) ; GetAsText ( DayOfWeek ( d ) ) ;
+            Exact ( f; "z" ) ; GetAsText ( DayOfYear ( d ) ) ;
+            Exact ( f; "W" ) ; GetAsText ( WeekOfYear ( d ) ) ;
+            Exact ( f; "F" ) ; MonthName ( d ) ;
+            Exact ( f; "m" ) ; Right ( GetAsText ( 100 + Month ( d ) ); 2 ) ;
+            Exact ( f; "M" ) ; Left ( MonthName ( d ) ; 3 ) ;
+            Exact ( f; "n" ) ; GetAsText ( Month ( d ) ) ;
+            Exact ( f; "t" ) ; GetAsText ( Day ( Date ( Month ( d ) + 1; 1; Year ( d ) ) - 1 ) ) ;
+            Exact ( f; "L" ) ; GetAsText ( If ( Day ( Date ( 3; 1; Year ( d ) ) - 1 ) = 29; 1; 0 ) ) ;
+            Exact ( f; "o" ) ; GetAsText ( Year ( d ) + Case ( WeekOfYear ( d ) = 1 and DayOfWeek ( Date ( 1; 1; Year ( d ) ) ) > 1; -1; WeekOfYear ( d ) > 52 and DayOfWeek ( Date ( 12; 31; Year ( d ) ) ) < 7 ; 1 ; 0 ) ) ;
+            Exact ( f; "Y" ) ; GetAsText ( Year ( d ) ) ;
+            Exact ( f; "y" ) ; Right ( GetAsText ( Year ( d ) ) ; 2 ) ;
+            Exact ( f; "a" ) ; If ( GetAsNumber ( t ) > 43200; "pm"; "am" ) ;
+            Exact ( f; "A" ) ; If ( GetAsNumber ( t ) > 43200; "PM"; "AM" ) ;
+            Exact ( f; "g" ) ; GetAsText ( If ( Hour ( t ) > 12; Hour ( t ) - 12; Hour ( t ) ) ) ;
+            Exact ( f; "G" ) ; GetAsText ( Hour ( t ) ) ;
+            Exact ( f; "h" ) ; Right ( GetAsText ( 100 + If ( Hour ( t ) > 12; Hour ( t ) - 12; Hour ( t ) ) ); 2) ;
+            Exact ( f; "H" ) ; Right ( GetAsText ( 100 + Hour ( t ) ); 2 );
+            Exact ( f; "i" ) ; Right ( GetAsText ( 100 + Minute ( t ) ); 2);
+            Exact ( f; "s" ) ; Right ( GetAsText ( 100 + Seconds ( t ) ); 2);
+            Exact ( f; "u" ) ; GetAsText ( GetAsNumber ( t ) ) ;
+            f
+        );
+        // Prepare for recursive call.
+        format = Right ( format; Length (format ) - Length ( f ) );
+        // Prepare help text.
+        h = If ( f = "?" and Length ( format ) = 0; "FormatTimestamp ( timestampValue , format )¶¶Returns the Timestamp date and/or time formatted as specified in format.¶¶Optionally use the backslash as an escape code to include text not intended to be formatted.¶Escaped \ is written \\\, all other escaped text must be enclosed within an opening \ and a closing \.¶Format codes are the same as PHP date() function format codes, but with Filemaker conventions.¶¶
+Day codes:¶
+d -	01-31¶
+D -	Mon-Sun¶
+j -	1-31¶
+l -	 (lowercase 'L') Sunday-Saturday¶
+N -	1 (Monday) ... 7 (Sunday). (PHP convention: ISO-8601 representation of day of week.)¶
+S -	st, nd, rd or th (English ordinal suffix.)¶
+w -	1 (Sunday) ... 7 (Saturday). (PHP convention : 0 (Sunday) ... 6 (Saturday).)¶
+z -	1-366. (PHP convention: 0-365.)¶¶
+Week codes:¶
+W -	1-54, week of year Jan. 1. (PHP convention: ISO-8601 week number of year, weeks starting on Monday.)¶¶
+Month codes:¶
+F -	January-December¶
+m -	01-12¶
+M -	Jan-Dec¶
+n -	1-12¶
+t -	28-31¶¶
+Year codes:¶
+L -	Leap year (1/0)¶
+o -	year number. ISO-8601 year number.¶
+Y -	4 digit year¶
+y -	2 digit year¶¶
+Time codes:¶
+a - 	am/pm¶
+A -	AM/PM¶
+g -	Hour: 1-12¶
+G -	Hour: 0-23¶
+h -	Hour: 01-12¶
+H -	Hour: 00-23¶
+i -	Min: 00-59¶
+s -	Sec: 00-59¶
+u -	Microseconds¶¶
+Examples:¶
+FormatTimestamp ( 9/21/2005 11:06:53, \"Y-m-d His \zulu\\\")  = 2005-09-21 110653 zulu¶
+FormatTimestamp ( 10-3-2011 , \"\today is the \jS\ day\\\")  = today is the 3rd day
+"; "" );
+        // Recursive call if not empty.
+        c = c & If ( IsEmpty ( format ) ; "" ; FormatTimestampPHP ( ts ; format ) )
+    ];
+
+    If ( c = "?" ; h ; c ) // Send back just help text if format was a question mark (?).
+    //c
+
+)

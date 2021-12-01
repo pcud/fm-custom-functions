@@ -1,0 +1,33 @@
+/*
+ *  CUSTOM FUNCTION
+ *    SetVariable ( varName ; varValue )
+ *
+ *  DESCRIPTION
+ *    Use when you want to set a variable via a custom function. By default sets a local var (even if no "$" are included in the varName), but can also set global vars if "$$" is included in the var name.
+ *    Use the ~letVarNameStart as a list of variable name starts that you don't want "$" to be appended to (if missing). Use this for let statment var declarations
+ *
+ *  PARAMS
+ *    varName: The name of the var to set
+ *    varValue: The value of the var to set
+ *
+ *  RETURNS
+ *    True
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-03-04: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    ~letVarNameStart = List ( "~" ; "@" );
+    ~first = Left ( varName ; 1 );
+    ~varName = If ( ~first = "$" or not IsEmpty ( FilterValues ( ~letVarNameStart ; ~first ) ) ; varName ; "$" & varName );
+    ~letStatement = "Let(["&~varName&"="&Quote(varValue)&"];1)"
+  ];
+
+  Evaluate ( ~letStatement )
+
+)

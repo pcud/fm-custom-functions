@@ -1,0 +1,43 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetIncrimentValue ( currentValue ; theList ; operator )
+ *
+ *  DESCRIPTION
+ *    Get the next value in a list based off the current value
+ *
+ *  PARAMS
+ *    currentValue: one value in the list
+ *    theList: The list of objects
+ *    operator: + or - to go up or down in the list
+ *
+ *  RETURNS
+ *    Returns a list item
+ *
+ *  DEPENDENCIES
+ *    Custom Function: ValuePosition (https://filemakerhacks.com/2011/06/12/valueposition-the-function-filemaker-forgot/)
+ *
+ *  CHANGELOG
+ *    2020-03-04: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    ~currentPosition = ValuePosition ( theList ; currentValue );
+    ~min = 1;
+    ~max = ValueCount ( theList );
+    ~newPosition = Case (
+      operator = "+" ; ~currentPosition + 1;
+      operator = "-" ; ~currentPosition - 1;
+      ~currentPosition
+    )
+  ];
+
+  GetValue ( theList ;
+    Case (
+      ~newPosition > ~max ; ~min ;
+      ~newPosition < ~min ; ~max ;
+      ~newPosition
+    )
+  )
+
+)

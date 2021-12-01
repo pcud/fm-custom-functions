@@ -1,0 +1,42 @@
+/*
+ *  CUSTOM FUNCTION
+ *    RemoveDuplicates ( theList )
+ *
+ *  DESCRIPTION
+ *    Removes all duplicate values from a list
+ *
+ *  PARAMS
+ *    theList: The list to remove duplicates from
+ *
+ *  RETURNS
+ *    A list with no duplicates
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2020-07-23: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While ( 
+    // initialVariable
+    [
+        ~list = theList;
+        ~i = 0
+    ];
+    
+    //condition
+    ~i < ValueCount ( ~list );
+    
+    // logic
+    [
+        ~i = ~i + 1;
+        ~thisItem = GetValue ( ~list ; ~i );
+        ~beforeList = LeftValues ( ~list ; ~i - 1 );
+        ~afterList = RightValues ( ~list ; ValueCount ( ~list ) - ~i );
+        ~list = List ( ~beforeList ; ~thisItem ; Substitute ( ~afterList ; ~thisItem &¶ ; ""  ) )
+    ];
+    
+    // result
+    ~list
+)

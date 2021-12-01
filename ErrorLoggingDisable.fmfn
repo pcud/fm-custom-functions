@@ -1,0 +1,28 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorLoggingDisable ()
+ *
+ *  DESCRIPTION
+ *    Disables error logging by setting $$errorLoggingDisabled to True
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    ""
+ *
+ *  DEPENDENCIES
+ *    $$errorLoggingDisabled
+ *
+ *  CHANGELOG
+ *    2020-04-28: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    $$errorLoggingDisabled = True
+  ];
+
+True
+
+)

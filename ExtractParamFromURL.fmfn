@@ -1,0 +1,49 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ExtractParamFromURL ( url ; param )
+ *
+ *  DESCRIPTION
+ *    For when you want to know the value of a specific url paramter
+ *
+ *  PARAMS
+ *    url: The url that contains the parameter you want to know
+ *    param: The name of the parameter
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2021-06-15: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+
+  // initialVariable
+  [
+    ~paramList = Substitute ( GetValue ( Substitute ( url; "?"; ¶); 2 ); "&"; ¶);
+    ~i = 0;
+    ~continue = True;
+    ~value = ""
+  ];
+
+  // condition
+  ~i < ValueCount ( ~paramList ) and ~continue;
+
+  // logic
+  [
+    ~i = ~i + 1;
+    ~thisParam = GetValue ( ~paramList ; ~i );
+    ~thisParamList = Substitute ( ~thisParam; "="; ¶ );
+    ~value = If (
+      GetValue ( ~thisParamList; 1 ) = param;
+      GetValue ( ~thisParamList; 2 )
+    );
+    ~continue = IsEmpty ( ~value )
+  ];
+
+  // result
+    ~value
+)

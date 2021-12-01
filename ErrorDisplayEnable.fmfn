@@ -1,0 +1,28 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorDisplayEnable ()
+ *
+ *  DESCRIPTION
+ *    Enables error display by setting $$errorDisplayDisabled to True
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    ""
+ *
+ *  DEPENDENCIES
+ *    $$errorDisplayDisabled
+ *
+ *  CHANGELOG
+ *    2020-04-28: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    $$errorDisplayDisabled = False
+  ];
+
+True
+
+)

@@ -1,0 +1,46 @@
+/*
+ *  CUSTOM FUNCTION
+ *    RemoveValues ( theList; removeList )
+ *
+ *  DESCRIPTION
+ *    Remove each value in removeList from theList
+ *
+ *  PARAMS
+ *    theList: The list that you want to remove values from
+ *    removeList: The list that has each value you want to remove
+ *
+ *  RETURNS
+ *    A new list
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2019-07-15: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+  [
+    ~list = Substitute ( theList ; ¶ ; "¶¶" );
+    ~i = 0
+  ];
+
+  ~i < ValueCount ( removeList );
+
+  [
+    ~i = ~i + 1;
+    ~thisRemove = GetValue ( removeList ; ~i );
+    ~list = Case (
+      not IsEmpty ( ~thisRemove );
+        Substitute (
+          ¶ & ~list & ¶ ;
+          ¶ & ~thisRemove & ¶ ;
+          ""
+        ) ;
+        ¶ & ~list & ¶
+      )
+  ];
+
+  Middle ( Substitute ( ~list ; "¶¶" ; ¶ ) ; 2 ; Length ( Substitute ( ~list ; "¶¶" ; ¶ ) ) - 2 )
+
+)

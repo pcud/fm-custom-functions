@@ -1,0 +1,37 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ConvertListToCSVHeaders ( headerList )
+ *
+ *  DESCRIPTION
+ *    Converts the header list
+ *
+ *  PARAMS
+ *    headerList: A list of items you want to convert to a header
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2021-11-05: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+  [
+    ~i = 0;
+    ~headers = ""
+  ];
+
+  ~i < ValueCount ( headerList );
+
+  [
+    ~i = ~i + 1;
+    ~thisHeader = GetValue ( headerList; ~i );
+    ~headers = ~headers &  If ( not IsEmpty ( ~thisHeader ); If ( ~i > 1; "," ) & Quote ( ~thisHeader ) )
+  ];
+
+  ~headers & "¶"
+
+)

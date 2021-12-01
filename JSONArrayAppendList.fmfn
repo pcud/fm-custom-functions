@@ -1,0 +1,48 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONArrayAppendList ( json ; path ; appendList ; jsonType )
+ *
+ *  DESCRIPTION
+ *    Appends a list of values onto a JSON Array. Maintains existing null values
+ *
+ *  PARAMS
+ *    json: The JSON to append the list to
+ *    path: The path where the list is in the JSON
+ *    appendList: The list to append to the list current at path
+ *    jsonType: The type of JSON, same as in JSONSetElement.
+ *
+ *  RETURNS
+ *    The JSON with the newly appended list. If there's a JSON error, returns "?"
+ *
+ *  DEPENDANCIES
+ *    JSONGetElementType: https://www.briandunning.com/cf/2287 (removed @ from start of CF name)
+ *
+ *  CHANGELOG
+ *    2019-10-21: Paul McCudden (paul@peak14.solutions): Created
+ *    2021-01-07: Paul McCudden (paul@peak14.solutions): Fixed issue where if appendList was empty, would cause FM to crash
+*/
+
+While (
+  [
+    //initialVariable
+    ~json = json;
+    ~isArray = JSONGetElementType ( ~json ; path ) = JSONArray or IsEmpty ( ~json ) or IsEmpty ( JSONGetElement ( ~json; path ) );
+    ~arrayLength = ValueCount ( JSONListKeys ( ~json ; path ) );
+    ~count = If ( IsEmpty ( appendList ) ; 1 ; ValueCount ( appendList ) ); // Set count to at least 1 so at least 1 value will be set
+    ~i = 0;
+    ~addValue = ""
+  ];
+
+  //condition
+  ~i < ~count and ~isArray;
+
+  [
+    //logic
+    ~i = ~i + 1;
+    ~addValue = GetValue ( appendList ; ~i );
+    ~json = JSONSetElement ( ~json ; path & "[" & ~i + ~arrayLength - 1 & "]"; ~addValue ; jsonType )
+  ];
+
+  If ( ~isArray ; ~json ; "? * Cannot append to a non-array jsonType")
+
+)

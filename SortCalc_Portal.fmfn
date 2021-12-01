@@ -1,0 +1,35 @@
+/*
+ *  CUSTOM FUNCTION
+ *    SortCalc_Portal ( IDField )
+ *
+ *  DESCRIPTION
+ *    Used to calculation the sort order for this specific field
+ *
+ *  PARAMS
+ *    IDFIeld: The field that contains the ID for this table
+ *
+ *  RETURNS
+ *    Number
+ *
+ *  DEPENDENCIES
+ *    Custom Function: ValuePosition
+ *    Custom Function: ListBaseTableName
+ *
+ *  CHANGELOG
+ *    2020-06-19: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    ~json = $$PortalSortInfo;
+    ~thisBaseTableName =	ExecuteSQL (	"SELECT BaseTableName FROM FileMaker_Tables WHERE TableName='" & GetValue ( Substitute ( GetFieldName ( IDField ) ; "::" ; ¶ ) ; 1 ) & "'" ; "" ; "" );
+    ~thisIDList = JSONGetElement ( ~json ; ~thisBaseTableName & "." & Get ( LayoutName ) & ".ids" )
+  ];
+
+  If ( not IsEmpty ( ~json );
+    If ( not IsEmpty ( ~thisIDList );
+      ValueCount ( Left ( ~thisIDList ; Position ( ¶ & ~thisIDList & ¶ ; ¶ & IDField & ¶ ; 1 ; 1 ) ) )
+    )
+  )
+
+)

@@ -1,0 +1,35 @@
+/*
+ *  CUSTOM FUNCTION
+ *    SQLGetTable ( field )
+ *
+ *  DESCRIPTION
+ *    Use to get the table name for SQL use from a field. Can use a reference as a field so it doesn't matter if the field or table name changes
+ *
+ *  PARAMS
+ *    field: Either the fieldName or the field reference
+ *
+ *  RETURNS
+ *    The table name to be used in SQL format or empty
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2019-10-16: Paul McCudden (paul@peak14.solutions): Created
+ *    2019-10-16: Alex Zueiv: contributed the amazing ~fn calc to avoid fieldname errors
+*/
+
+
+Let (
+  [
+    ~field = field;
+    ~fn = Case (
+      not EvaluationError ( GetFieldName ( ~field ) ) ;
+        GetFieldName ( ~field ) ;
+      not EvaluationError ( GetField ( field ) ) or EvaluationError ( Evaluate ( field ) ) = 103 ;
+        ~field
+    )
+  ];
+
+  If ( not IsEmpty ( ~fn ) ; Quote( GetValue ( Substitute ( ~fn ; "::" ; "¶" ) ; 1 ) ) )
+)

@@ -1,0 +1,126 @@
+/**
+* JSONGetElementType ( json ; keyOrIndexOrPath )
+*
+* Created 2019-08-15 by Alex Zueiv
+* Returns JSON type (number) of the specified element.
+* Test for the Data Viewer:
+
+Let ( json = "[null,\"1\",2,{\"3\":3,\"0\":{\"3\":\"\"}},[4,[]],true]" ;
+List (
+	JSONGetElementType ( json ; "" ) ;          // JSONArray (4)
+Quote ( List (
+	JSONGetElementType ( json ; 0 ) ;           // JSONNull (6)
+	JSONGetElementType ( json ; 1 ) ;           // JSONString (1)
+	JSONGetElementType ( json ; 2 ) ;           // JSONNumber (2)
+) ) ;
+Quote ( List (
+	JSONGetElementType ( json ; 3 ) ;           // JSONObject (3)
+	JSONGetElementType ( json ; "[3].3" ) ;     // JSONNumber (2)
+	JSONGetElementType ( json ; "[3].0" ) ;     // JSONObject (3)
+	JSONGetElementType ( json ; "[3].0.3" ) ;   // JSONString (1)
+	JSONGetElementType ( json ; "[3].x" ) ;     // undefined (?)
+) ) ;
+Quote ( List (
+	JSONGetElementType ( json ; 4 ) ;           // JSONArray (4)
+	JSONGetElementType ( json ; "[4][0]" ) ;    // JSONNumber (2)
+	JSONGetElementType ( json ; "[4][1]" ) ;    // JSONArray (4)
+	JSONGetElementType ( json ; "[4][1][0]" ) ; // undefined (?)
+) ) ;
+	JSONGetElementType ( json ; 5 ) ;           // JSONBoolean (5)
+	JSONGetElementType ( json ; 99 ) ;          // undefined (?)
+) )
+
+// Result:
+
+4
+"6¶1¶2"
+"3¶2¶3¶1¶?"
+"4¶2¶4¶?"
+5
+?
+
+* https://www.briandunning.com/cf/2287
+**/
+
+Let ( [
+
+LST = Replace ( Substitute (
+	¶ & keyOrIndexOrPath ;
+	[ "." ; ¶ ] ; [ "[" ; "¶[" ] ; [ "]" ; "]¶" ] ;
+	[ "¶¶" ; ¶ ] ; [ "¶¶" ; ¶ ]
+) ; 1 ; 1 ; "" ) ;
+
+PATH = Substitute ( LeftValues ( LST ; ValueCount ( LST ) - 1 ) ; ¶ ; "." ) ;
+PRNT = JSONGetElement ( json ; PATH ) ;
+PTYP = Left ( PRNT ; 1 ) ;
+KEY = GetValue ( LST ; ValueCount ( LST ) ) ;
+IDX = GetAsNumber ( KEY ) ;
+ERR = JSONGetElement ( json ; keyOrIndexOrPath ) ;
+
+// get first character of the element value definition
+FCHR = Case (
+
+	// return error description
+	Left ( ERR ; 1 ) = "?" ; "?" ;
+
+	// return type of the whole json element
+	KEY = "" ; PTYP ;
+
+	// get first array item
+	PTYP = "[" and IDX = 0 ; Middle ( PRNT ; 2 ; 1 ) ;
+				
+	// calculate item position by the count of preceding commas
+	PTYP = "[" ; Let ( [
+		KEYS = LeftValues ( JSONListKeys ( PRNT ; "" ) ; IDX ) ;
+		EXPR = "let(x=" & Substitute ( KEYS ; ¶ ;
+			";patterncount(jsongetelement($x;x);\",\"))+let(x="
+		) & "0;x)" ;
+		x = $x ; $x = PRNT ; OFFSET = Evaluate ( EXPR ) ; $x = x ;
+		POS = Position ( PRNT ; "," ; 1 ; IDX + OFFSET )
+	] ;
+		If ( POS ; Middle ( PRNT ; POS + 1 ; 1 ) )
+	) ;
+		
+	// find object by quoted key name
+	PTYP = "{" ; Let ( [
+		KEYS = JSONListKeys ( PRNT ; "" ) ;
+		QK = JSONSetElement ( "[]" ; 0 ; KEY ; 1 ) ;
+		QK = Middle ( QK ; 2 ; Length ( QK ) - 2 ) & ":" ;
+		QTY = PatternCount ( PRNT ; QK )
+	] ;
+		Case (
+			FilterValues ( KEYS ; KEY ) = "" ;
+				"" ; // undefined
+			QTY = 1 ; Middle (
+				PRNT ;
+				Position ( PRNT ; QK ; 1 ; 1 ) + Length ( QK ) ;
+				1
+			) ;
+			QTY > 1 ; Let ( [
+				// delete all other objects
+				SRT = UniqueValues ( KEY & ¶ & KEYS ) ;
+				DLT = RightValues ( SRT ; ValueCount ( SRT ) - 1 ) ;
+				EXPR = "let([x=" & Substitute ( Quote ( DLT ) ; "\¶" ;
+					"\";$x=jsondeleteelement($x;x)];\"\")&let([x=\""
+				) & "];$x)" ;
+				x = $x ; $x = PRNT ; PRNT = Evaluate ( EXPR ) ; $x = x
+			] ;
+				Middle ( PRNT ; Length ( QK ) + 2 ; 1 )
+			)
+		)
+	)
+
+)
+
+] ; Case (
+
+	FCHR = "\"" ; JSONString ; // 1
+	Filter ( "-1234567890" ; FCHR ) ≠ "" ; JSONNumber ; // 2
+	FCHR = "{" ; JSONObject ; // 3
+	FCHR = "[" ; JSONArray ; // 4
+	FCHR = "t" or FCHR = "f" ; JSONBoolean ; // 5
+	FCHR = "n" ; JSONNull ; // 6
+	FCHR = "?" ; ERR ; // description
+	"?"
+
+) )

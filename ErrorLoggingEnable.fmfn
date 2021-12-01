@@ -1,0 +1,28 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorLoggingEnable ()
+ *
+ *  DESCRIPTION
+ *    Enables error logging and display by setting $$errorLoggingDisabled to False
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    ""
+ *
+ *  DEPENDENCIES
+ *    $$errorLoggingDisabled
+ *
+ *  CHANGELOG
+ *    2020-04-28: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+  [
+    $$errorLoggingDisabled = False
+  ];
+
+True
+
+)
