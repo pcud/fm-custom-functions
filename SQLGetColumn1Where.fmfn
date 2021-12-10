@@ -39,7 +39,7 @@ While (
   [
     ~i = ~i + 1;
     ~querry = ~querry &"¶  "& If ( ~i > 1; If ( andSearch; "AND "; "OR " ); "WHERE " ) & SQLGetField ( whereField ) & " = ?";
-    ~params = ~params & "; " & GetValue ( whereValue ; ~i )
+    ~params = ~params & "; \"" & GetValue ( whereValue ; ~i ) & "\""
   ];
 
   // result
@@ -49,4 +49,5 @@ While (
     "  ; \"\"; \"\"" & ~params &¶&
     ")" 
   )
+
 )
