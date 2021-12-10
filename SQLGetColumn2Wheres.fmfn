@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    SQLGetColumn2Wheres ( returnField ; whereField1 ; whereValue2 ; whereField2 ; whereValue2 )
+ *    SQLGetColumn2Wheres ( returnField ; whereField1 ; whereValue1 ; whereField2 ; whereValue2 )
  *
  *  DESCRIPTION
  *    Does a simple SQL Statement with two where queries
@@ -23,9 +23,9 @@
 
 
 ExecuteSQL (
-  "SELECT " & SQL.GetField ( returnField ) & " FROM " & SQL.GetTable ( returnField ) &
-  "WHERE " & SQL.GetField ( whereField1 ) & " = ?" &
-  " AND " & SQL.GetField ( whereField2 ) & " = ?" ;
+  "SELECT " & SQLGetField ( returnField ) & " FROM " & SQLGetTable ( returnField ) &
+  "WHERE " & SQLGetField ( whereField1 ) & " = ?" &
+  " AND " & SQLGetField ( whereField2 ) & " = ?" ;
   "" ;
   "" ;
   whereValue1 ; whereValue2
