@@ -1,0 +1,22 @@
+/*
+ *  CUSTOM FUNCTION
+ *    MenuKeyDisplay ( order )
+ *
+ *  DESCRIPTION
+ *    Displays the Menu Key for the specified order
+ *
+ *  PARAMS
+ *    order: The order of the menu to display
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    SQL CF
+ *
+ *  CHANGELOG
+ *    2021-12-16: Paul McCudden: Created
+*/
+
+ExecuteSQL (
+    "SELECT " & " FROM table WHERE expression " ; "" ; "" ; "" )

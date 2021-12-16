@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    SQLGetColumn1Where ( returnField ; whereField ; whereValue; andSearch )
+ *    SQLGetColumn1Where ( returnField ; whereField ; whereValueList; andSearch )
  *
  *  DESCRIPTION
  *    Does a simple SQL Statement with where query(ies). If the whereField is left blank, will return all of the values in returnField
@@ -8,7 +8,7 @@
  *  PARAMS
  *    returnField: The field you want to return the value of
  *    whereField: The field that contains the value to filter for
- *    whereValue: A list of values to filter for
+ *    whereValueList: A list of values to filter for
  *    andSearch: Set to true to do an and search with each value in where value. Otherwise will be or
  *
  *  RETURNS
@@ -29,7 +29,7 @@ While (
     ~querry = "SELECT " & SQLGetField ( returnField ) & " FROM " & SQLGetTable ( returnField );
     ~params = "";
     ~i = 0;
-    ~count = ValueCount ( whereValue )
+    ~count = ValueCount ( whereValueList )
   ];
 
   // condition
@@ -39,7 +39,7 @@ While (
   [
     ~i = ~i + 1;
     ~querry = ~querry &"¶  "& If ( ~i > 1; If ( andSearch; "AND "; "OR " ); "WHERE " ) & SQLGetField ( whereField ) & " = ?";
-    ~params = ~params & "; \"" & GetValue ( whereValue ; ~i ) & "\""
+    ~params = ~params & "; \"" & GetValue ( whereValueList ; ~i ) & "\""
   ];
 
   // result
