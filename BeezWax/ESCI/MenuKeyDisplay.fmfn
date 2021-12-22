@@ -18,5 +18,9 @@
  *    2021-12-16: Paul McCudden: Created
 */
 
-ExecuteSQL (
-    "SELECT " & " FROM table WHERE expression " ; "" ; "" ; "" )
+GetValue ( ExecuteSQL (
+    "SELECT " & SQLFieldName ( MenuItems::menuKey) &
+        "FROM " & SQLTableName ( MenuItems::id ) &
+        "WHERE " & SQLFieldName ( MenuItems::menuSortOrder ) & " = ?";
+    ""; ""; order
+); 1 )

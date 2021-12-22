@@ -1,0 +1,53 @@
+/*
+ *  CUSTOM FUNCTION
+ *    MenuItemsTOName
+ *
+ *  DESCRIPTION
+ *    Returns what the table occurance name should be for this menu items table. Strips out unusable characters in layout name
+ *
+ *  PARAMS
+ *    --None--
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    TableNameOnly
+ *    FieldNameOnly
+ *
+ *  CHANGELOG
+ *    2021-12-20: Paul McCudden: Created
+*/
+
+TableNameOnly ( MenuItems::menuKey ) & "_" & 
+Substitute ( Lower ( Get ( LayoutTableName ) );
+  ["+"; ""];
+  ["-"; ""];
+  ["*"; ""];
+  ["/"; ""];
+  ["^"; ""];
+  ["&"; ""];
+  ["="; ""];
+  ["≠"; ""];
+  ["<"; ""];
+  [">"; ""];
+  ["≤"; ""];
+  ["≥"; ""];
+  ["("; ""];
+  [","; ""];
+  [";"; ""];
+  [")"; ""];
+  ["["; ""];
+  ["]"; ""];
+  ["\""; ""];
+  [":"; ""];
+  ["$"; ""];
+  ["{"; ""];
+  ["}"; ""];
+  ["and"; ""];
+  ["xor"; ""];
+  ["or"; ""];
+  ["not"; ""];
+  [","; ""]
+) &
+"::"

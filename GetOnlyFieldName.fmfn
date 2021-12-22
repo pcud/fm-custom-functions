@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    GetOnlyFieldName ( field )
+ *    GetOnlyFieldName ( fieldRefOrFieldName )
  *
  *  DESCRIPTION
  *    Strips out the table name from a field and returns just the field name text
@@ -21,10 +21,10 @@
 Let (
     [
         ~fn = Case (
-            not EvaluationError ( GetFieldName ( field ) ) ;
-                GetFieldName ( field ) ;
-            not EvaluationError ( GetField ( field ) ) or EvaluationError ( Evaluate ( field ) ) = 103 ;
-                field
+            not EvaluationError ( GetFieldName ( fieldRefOrFieldName ) ) ;
+                GetFieldName ( fieldRefOrFieldName ) ;
+            not EvaluationError ( GetField ( fieldRefOrFieldName ) ) or EvaluationError ( Evaluate ( fieldRefOrFieldName ) ) = 103 ;
+                fieldRefOrFieldName
         )
     ];
 
