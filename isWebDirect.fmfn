@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isWebDirect ()
+ *
+ *  DESCRIPTION
+ *    Use when you want to know if the user is on webdirect or not
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2021-12-23: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Get ( SystemPlatform ) = 4
