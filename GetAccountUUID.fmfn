@@ -19,14 +19,11 @@
  *    2021-09-13: Paul McCudden (paul@peak14.solutions): Created
 */
 
-
-SQL.Get1ColumnWhere ( 
-   Users::PrimaryKey;
-   Users::UserName;
-   Trim (
-      FilterValues (
-         SQL.Get1ColumnWhere ( Users::Username ; "" ; "" );
-         Get ( AccountName )
-      )
-   )
+SQL.GetColumn1Where  (
+   PEOPLE::__UUID;
+   PEOPLE::accountName;
+   GetValue ( FilterValues (
+      SQL.GetColumn1Where ( PEOPLE::accountName ; "" ; "" );
+      Get ( AccountName )
+   ); 1 )
 )
