@@ -79,7 +79,7 @@ While (
             );
             ""
         );
-        ~sqlStatement = ~initialSQLStatement & If ( ValueCount ( ~attributeList > 0); "¶AND (" );
+        ~sqlStatement = ~initialSQLStatement & If ( ValueCount ( ~attributeList > 0 ); "¶AND (" );
         ~i = 0
     ];
     
