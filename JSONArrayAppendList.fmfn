@@ -1,14 +1,14 @@
 /*
  *  CUSTOM FUNCTION
- *    JSONArrayAppendList ( json ; path ; appendList ; jsonType )
+ *    JSONArrayAppendList ( json ; keyOrIndexOrPath ; appendList ; jsonType )
  *
  *  DESCRIPTION
  *    Appends a list of values onto a JSON Array. Maintains existing null values
  *
  *  PARAMS
  *    json: The JSON to append the list to
- *    path: The path where the list is in the JSON
- *    appendList: The list to append to the list current at path
+ *    keyOrIndexOrPath: The keyOrIndexOrPath where the list is in the JSON
+ *    appendList: The list to append to the list current at keyOrIndexOrPath
  *    jsonType: The type of JSON, same as in JSONSetElement.
  *
  *  RETURNS
@@ -25,9 +25,9 @@
 While (
   [
     //initialVariable
-    ~json = json;
-    ~isArray = JSONGetElementType ( ~json ; path ) = JSONArray or IsEmpty ( ~json ) or IsEmpty ( JSONGetElement ( ~json; path ) );
-    ~arrayLength = ValueCount ( JSONListKeys ( ~json ; path ) );
+    ~json = If ( IsEmpty ( json ) or IsEmpty ( JSONGetElement ( json; keyOrIndexOrPath ) ); JSONSetElement ( json; keyOrIndexOrPath; "[]"; JSONArray ); json );
+    ~isArray = JSONGetElementType ( ~json ; keyOrIndexOrPath ) = JSONArray;
+    ~arrayLength = ValueCount ( JSONListKeys ( ~json ; keyOrIndexOrPath ) );
     ~count = If ( IsEmpty ( appendList ) ; 1 ; ValueCount ( appendList ) ); // Set count to at least 1 so at least 1 value will be set
     ~i = 0;
     ~addValue = ""
@@ -40,7 +40,7 @@ While (
     //logic
     ~i = ~i + 1;
     ~addValue = GetValue ( appendList ; ~i );
-    ~json = JSONSetElement ( ~json ; path & "[" & ~i + ~arrayLength - 1 & "]"; ~addValue ; jsonType )
+    ~json = JSONSetElement ( ~json ; keyOrIndexOrPath & "[" & ~i + ~arrayLength - 1 & "]"; ~addValue ; jsonType )
   ];
 
   If ( ~isArray ; ~json ; "? * Cannot append to a non-array jsonType")
