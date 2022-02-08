@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isRunningPSOS ()
+ *
+ *  DESCRIPTION
+ *    Use when you want to know if the current context is on the server or not
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-02-26: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+LeftWords ( Get (ApplicationVersion) ; 1 ) = "Server"

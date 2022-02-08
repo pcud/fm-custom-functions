@@ -1,0 +1,52 @@
+/*
+ *  CUSTOM FUNCTION
+ *    AssignJSONParams ( params )
+ *
+ *  DESCRIPTION
+ *    Assigns what is stored in params as FileMaker variables
+ *
+ *  PARAMS
+ *    params: A JSON object that contains the param name as the key and param value as the value
+ *
+ *  RETURNS
+ *    Boolean
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-02-07: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        params = If ( IsEmpty ( params ); Get ( ScriptParameter ) );
+        ~s = Get ( UUID );
+        ~isValidJSON = Left ( JSONFormatElements ( params ); 1 ) <> "?";
+        ~params = ~s & ¶ & params & ¶ & ~s
+    ];
+
+    If ( ~isValidJSON;
+        Evaluate ( "Let([¶" & Substitute ( ~params;
+            // Strip out uneed json info and seperate each variable onto it's own line
+            ["{"; ""];
+            ["}"; ""];
+            [","; ¶];
+
+            // Format each line to have the proper syntax
+            ["¶\""; "¶$"];
+            ["\":"; "="];
+
+            // Eliminate any empty lines
+            ["¶¶"; ¶ & ~s & ¶];
+            ["¶¶"; ¶ & ~s & ¶];
+            [~s & ¶; ""];
+            [¶ & ~s; ""];
+            [~s; ""];
+
+            // Format each line for the let request
+            [¶; ";¶"]
+        ) & "¶];1)" );
+        False
+    )
+)
