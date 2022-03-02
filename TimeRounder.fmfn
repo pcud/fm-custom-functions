@@ -1,0 +1,36 @@
+/*
+ *  CUSTOM FUNCTION
+ *    TimeRounder ( theTime; toTheNearest )
+ *
+ *  DESCRIPTION
+ *    Rounds the time to the nearest passed value
+ *
+ *  PARAMS
+ *    theTime: the time to round
+ *    toTheNearest: the nearest value to round to
+ *
+ *  RETURNS
+ *    Time
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-02-25: Paul McCudden (paul@peak14.solutions): Created
+ *
+*/
+
+Let (
+  [
+    ~time = GetAsNumber ( GetAsTime ( theTime ) );
+    ~nearest = GetAsNumber ( toTheNearest );
+    ~min = Mod ( GetAsTime ( theTime ); 3600 )
+  ];
+
+  GetAsTime ( Case (
+    ~time = "?"; "0";
+    ~nearest = 0; "0";
+    theTime - ~min + Round ( ~min / 60 / toTheNearest; 0 ) * 60 * toTheNearest
+  ) )
+  
+)
