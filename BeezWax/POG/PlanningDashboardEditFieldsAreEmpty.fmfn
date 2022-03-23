@@ -1,0 +1,53 @@
+/*
+ *  CUSTOM FUNCTION
+ *    PlanningDashboardFieldAreEmpty ( hasSubmit; excludeFieldList )
+ *
+ *  DESCRIPTION
+ *    Checks to see if all the fields in $$planningDashboard_fieldList are empty
+ *
+ *  PARAMS
+ *    hasSubmit: If this hide calc is used on the button that has the submit script or not
+ *    excludeFieldList: A list of fields to exclude from the IsEmpty() check from the field list in $$planningDashboard_fieldList
+ *
+ *  RETURNS
+ *    Boolean
+ *
+ *  DEPENDENCIES
+ *    $$planningDashboard_fieldList: Has to contain a list of fields that is set in a script
+ *
+ *  CHANGELOG
+ *    2022-03-18: Paul McCudden: Created
+*/
+
+If ( 
+    IsEmpty ( $$planningDashboard_fieldList );
+    hasSubmit;
+    Let (
+        [
+        ~unique = Get ( UUID );
+        // Use a non-looping method to take out any fields passed into excludeFieldList from $$planningDashboard_field
+        ~fieldListToEval = If ( not IsEmpty ( excludeFieldList ); "Substitute (" &
+            "\"" & ~unique & Substitute ( $$planningDashboard_fieldList; ¶; "\¶" ) & ~unique & "\";¶" &
+            // This section replaces each field name in excludeFieldList that exists in $$planningDashboard_field with just ¶
+            "  [ \"" &
+                Substitute (
+                    excludeFieldList;
+                    ¶;
+                    "\"; \"\"];¶  [ \""
+                ) &
+            "\"; \"\"];¶" &
+            // This section is to eliminate any empty values in ~fieldList
+            "  [ \"\¶\¶\"; \"\¶" & ~unique & "\¶\" ];¶" &
+            "  [ \"\¶\¶\"; \"\¶" & ~unique & "\¶\" ];¶" &
+            "  [ \"" & ~unique & "\¶\"; \"\" ];¶" &
+            "  [ \"\¶" & ~unique & "\"; \"\" ];¶" &
+            "  [ \"" & ~unique & "\"; \"\" ]¶)"
+        );
+        ~fieldList = If ( not IsEmpty ( ~fieldListToEval ); Evaluate ( ~fieldListToEval ); $$planningDashboard_fieldList )
+        ];
+
+        If ( IsEmpty ( ~fieldList ); hasSubmit; Evaluate (
+            If ( not hasSubmit; "not " ) & "(¶  IsEmpty ( " & Substitute ( ~fieldList; ¶; "_ENTRY ) OR¶  IsEmpty ( " ) & "_ENTRY )¶)"
+        ) )
+    )
+)
