@@ -1,0 +1,54 @@
+/*
+ *  CUSTOM FUNCTION
+ *    iterateThroughList ( theList; thisVariableName; iterationVariableName)
+ *
+ *  DESCRIPTION
+ *    To be used in the "Exit Loop If" Script step and will return true or false
+ *
+ *  PARAMS
+ *    list: The variable that contains the list to iterate through
+ *    iterationVariableName (optional): The name of the variable to use to count through the list. If nothing passed, will use $i. Clears after last iteration
+ *    thisVariableName (optional): The name of the variable to set this current iteration variable to. If nothing passed, will use $thisValue
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    SetVariable CF: https://www.briandunning.com/cf/2404
+ *
+ *  CHANGELOG
+ *    2022-03-28: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        thisVariableName = If ( IsEmpty ( thisVariableName ); "$thisValue"; thisVariableName );
+        iterationVariableName = If ( IsEmpty ( iterationVariableName ); "$i"; iterationVariableName );
+        ~iteration = Evaluate ( iterationVariableName )
+    ];
+
+    If ( ~iteration >= ValueCount ( theList );
+    
+        // Exit Loop and clear iteration/this variable
+        Let (
+            [
+                ~clearIterationVariable = SetVariable ( iterationVariableName; "" );
+                ~clearThisVariableName = SetVariable ( thisVariableName; "" )
+            ];
+
+            True
+
+        );
+
+        // Incriment iteration/this variables
+        Let (
+            [
+                ~incrimentIteration = SetVariable ( iterationVariableName; ~iteration + 1);
+                ~incrimentThis = SetVariable ( thisVariableName; GetValue ( theList; ~iteration + 1) )
+            ];
+
+            False
+
+        )
+    )
+)
