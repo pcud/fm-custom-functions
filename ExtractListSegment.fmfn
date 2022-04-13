@@ -1,25 +1,3 @@
-/*
- *  CUSTOM FUNCTION
- *    ExtractListSegment ( theList ; divider ; segmentNum )
- *
- *  DESCRIPTION
- *    Use when you have a list that contains multiple values per list item and you only want a single value.
- *
- *  PARAMS
- *    theList: The list to extract from
- *    divider: The value that divides each segment in the list
- *    segmentNum: The segment of each list item you want to extract
- *
- *  RETURNS
- *    Returns a list of values
- *
- *  DEPENDENCIES
- *    --NONE--
- *
- *  CHANGELOG
- *    2020-06-24: Paul McCudden (paul@peak14.solutions): Created
-*/
-
 While (
 
   // initialVariable
@@ -36,10 +14,43 @@ While (
   [
     ~i = ~i + 1;
     ~thisItem = GetValue ( theList ; ~i );
-    ~add = Position ( ~thisItem ; divider ; 1 ; 1 );
-    ~newList = If ( ~add ; List ( ~newList ; GetValue ( Substitute ( ~thisItem ; divider ; ¶ ) ; segmentNum ) ) ; ~newList )
+    ~add = Position ( ~thisItem ; divider ; 1 ; 1 ) <> 0;
+    ~thisValue = If ( ~add; GetValue ( Substitute ( ~thisItem ; divider ; ¶ ); segmentNum ) );
+    ~newList = 
+      // Add the current list
+      ~newList &
+
+      // Add a new ¶ if there is something to add or if nulls are included
+      If ( ~i > 1 and ( includeNulls or not IsEmpty ( ~thisValue ) ); "¶" ) &
+
+      // Add the new item
+      ~thisValue
   ];
 
   // result
     ~newList
 )
+
+/*
+ *  CUSTOM FUNCTION
+ *    ExtractListSegment ( theList ; divider ; segmentNum; includeNulls )
+ *
+ *  DESCRIPTION
+ *    Use when you have a list that contains multiple values per list item and you only want a single value.
+ *
+ *  PARAMS
+ *    theList: The list to extract from
+ *    divider: The value that divides each segment in the list
+ *    segmentNum: The segment of each list item you want to extract
+ *    includeNulls: If true, will include empty values
+ *
+ *  RETURNS
+ *    Returns a list of values
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-06-24: Paul McCudden (paul@peak14.solutions): Created
+ *    2022-04-11: Paul McCudden (paul@peak14.solutions): Added includeNulls parameter
+*/

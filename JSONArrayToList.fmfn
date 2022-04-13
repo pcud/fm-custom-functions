@@ -1,0 +1,22 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONArrayToList ( theArray )
+ *
+ *  DESCRIPTION
+ *    Converts a JSONArray to a FileMaker list
+ *
+ *  PARAMS
+ *    theArray: the array the contains the values to convert
+ *
+ *  RETURNS
+ *    List
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-04-06: Paul McCudden (paul@peak14.solutions): Created
+ *
+*/
+
+JSONListValues ( theArray ; "" )

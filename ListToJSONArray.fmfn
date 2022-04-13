@@ -1,0 +1,32 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ListToJSONArray ( theList; JSONType )
+ *
+ *  DESCRIPTION
+ *    Converts a FileMaker list to a JSONArray
+ *
+ *  PARAMS
+ *    theList: the list the contains the values to convert
+ *    JSONType: The JSON type of each item in the list
+ *
+ *  RETURNS
+ *    Array
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-04-06: Paul McCudden (paul@peak14.solutions): Created
+ *
+*/
+
+Let (
+    [
+        ~quote = If ( JSONType <> JSONNumber; "\"" )
+    ];
+
+    "[" & ~quote & Substitute ( theList;
+        [¶; ~quote & "," & ~quote]
+    ) & ~quote & "]"
+
+)

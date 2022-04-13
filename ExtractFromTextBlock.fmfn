@@ -1,0 +1,31 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ExtractFromTextBlock ( fullText; startString; endString )
+ *
+ *  DESCRIPTION
+ *    Used for when you want to get a block of text from a larger block of text where you know the start and end
+ *
+ *  PARAMS
+ *    fullText: The full block of text
+ *    startString: The unique string that starts the block you want to get
+ *    endString): The inque string the ends the block you want to get
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2022-03-30: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~startPosition = Position ( fullText; startString; 1; 1 );
+        ~endPosition = Position ( fullText; endString; ~startPosition; 1 )
+    ];
+
+    Middle ( fullText; ~startPosition; ~endPosition - ~startPosition + Length ( endString ))
+
+)
