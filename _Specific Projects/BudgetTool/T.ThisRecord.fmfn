@@ -1,0 +1,22 @@
+/*
+ *  CUSTOM FUNCTION
+ *    T.ThisRecord ( method )
+ *
+ *  DESCRIPTION
+ *    Assembles a Transaction object for this current record to make interacting with the transactions module easy
+ *
+ *  PARAMS
+ *    method: The method for this record. One of:
+ *      "create"
+ *      "edit"
+ *      "delete"
+ *
+ *  RETURNS
+ *    The passed number with superscrtiped ordinal text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-03-19: Paul McCudden (paul@peak14.solutions): Created
+*/

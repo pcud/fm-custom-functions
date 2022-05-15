@@ -1,0 +1,23 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ConvertToUnixTimestamp ( FileMakerTimestamp )
+ *
+ *  DESCRIPTION
+ *    Returns the passed FileMaker Timestamp as a Unix Timestamp
+ *
+ *  PARAMS
+ *    FileMakerTimestamp (optional): the FileMaker timestamp. Will use the current timestamp if empty
+ *
+ *  RETURNS
+ *    Number
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-07-01: Steve Winter: Created (https://msdev.nz/generating-jwts-in-native-filemaker/)
+ *    2022-04-22: Paul McCudden: Turned into a custom function and added the ability to pass a timestamp
+ *
+*/
+
+GetAsNumber ( If ( IsEmpty ( FileMakerTimestamp ); Get ( CurrentTimestamp ); GetAsTimestamp ( FileMakerTimestamp ) ) ) - 62135575200

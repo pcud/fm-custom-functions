@@ -1,0 +1,27 @@
+/*
+ *  CUSTOM FUNCTION
+ *    URLBase64Encode ( text )
+ *
+ *  DESCRIPTION
+ *    Returns the text that is base64 encoded for urls. Used as part of creating JWT
+ *
+ *  PARAMS
+ *    text: the text to encode
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-07-01: Steve Winter: Created (https://msdev.nz/generating-jwts-in-native-filemaker/)
+ *
+*/
+
+Substitute ( 
+   Base64EncodeRFC ( 4648 ; text );
+   [ "=" ; "" ];
+   [ "+" ; "-" ];
+   [ "/" ; "_" ]
+)

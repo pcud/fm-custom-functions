@@ -47,7 +47,7 @@
  *    --None--
  *
  *  CHANGELOG
- *    2021-09-17: Paul McCudden (paul@peak14.solutions): Created
+ *    2021-09-17: Paul McCudden: Created
 */
 
 While (
@@ -88,7 +88,7 @@ While (
             "    AP: For displaying hours based on a 12-hour clock and showing AM or PM¶"&
             "Escaped Values:¶"&
             "    Any value can be enclosed in \ to be escaped¶"&
-            "    Note that two \\ will need to be included in text strings¶"&
+            "    Note that two \ will need to be included in text strings¶"&
             "Help:¶"&
             "    If format is ?, this function will output help text"
         )
@@ -103,7 +103,23 @@ While (
         ~processing = If ( ~processing = "\\"; Middle ( format; 1; Position ( format; "\\"; 2; 1 ) ); ~processing );
 
         // If there are multiple of the same character in a row, grab all of that character
-        ~processing = If ( Right ( Left ( ~toProcess; 2 ); 1) = ~processing; Middle ( format; 1; Position ( format; ~processing; 2; 1 ) ); ~processing);
+        ~processing = While (
+            [
+                ~processCheck = ~processing;
+                ~processing2 = ~processing;
+                ~next = Right ( Left ( ~toProcess; 2 ); 1 )
+            ];
+
+            Exact ( ~processCheck; ~next ) and Length ( ~processing2 ) < Length ( ~toProcess );
+
+            [
+                ~processing2 = ~processing2 & ~next;
+                ~next = Right ( Left ( ~toProcess; Length ( ~processing2 ) + 1 ); 1 )
+            ];
+
+            ~processing2
+        
+        );
         
         // We have the full processing section. Cut it out of what's left to process
         ~toProcess = Right ( ~toProcess; Length ( ~toProcess) - Length ( ~processing ) );
@@ -115,10 +131,24 @@ While (
             ~processing = "yy"; Right ( GetAsText ( Year ( ~date ) ); 2 );
             ~processing = "yyyy"; GetAsText ( Year ( ~date ) );
             ~processing = "m"; GetAsText ( Month ( ~date ) );
-            ~processing = "mm"; Right ( "0" & GetAsText ( Month ( ~date ) ); 2 );
+            ~processing = "mm"; Right ( "0" & Month ( ~date ); 2 );
             ~processing = "mmm"; Left ( MonthName ( ~date ); 3 );
             ~processing = "mmmm"; MonthName ( ~date );
+            ~processing = "d"; GetAsNumber ( Day ( ~date ) );
+            ~processing = "dd"; GetAsText ( Right ( "0" & Day ( ~date ); 2 ) );
+            ~processing = "ddd"; Left ( DayName ( ~date ); 3 );
+            ~processing = "dddd"; DayName ( ~date );
+            Exact ( ~processing ; "HH" ); Hour ( ~date );
+            Exact ( ~processing ; "hh" ); Hour ( ~date ) - If ( Hour ( ~date ) > 12; 12 );
+            ~processing = "ii"; Right ( "0" & Minute ( ~date ); 2 );
+            ~processing = "ss"; Right ( "0" & Seconds ( ~date ); 2 );
 
+            // ".000: The milliseconds as a fraction (to the same number of digits)" - Need to complete
+            ~processing = ".000"; "?";
+
+
+            Exact ( ~processing ; "ap" ); If ( Hour ( ~date ) > 12; "pm"; "am" );
+            Exact ( ~processing ; "AP" ); If ( Hour ( ~date ) > 12; "PM"; "AM" );
 
             // If there is no match, output what they entered
             ~processing

@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isCardWindow ()
+ *
+ *  DESCRIPTION
+ *    Use when you want to know if you are currently on a card window or not
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-02-26: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Get ( WindowStyle ) = 3

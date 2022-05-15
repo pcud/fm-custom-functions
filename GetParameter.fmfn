@@ -7,7 +7,6 @@
  *
  *  PARAMS
  *    var: The name of the variable
- *    convertArrayToList: Set to true if you want to return an array as a list
  *
  *  RETURNS
  *    Returns the parameter

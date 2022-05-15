@@ -1,0 +1,47 @@
+/*
+ *  CUSTOM FUNCTION
+ *    Navigation ( order; type )
+ *
+ *  DESCRIPTION
+ *    A place where all of the navigation variables can live so they are easily changeable
+ *
+ *  PARAMS
+ *    order: The order that this button is in
+ *    type: The type of data to return
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-0512: Paul McCudden: Created
+*/
+
+Case (
+    order = 1;
+        Case (
+            type = "label"; "POs";
+            type = "parameter"; JSONSEtElement ( "{}"; "key"; "POs"; JSONString );
+            type = "isActive"; PatternCount ( Get ( LayoutName ); "POs" ) > 0
+        );
+    order = 2;
+        Case (
+            type = "label"; "Events";
+            type = "parameter"; JSONSEtElement ( "{}"; "key"; "events"; JSONString );
+            type = "isActive"; PatternCount ( Get ( LayoutName ); "Events" ) > 0
+        );
+    order = 3;
+        Case (
+            type = "label"; "Reports";
+            type = "parameter"; JSONSEtElement ( "{}"; "key"; "reports"; JSONString );
+            type = "isActive"; PatternCount ( Get ( LayoutName ); "Reports" ) > 0
+        );
+    order = 4;
+        Case (
+            type = "label"; "Admin";
+            type = "parameter"; JSONSEtElement ( "{}"; "key"; "admin"; JSONString );
+            type = "isActive"; PatternCount ( Get ( LayoutName ); "Admin" ) > 0
+        )
+)

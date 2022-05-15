@@ -28,7 +28,7 @@ Let (
 
     If ( ~isValidJSON;
         Evaluate ( "Let([¶" & Substitute ( ~params;
-            // Strip out uneed json info and seperate each variable onto it's own line
+            // Strip out uneeded json info and seperate each variable onto it's own line
             ["{"; ""];
             ["}"; ""];
             [","; ¶];

@@ -1,0 +1,23 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isField ( textOrFieldReference )
+ *
+ *  DESCRIPTION
+ *    Use when you want to know if something is a valid field or not
+ *
+ *  PARAMS
+ *    textOrFieldReference: Text of a possible field name or a field reference 
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-04-22: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+not EvaluationError ( GetFieldName ( textOrFieldReference ) ) or
+not EvaluationError ( GetField ( textOrFieldReference ) ) or 
+EvaluationError ( Evaluate ( textOrFieldReference ) ) = 103

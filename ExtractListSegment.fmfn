@@ -1,3 +1,27 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ExtractListSegment ( theList ; divider ; segmentNum; includeNulls )
+ *
+ *  DESCRIPTION
+ *    Use when you have a list that contains multiple values per list item and you only want a single value.
+ *
+ *  PARAMS
+ *    theList: The list to extract from
+ *    divider: The value that divides each segment in the list
+ *    segmentNum: The segment of each list item you want to extract
+ *    includeNulls: If true, will include empty values
+ *
+ *  RETURNS
+ *    Returns a list of values
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-06-24: Paul McCudden (paul@peak14.solutions): Created
+ *    2022-04-11: Paul McCudden (paul@peak14.solutions): Added includeNulls parameter
+*/
+
 While (
 
   // initialVariable
@@ -30,27 +54,3 @@ While (
   // result
     ~newList
 )
-
-/*
- *  CUSTOM FUNCTION
- *    ExtractListSegment ( theList ; divider ; segmentNum; includeNulls )
- *
- *  DESCRIPTION
- *    Use when you have a list that contains multiple values per list item and you only want a single value.
- *
- *  PARAMS
- *    theList: The list to extract from
- *    divider: The value that divides each segment in the list
- *    segmentNum: The segment of each list item you want to extract
- *    includeNulls: If true, will include empty values
- *
- *  RETURNS
- *    Returns a list of values
- *
- *  DEPENDENCIES
- *    --NONE--
- *
- *  CHANGELOG
- *    2020-06-24: Paul McCudden (paul@peak14.solutions): Created
- *    2022-04-11: Paul McCudden (paul@peak14.solutions): Added includeNulls parameter
-*/
