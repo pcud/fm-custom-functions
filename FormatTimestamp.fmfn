@@ -7,41 +7,11 @@
  *
  *  PARAMS
  *    timestamp: The timestamp, date or time to format
- *    format: The format as a text string. Key character:
- *      Year Codes:
- *          yy: The year as 2 digits
- *          yyyy: The year as 4 digits
- *      Month Codes:
- *          m: The month as a 1 or 2 digits
- *          mm: The month as 2 digits
- *          mmm: The short name of the month
- *          mmmm: The full name of the month
- *          mmmmm: The first letter of the month name
- *      Day Codes:
- *          d: The day as 1 or 2 digits
- *          dd: The day as 2 digits
- *          ddd: The short name of the day of the week
- *          dddd: The full name of the day of the week
- *          ddddd: The first letter of the day of the week
- *      Hour Codes:
- *          HH: The hours on a 24-hour clock
- *          hh: The hours on a 12-hour clock
- *      Other Time Codes:
- *          ii: The minutes
- *          ss: The seconds
- *          .000: The milliseconds as a fraction (to the same number of digits)
- *          ap: For displaying hours based on a 12-hour clock and showing am or pm
- *          AP: For displaying hours based on a 12-hour clock and showing AM or PM
- *          Ap: For displaying hours based on a 12-hour clock and showing Am or Pm
- *      Escaped Values:
- *          Any value can be enclosed in "\" to be escaped
- *          Note that two "\\" will need to be included in text strings
- *      Help:
- *          If format is "?", this function will output help text
+ *    format: The format as a text string. Call function with format as "?" for more details
  *
  *  EXAMPLES
  *    FormatTimestamp ( GetAsTimestamp ( "12/01/2000 1:00PM" ); "ddd, dd mm yyyy - HH:ii")
- *      "Sat, 01 12 2000 - 13:00"
+ *      "sat, 01 12 2000 - 13:00"
  *    FormatTimestamp ( GetAsTimestamp ( "01/01/2011 4:05PM" ); "d/m/yy hh:ii ap")
  *      "1/1/11 4:05 pm"
  *
@@ -49,20 +19,21 @@
  *    --None--
  *
  *  CHANGELOG
- *    2021-09-17: Paul McCudden: Created
+ *    2021-09-17: Paul McCudden: Created - Time section incomplete
+ *    2022-05-26: Paul McCudden: Mostly finished time section - Millisecond section incomplete
 */
 
 While (
     [
-        theTimestamp = If ( IsEmpty ( theTimestamp ); Get ( CurrentTimestamp ); theTimestamp ); 
-        ~date = GetAsDate ( theTimestamp );
-        ~time = GetAsTime ( theTimestamp );
-        format = If ( IsEmpty ( format ); "?"; format);
+        ~theTimestamp = If ( IsEmpty ( theTimestamp ); Get ( CurrentTimestamp ); theTimestamp ); 
+        ~date = GetAsDate ( ~theTimestamp );
+        ~time = GetAsTime ( ~theTimestamp );
+        ~format = If ( IsEmpty ( format ); "?"; format);
         ~escapeCharater = "\\";
 
         // Avoid loop if they want help text
-        ~toProcess = If ( format <> "?"; format );
-        ~formatted = If ( format = "?";
+        ~toProcess = If ( ~format <> "?"; ~format );
+        ~formatted = If ( ~format = "?";
             "FormatTimestamp ( theTimestamp; format ):¶"&
             "Formats theTimestamp using the excel/google sheet conventions¶¶"&
             "Year Codes:¶"&
