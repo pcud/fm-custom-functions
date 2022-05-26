@@ -22,6 +22,7 @@
  *          dd: The day as 2 digits
  *          ddd: The short name of the day of the week
  *          dddd: The full name of the day of the week
+ *          ddddd: The first letter of the day of the week
  *      Hour Codes:
  *          HH: The hours on a 24-hour clock
  *          hh: The hours on a 12-hour clock
@@ -31,6 +32,7 @@
  *          .000: The milliseconds as a fraction (to the same number of digits)
  *          ap: For displaying hours based on a 12-hour clock and showing am or pm
  *          AP: For displaying hours based on a 12-hour clock and showing AM or PM
+ *          Ap: For displaying hours based on a 12-hour clock and showing Am or Pm
  *      Escaped Values:
  *          Any value can be enclosed in "\" to be escaped
  *          Note that two "\\" will need to be included in text strings
@@ -38,9 +40,9 @@
  *          If format is "?", this function will output help text
  *
  *  EXAMPLES
- *    DisplayTimestamp ( GetAsTimestamp ( "12/01/2000 1:00PM" ); "ddd, dd mm yyyy - hh:nn")
+ *    FormatTimestamp ( GetAsTimestamp ( "12/01/2000 1:00PM" ); "ddd, dd mm yyyy - HH:ii")
  *      "Sat, 01 12 2000 - 13:00"
- *    DisplayTimestamp ( GetAsTimestamp ( "01/01/2011 4:05PM" ); "d/m/yy h:nn ap")
+ *    FormatTimestamp ( GetAsTimestamp ( "01/01/2011 4:05PM" ); "d/m/yy hh:ii ap")
  *      "1/1/11 4:05 pm"
  *
  *  DEPENDENCIES
@@ -56,7 +58,7 @@ While (
         ~date = GetAsDate ( theTimestamp );
         ~time = GetAsTime ( theTimestamp );
         format = If ( IsEmpty ( format ); "?"; format);
-        ~keys = "ymdhns";
+        ~escapeCharater = "\\";
 
         // Avoid loop if they want help text
         ~toProcess = If ( format <> "?"; format );
@@ -77,15 +79,17 @@ While (
             "    dd: The day as 2 digits¶"&
             "    ddd: The short name of the day of the week¶"&
             "    dddd: The full name of the day of the week¶"&
+            "    ddddd: The first letter of the day of the week¶"&
             "Hour Codes:¶"&
             "    HH: The hours on a 24-hour clock¶"&
             "    hh: The hours on a 12-hour clock¶"&
             "Other Time Codes:¶"&
             "    ii: The minutes¶"&
             "    ss: The seconds¶"&
-            "    .000: The milliseconds as a fraction (to the same number of digits)¶"&
+            "    .000: The milliseconds as a fraction (to the same number of digits) - incomplete¶"&
             "    ap: For displaying hours based on a 12-hour clock and showing am or pm¶"&
             "    AP: For displaying hours based on a 12-hour clock and showing AM or PM¶"&
+            "    Ap: For displaying hours based on a 12-hour clock and showing Am or Pm¶"&
             "Escaped Values:¶"&
             "    Any value can be enclosed in \ to be escaped¶"&
             "    Note that two \ will need to be included in text strings¶"&
@@ -94,31 +98,53 @@ While (
         )
     ];
 
-    not IsEmpty ( ~toProcess);
+    not IsEmpty ( ~toProcess );
     
     [
         ~processing = Left ( ~toProcess; 1 );
 
         // Grab full escaped value if we're processing the start of an escape
-        ~processing = If ( ~processing = "\\"; Middle ( format; 1; Position ( format; "\\"; 2; 1 ) ); ~processing );
-
-        // If there are multiple of the same character in a row, grab all of that character
-        ~processing = While (
-            [
-                ~processCheck = ~processing;
-                ~processing2 = ~processing;
-                ~next = Right ( Left ( ~toProcess; 2 ); 1 )
-            ];
-
-            Exact ( ~processCheck; ~next ) and Length ( ~processing2 ) < Length ( ~toProcess );
-
-            [
-                ~processing2 = ~processing2 & ~next;
-                ~next = Right ( Left ( ~toProcess; Length ( ~processing2 ) + 1 ); 1 )
-            ];
-
-            ~processing2
+        ~processing = If ( ~processing = ~escapeCharater;
         
+            Case ( 
+                
+                // If there's no ending escape character, just return the escape character
+                Position ( ~toProcess; ~escapeCharater; 2; 1 ) = 0;
+                ~processing;
+
+                // Grab all the characters until the next escape character
+                Left ( ~toProcess; Position ( ~toProcess ; ~escapeCharater ; 2 ; 1 ) )
+            );
+            ~processing
+        );
+
+        // If they are doing ap, grab the "p"
+        ~processing = If (
+            ~processing = "a" and Right ( Left ( ~toProcess; 2 ); 1 ) = "p";
+            Left ( ~toProcess; 2 );
+            ~processing
+        );
+
+        // If there are multiple of the same character in a row, grab all of that character - only do this section if processing is a single character still
+        ~processing = If ( Length ( ~processing ) = 1;
+            While (
+                [
+                    ~processCheck = ~processing;
+                    ~processing2 = ~processing;
+                    ~next = Right ( Left ( ~toProcess; 2 ); 1 )
+                ];
+
+                ~processCheck = ~next and Length ( ~processing2 ) < Length ( ~toProcess );
+
+                [
+                    ~processing2 = ~processing2 & ~next;
+                    ~next = Right ( Left ( ~toProcess; Length ( ~processing2 ) + 1 ); 1 )
+                ];
+
+                ~processing2
+            
+            );
+            ~processing
         );
         
         // We have the full processing section. Cut it out of what's left to process
@@ -126,30 +152,56 @@ While (
 
         // Format the processing section we have
         ~formatted = ~formatted & Case (
-            ~processing = "\\\\"; "\\";
-            Left ( ~processing; 1) = "\\"; Right ( Left ( ~processing; Length ( ~processing ) - 1 ); Length ( ~processing ) - 2 );
+
+            // Escape Character
+            Left ( ~processing; 1 ) = ~escapeCharater; Substitute ( ~processing; ~escapeCharater; "" );
+
+            // Year
             ~processing = "yy"; Right ( GetAsText ( Year ( ~date ) ); 2 );
             ~processing = "yyyy"; GetAsText ( Year ( ~date ) );
+
+            // Month
             ~processing = "m"; GetAsText ( Month ( ~date ) );
             ~processing = "mm"; Right ( "0" & Month ( ~date ); 2 );
-            ~processing = "mmm"; Left ( MonthName ( ~date ); 3 );
-            ~processing = "mmmm"; MonthName ( ~date );
+            Exact ( ~processing; "MMM" ); Upper ( Left ( MonthName ( ~date ); 3 ) );
+            Exact ( ~processing; "Mmm" ); Proper ( Left ( MonthName ( ~date ); 3 ) );
+            ~processing = "mmm"; Lower ( Left ( MonthName ( ~date ); 3 ) );
+            Exact ( ~processing; "MMMM" ); Upper ( MonthName ( ~date ) );
+            Exact ( ~processing; "Mmmm" ); Proper ( MonthName ( ~date ) );
+            ~processing = "mmmm"; Lower ( MonthName ( ~date ) );
+            Exact ( ~processing; "MMMMM" ); Upper ( Left ( MonthName ( ~date ); 1 ) );
+            ~processing = "mmmmm"; Lower ( Left ( MonthName ( ~date ); 1 ) );
+
+            // Day
             ~processing = "d"; GetAsNumber ( Day ( ~date ) );
             ~processing = "dd"; GetAsText ( Right ( "0" & Day ( ~date ); 2 ) );
-            ~processing = "ddd"; Left ( DayName ( ~date ); 3 );
-            ~processing = "dddd"; DayName ( ~date );
-            Exact ( ~processing ; "HH" ); Hour ( ~date );
-            Exact ( ~processing ; "hh" ); Hour ( ~date ) - If ( Hour ( ~date ) > 12; 12 );
-            ~processing = "ii"; Right ( "0" & Minute ( ~date ); 2 );
-            ~processing = "ss"; Right ( "0" & Seconds ( ~date ); 2 );
+            Exact ( ~processing; "DDD"); Upper ( Left ( DayName ( ~date ); 3 ) );
+            Exact ( ~processing; "Ddd"); Proper ( Left ( DayName ( ~date ); 3 ) );
+            ~processing = "ddd"; Lower ( Left ( DayName ( ~date ); 3 ) );
+            Exact ( ~processing; "DDDD" ); Upper ( DayName ( ~date ) );
+            Exact ( ~processing; "Dddd" ); Proper ( DayName ( ~date ) );
+            ~processing = "dddd"; Lower ( DayName ( ~date ) );
+            Exact ( ~processing; "DDDDD" ); Upper ( Left ( DayName ( ~date ); 1 ) );
+            ~processing = "ddddd"; Lower ( Left ( DayName ( ~date ); 1 ) );
 
-            // ".000: The milliseconds as a fraction (to the same number of digits)" - Need to complete
+            // Hours
+            Exact ( ~processing; "HH"  ); Hour ( ~time );
+            Exact ( ~processing; "hh" ); Hour ( ~time ) - If ( Hour ( ~time ) > 12; 12 );
+
+            // Minuets
+            ~processing = "ii"; Right ( "0" & Minute ( ~time ); 2 );
+
+            // Seconds
+            ~processing = "ss"; Right ( "0" & Seconds ( ~time ); 2 );
+
+            // Milliseconds - Need to complete
             ~processing = ".000"; "?";
 
-
-            Exact ( ~processing ; "ap" ); If ( Hour ( ~date ) > 12; "pm"; "am" );
-            Exact ( ~processing ; "AP" ); If ( Hour ( ~date ) > 12; "PM"; "AM" );
-
+            // Meridiem Indicator (AM/PM)
+            Exact ( ~processing; "AP" ); If ( Hour ( ~time ) > 12; "PM"; "AM" );
+            Exact ( ~processing; "Ap" ); If ( Hour ( ~time ) > 12; "Pm"; "Am" );
+            Exact ( ~processing; "ap" ); If ( Hour ( ~time ) > 12; "pm"; "am" );
+            
             // If there is no match, output what they entered
             ~processing
         )

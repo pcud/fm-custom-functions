@@ -1,0 +1,35 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONCreateElementFromList ( json; theList; seperator )
+ *
+ *  DESCRIPTION
+ *    Creates a JSON from a list. Meant to be used before FM 16
+ *
+ *  PARAMS
+ *    json: The JSON to add values to
+ *    theList: The list of values to add to the JSON
+ *    seperator: The value that seperates the keys from the values
+ *
+ *  RETURNS
+ *    JSON
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-05-23: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~json = If ( IsEmpty ( json ); "{}"; json );
+        ~insertPoint = Position ( ~json ; "}" ; Length ( ~json ) ; -1 ) - 1
+    ];
+        Left ( ~json; ~insertPoint ) &
+        If ( ~insertPoint > 1; "," ) &
+        "\"" & Substitute ( theList;
+            [seperator; "\":\""];
+            [¶; "\",\""]
+        ) & "\"" &
+        "}"
+)

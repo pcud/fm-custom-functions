@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    T.ThisRecord ( method )
+ *    T.PackageThisRecord ( method; notes )
  *
  *  DESCRIPTION
  *    Assembles a Transaction object for this current record to make interacting with the transactions module easy
@@ -18,5 +18,21 @@
  *    --NONE--
  *
  *  CHANGELOG
- *    2020-03-19: Paul McCudden (paul@peak14.solutions): Created
+ *    2020-05-26: Paul McCudden (paul@peak14.solutions): Created
 */
+
+Let (
+    [
+        ~thisBaseTableName = GetBaseTableName ( "" );
+        ~packedRecord = ""
+    ];
+    
+    T.Transact (
+        ~thisBaseTableName;
+        method;
+        GetField ( ~thisBaseTableName & "::ID" );
+        notes;
+        ~packedRecord
+    )
+
+)

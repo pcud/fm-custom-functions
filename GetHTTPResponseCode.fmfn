@@ -33,7 +33,7 @@ While (
     not ~stop;
 
     [
-        // Countfrom the bottom line up since we only want the last code
+        // Count from the bottom line up since we only want the last code
         ~thisLine = GetValue ( responseHeaders; ~lineCount - ~i );
         ~i = ~i + 1;
         ~isResponseCode = Left ( ~thisLine; Length ( ~responseCodeStart ) ) = ~responseCodeStart;

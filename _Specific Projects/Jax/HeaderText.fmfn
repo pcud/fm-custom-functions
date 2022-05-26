@@ -1,0 +1,31 @@
+/*
+ *  CUSTOM FUNCTION
+ *    HeaderText (  )
+ *
+ *  DESCRIPTION
+ *    Returns what the header should be based on the layout name
+ *
+ *  PARAMS
+ *    --None--
+ *
+ *  RETURNS
+ *    The passed number with superscrtiped ordinal text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-05-16: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~l = Get ( LayoutName );
+        ~ll = Substitute ( ~l; "-"; ¶ )
+    ];
+
+    Case (
+        ~l = "Home"; Get ( FileName ) & " file";
+        Trim ( GetValue ( ~ll; 1 ) )
+    )
+)

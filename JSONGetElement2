@@ -1,0 +1,32 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONGetElement2 ( json; keyOrIndexOrPath )
+ *
+ *  DESCRIPTION
+ *    Grabs an element from a JSON. Meant to be used in versions before naitive JSON functionality was introduced.
+ *
+ *  PARAMS
+ *    json: The JSON to grab data from
+ *    keyOrIndexOrPath: The key, index, or path to grab the element of.
+ *
+ *  RETURNS
+ *    The data type of the element
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-05-23: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~start = Position ( json ; "\"" & keyOrIndexOrPath & "\":" ; 1 ; 1 ) + Length ( keyOrIndexOrPath ) + 4;
+        ~end = Position ( json ; "," ; ~start ; 1 );
+        ~end = If ( ~end <> 0; ~end;
+          Length ( json )
+        )
+    ];
+
+        Middle ( json ; ~start ; ~end - ~start - 1 )
+)
