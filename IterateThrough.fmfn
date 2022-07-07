@@ -1,12 +1,12 @@
 /*
  *  CUSTOM FUNCTION
- *    iterateThroughList ( theList; thisVariableName; iterationVariableName )
+ *    iterateThrough ( listOrArrayOrObject; thisVariableName; iterationVariableName )
  *
  *  DESCRIPTION
  *    To be used in the "Exit Loop If" Script step and will return true or false
  *
  *  PARAMS
- *    list: The variable that contains the list to iterate through
+ *    listOrArrayOrObject: The variable that contains the list or array or object to iterate through
  *    iterationVariableName (optional): The name of the variable to use to count through the list. If nothing passed, will use $i. Clears after last iteration
  *    thisVariableName (optional): The name of the variable to set this current iteration variable to. If nothing passed, will use $thisValue
  *
@@ -14,10 +14,11 @@
  *    True or False
  *
  *  DEPENDENCIES
- *    --None--
+ *    FileMaker 19.5 or higher
  *
  *  CHANGELOG
  *    2022-03-28: Paul McCudden: Created
+ *    2022-07-07: Paul McCudden: Updated to work with arrays and objects
 */
 
 Let (
@@ -25,10 +26,19 @@ Let (
         thisVariableName = If ( IsEmpty ( thisVariableName ); "$thisValue"; If ( Left ( thisVariableName; 1 ) <> "$"; "$" ) & thisVariableName );
         iterationVariableName = If ( IsEmpty ( iterationVariableName ); "$i"; iterationVariableName );
         
+        ~listType = Case (
+            Left ( JSONFormatElements ( listOrArrayOrObject ); 1 ) = "?"; "list";
+            JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONArray; "array";
+            JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONObject; "object";
+            ""
+        );
         ~newIteration = Evaluate ( iterationVariableName ) + 1;
-		~exitLoop = ~newIteration > ValueCount ( theList );
+		~exitLoop = ~newIteration > ValueCount ( If ( ~listType = "list"; listOrArrayOrObject; JSONListKeys ( listOrArrayOrObject; "" ) ) );
         ~newIteration = If ( ~exitLoop; ""; ~newIteration );
-        ~newVariableValue = If ( ~exitLoop; ""; GetValue ( theList; ~newIteration ) );
+        ~newVariableValue = If ( ~exitLoop; ""; Case (
+            ~listType = "list"; GetValue ( theList; ~newIteration );
+            GetValue ( JSONListValues ( listOrArrayOrObject; "" ); ~newIteration ) )
+        );
 
        ~letStatement = "Let([" & thisVariableName & "=\"" & ~newVariableValue & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
     ];
