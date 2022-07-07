@@ -1,0 +1,44 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetCurrentTimeZoneUTCOffset ( )
+ *
+ *  DESCRIPTION
+ *    Returns a FileMaker time that's the offset from UTC + 0 from the current timestamp
+ *    There is odd behaviour with webdirect. Get ( CurrentTimestamp ) can be a few min off from Get ( CurrentTimeUTCMilliseconds )
+ *    Because of this, when the hour rolls over for one but not the other, unless we check for this, it will return the wrong number
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    Time
+ *
+ *  DEPENDANCIES
+ *    GetCurrentUTCTimestamp
+ *
+ *  CHANGELOG
+ *    2021-03-10: Paul McCudden: Created
+*/
+
+Let (
+    [
+        ~tsLocal = Get ( CurrentTimestamp );
+        ~tsHourLocal = GetAsNumber ( GetAsTime ( ~tsLocal ) ) / 3600;
+        ~hourDecimalLocal = GetAsNumber ( GetAsTime ( ~tsLocal ) ) / 3600 - Int ( GetAsNumber ( GetAsTime ( ~tsLocal ) ) / 3600 ) ;
+        ~tsUTC = GetCurrentUTCTimestamp;
+        ~tsHourUTC = GetAsNumber ( GetAsTime ( ~tsUTC ) ) / 3600;
+        ~round = ~hourDecimalLocal > .75 or ~hourDecimalLocal < .25
+    ];
+
+    GetAsTime (
+        Timestamp ( 
+            Date ( Month ( ~tsLocal ); Day ( ~tsLocal ); Year ( ~tsLocal ) );
+            Time ( If ( ~round; Round ( ~tsHourLocal; 0 ); Floor ( ~tsHourLocal ) ); 0; 0 )
+        ) -
+        Timestamp ( 
+            Date ( Month ( ~tsUTC ); Day ( ~tsUTC ); Year ( ~tsUTC ) );
+            Time ( If ( ~round; Round ( ~tsHourUTC ; 0 ); Floor ( ~tsHourUTC ) ); 0; 0 )
+        )
+    )
+
+)

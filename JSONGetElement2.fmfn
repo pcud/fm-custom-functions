@@ -21,12 +21,17 @@
 
 Let (
     [
-        ~start = Position ( json ; "\"" & keyOrIndexOrPath & "\":" ; 1 ; 1 ) + Length ( keyOrIndexOrPath ) + 4;
+        ~start = Position ( json ; "\"" & keyOrIndexOrPath & "\":" ; 1 ; 1 );
         ~end = Position ( json ; "," ; ~start ; 1 );
         ~end = If ( ~end <> 0; ~end;
           Length ( json )
         )
     ];
 
-        Middle ( json ; ~start ; ~end - ~start - 1 )
+    Case (
+      IsEmpty ( keyOrIndexOrPath ); json;
+      ~start > 0; Middle ( json; ~start + Length ( keyOrIndexOrPath ) + 3; ~end - ~start - Length ( keyOrIndexOrPath ) - 3 );
+      "?"
+    )
+
 )

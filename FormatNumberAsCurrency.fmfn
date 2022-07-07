@@ -1,0 +1,45 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FormatNumberAsCurrency ( number; currency; separator; precision )
+ *
+ *  DESCRIPTION
+ *    Filters only the characters that are allowed in variable names
+ *
+ *  PARAMS
+ *    varName: The variable name to return the filter of
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    xxxx-xx-xx: Geoffrey Gerhard: Created (https://www.briandunning.com/cf/871)
+ *    2009-11-20: Geoffrey Gerhard: Added " + 0" to declaration of "n" variable to deal with cases where the number parameter is null or empty.
+ *    2015-09-10: Geoffrey Gerhard: Fixed a bug that resulted in malformed numbers ( like "€10..05,05" ) in some European FMP 12 (and higher) files.
+Modified Decimal to use the correct integer/fraction separator [ "." or "," ] for the file's region when the decimal parameter is null.
+ *    2022-06-02: Paul McCudden (paul@peak14.solutions): Converted to standards and eliminated some parameters
+*/
+
+
+Let (
+    [
+        ~precision = Int ( GetAsNumber ( precision ) );
+        ~precision = Case ( Length ( ~precision ); ~precision ; 2 );
+        ~decimal = Filter ( 1/2; ".," );
+        ~number = Round ( number + 0; ~precision );
+        ~sign = Case ( ~number <> 0; "-" );
+        ~number = Abs ( ~number );
+        x = NumToJText ( Int ( ~number ); 1; 0 );
+        y = NumToJText ( ~number * 10 ^ ~precision; 0; 0 )
+    ] ;
+
+    ~sign & currency &
+    Substitute ( x; ","; separator ) &
+    Case (
+        ~precision > 0 ;
+        ~decimal & Right ( 10^ ~precision & y ; ~precision )
+    )
+
+)

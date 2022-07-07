@@ -16,37 +16,72 @@
  *
  *  CHANGELOG
  *    2022-02-07: Paul McCudden (paul@peak14.solutions): Created
+ *    2022-06-16: Paul McCudden (paul@peak14.solutions): Update to loop if necessary
 */
 
 Let (
     [
-        params = If ( IsEmpty ( params ); Get ( ScriptParameter ) );
-        ~s = Get ( UUID );
-        ~isValidJSON = Left ( JSONFormatElements ( params ); 1 ) <> "?";
-        ~params = ~s & ¶ & params & ¶ & ~s
+        ~params = If ( IsEmpty ( params ); Get ( ScriptParameter ); params );
+        ~params = If ( Left ( JSONFormatElements ( ~params ); 1 ) = "?"; "{}"; ~params )
     ];
 
-    If ( ~isValidJSON;
-        Evaluate ( "Let([¶" & Substitute ( ~params;
-            // Strip out uneeded json info and seperate each variable onto it's own line
-            ["{"; ""];
-            ["}"; ""];
-            [","; ¶];
+    If ( PatternCount ( ~params; "{" ) + PatternCount ( ~params; "[" ) = 1;
 
-            // Format each line to have the proper syntax
-            ["¶\""; "¶$"];
-            ["\":"; "="];
+        // If no nested JSON variables, we don't need to loop
+        Let (
+            [
+                ~s = Get ( UUID );
+                ~params = ~s & ¶ & ~params & ¶ & ~s
+            ];
 
-            // Eliminate any empty lines
-            ["¶¶"; ¶ & ~s & ¶];
-            ["¶¶"; ¶ & ~s & ¶];
-            [~s & ¶; ""];
-            [¶ & ~s; ""];
-            [~s; ""];
+            Evaluate ( "Let([¶" & Substitute ( ~params;
+                // Strip out uneeded json info and seperate each variable onto it's own line
+                ["{"; ""];
+                ["}"; ""];
+                [","; ¶];
 
-            // Format each line for the let request
-            [¶; ";¶"]
-        ) & "¶];1)" );
-        False
+                // Format each line to have the proper syntax
+                ["¶\""; "¶$"];
+                ["\":"; "="];
+
+                // Eliminate any empty lines
+                ["¶¶"; ¶ & ~s & ¶];
+                ["¶¶"; ¶ & ~s & ¶];
+                [~s & ¶; ""];
+                [¶ & ~s; ""];
+                [~s; ""];
+
+                // Format each line for the let request
+                [¶; ";¶"];
+                ["\\r"; "\¶"]
+            ) & "¶];\"Used Substitute Method\")" )
+        );
+
+        // We have nested JSON variables, need to loop
+        While (
+            [
+                ~paramList = JSONListKeys ( ~params; "" );
+                ~paramCount = ValueCount ( ~paramList );
+                ~i = 0;
+                ~setVariable = ""
+            ];
+
+            ~i < ~paramCount;
+            
+            [
+                ~i = ~i + 1;
+                ~thisParam = GetValue ( ~paramList; ~i );
+                ~thisValue = Substitute ( JSONGetElement ( ~params; ~thisParam );
+                    ["\""; "\\\""];
+                    ["\\r"; "\¶"]
+                );
+                ~thisParam = If ( Left ( ~thisParam; 1 ) <> "$"; "$") & ~thisParam;
+                ~setVariable = Evaluate ( "Let([" & ~thisParam & "=\"" & ~thisValue & "\"];1)" )
+            ];
+
+            "Used While() Method"
+        )
+
     )
+
 )

@@ -1,0 +1,1 @@
+PatternCount ( Left ( ¶ & theList & ¶ ; Position ( ¶ & theList & ¶ ; ¶ & theValue & ¶ ; 1 ; 1 ) ) ; ¶ )

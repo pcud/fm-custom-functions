@@ -1,0 +1,22 @@
+/*
+ *  CUSTOM FUNCTION
+ *    CreateID ( feield )
+ *
+ *  DESCRIPTION
+ *    Creates a unique ID with a human readble way to understand which table it's from
+ *
+ *  PARAMS
+ *    field: The name of the field to pull the base table from
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    GetBaseTableName
+ *
+ *  CHANGELOG
+ *    2022-05-27: Paul McCudden: Created
+ *
+*/
+
+GetBaseTableName ( field ) & "-" & Get ( UUID )

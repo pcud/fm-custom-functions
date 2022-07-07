@@ -20,4 +20,4 @@
  *
 */
 
-GetAsNumber ( If ( IsEmpty ( FileMakerTimestamp ); Get ( CurrentTimestamp ); GetAsTimestamp ( FileMakerTimestamp ) ) ) - 62135575200
+Round ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ; 0 ) - GetAsNumber ( Timestamp ( Date ( 1 ; 1 ; 1970 ) ; Time ( 0 ; 0 ; 0 ) ) )

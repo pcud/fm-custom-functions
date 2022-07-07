@@ -1,0 +1,203 @@
+/*
+ *  CUSTOM FUNCTION
+ *    T.PackageThisLayout ( method; moreFields; lessFields )
+ *
+ *  DESCRIPTION
+ *    Assembles a Transaction object for all fields on the current layout.
+ *    !~EXECPTIONS~!
+ *      If you want to grab all fields listed inside a portal, each field inside the portal needs to be named AND the portal needs to be named.
+ *      If this isn't done, the CF will assume only a single field needs to be grabbed
+ *
+ *  PARAMS
+ *    method: The method for this record. One of:
+ *      "create"
+ *      "edit"
+ *      "delete"
+ *
+ *  RETURNS
+ *    The passed number with superscrtiped ordinal text
+ *
+ *  DEPENDENCIES
+ *    Transactions Module created by Brendan Pierce (brendan_p@beezwax.net)
+ *
+ *  CHANGELOG
+ *    2020-06-08: Paul McCudden (paul_m@beezwax.net): Created
+*/
+
+While (
+    [
+	    ~method = Case (
+            method = "create"; method;
+            method = "delete"; method;
+            "edit"
+        );
+	    ~moreFields = "";
+	    ~lessFields = "";
+        ~idFieldName = "ID";
+        ~unique = Get ( UUID );
+        ~list = List (
+            LayoutObjectNames ( "" ; Get ( LayoutName ) );
+            ~unique;
+            FieldNames ( "" ; Get ( LayoutName ) )
+        );
+        ~i = 0;
+        ~isObject = True;
+        ~transactions = "[]";
+        ~transactionKeys = "{}"
+    ];
+
+    ~i < ValueCount ( ~list );
+
+    [
+        ~i = ~i + 1;
+        ~objectOrField = GetValue ( ~list; ~i );
+        ~skip = ~objectOrField = ~unique;
+        ~isObject = If ( ~skip; False; ~isObject );
+        ~skip = If ( ~skip; True;
+            ~isObject and GetLayoutObjectAttribute ( ~objectOrField; "objectType" ) <> "field"
+        );
+
+        // We can only find out if this is a portal if it's named since all grouping objects use "<"
+        ~isPortal = If ( ~skip or not ~isObject; False;
+            GetLayoutObjectAttribute ( GetLayoutObjectAttribute ( ~objectOrField; "enclosingObject" ); "objectType" ) = "portal"
+        );
+        // Process this one value or each value in the portal multiple times
+        ~fieldName = Case (
+            ~skip; "";
+            ~isObject and GetLayoutObjectAttribute ( ~objectOrField ; "objectType" ) = "field";
+                GetLayoutObjectAttribute ( ~objectOrField ; "source" );
+            not ~isObject and PatternCount ( ~objectOrField ; "::" ) = 0;
+                Get ( LayoutTableName ) & "::" & ~objectOrField;
+            not ~isObject;
+                ~objectOrField
+        );
+        ~tableName = If ( not IsEmpty ( ~fieldName ); GetValue ( Substitute ( ~fieldName; "::"; ¶ ); 1 ) );
+        ~baseTableName = If ( not IsEmpty ( ~fieldName ); ExecuteSQL (
+            "SELECT DISTINCT BaseTableName " &
+                "FROM FileMaker_Tables " &
+                "WHERE TableName = '" &
+
+                    // Use filter values to allow for inconsistent letter cases.
+                    GetValue ( FilterValues (
+                        ExecuteSQL ( "SELECT DISTINCT TableName FROM FileMaker_Tables "; ""; "" );
+                        ~tableName
+                    ); 1 )
+
+                & "'"; 
+            "";
+            "" 
+        ) );
+        ~value = Case (
+            IsEmpty ( ~fieldName ); "";
+            ~isObject; GetLayoutObjectAttribute ( ~objectOrField ; "content" );
+            /* not ~isObject; */ GetField ( ~objectOrField )
+        );
+        ~id = If ( not IsEmpty ( ~fieldName ); GetField ( ~tableName & "::" & ~idFieldName ) );
+        ~transactionKeys = Case (
+            IsEmpty ( ~fieldName ) or ( ~fieldName = ~tableName & "::" & ~idFieldName and ~method = "edit" );
+                ~transactionKeys;
+            ~isPortal;
+                While (
+                    [
+                        ~thisValue = "notEmpty";
+                        ~j = 0;
+                        ~portalTransactions = ~transactionKeys
+                    ];
+
+                    not IsEmpty ( ~thisValue );
+
+                    [
+                        ~j = ~j + 1;
+                        ~thisID = GetNthRecord ( GetField ( ~tableName & "::" & ~idFieldName); ~j );
+                        ~thisValue = GetLayoutObjectAttribute ( ~objectOrField ; "content" ; "" ; ~j );
+                        ~portalTransactions = If ( IsEmpty ( ~thisValue ); ~portalTransactions; JSONSetElement ( ~portalTransactions;
+                            [~thisID & ".fields." & ~fieldName; ~thisValue; JSONString];
+                            [~thisID & ".baseTable"; ~baseTableName; JSONString]
+                        ) )
+                    ];
+
+                    ~portalTransactions
+                    
+                );
+            JSONSetElement ( ~transactionKeys;
+                [~id & ".fields." & ~fieldName; ~value; JSONString];
+                [~id & ".baseTable"; ~baseTableName; JSONString]
+            )
+        );
+
+        // Remove the field name from the list if we already grabbed the object
+        ~list = If ( ~isObject and not IsEmpty ( ~fieldName ); ~list;
+            Let (
+                [
+                    ~newList = Substitute ( ¶ & ~list & ¶;
+                        [¶& ~fieldName &¶; ¶];
+                        [¶& GetValue ( Substitute ( ~fieldName; "::"; ¶ ); 2 ) &¶; ¶]
+                    );
+                    ~newList = If ( Left ( ~newList; 1 ) <> ¶; ~newList;
+                        Right ( ~newList; Length ( ~newList ) - 1 )
+                    );
+                    ~newList = If ( Right ( ~newList; 1) <> ¶; ~newList;
+                        Left ( ~newList; Length ( ~newList ) - 1 )
+                    )
+                ];
+
+                ~newList
+            )
+        )
+    ];
+
+    // JSONFormatElements ( ~transactionKeys )
+    
+
+    // Assemble the transaction object using the Transaction custom functions
+    While (
+        [
+            ~i = 0;
+            ~ids = JSONListKeys ( ~transactionKeys ; "" );
+            ~transactions = "[]"
+        ];
+
+        ~i < ValueCount ( ~ids );
+
+        [
+            ~i = ~i + 1;
+            ~thisID = GetValue ( ~ids; ~i );
+            ~thisObject = JSONGetElement ( ~transactionKeys; ~thisID );
+            ~transactions = JSONSetElement (
+                ~transactions;
+                ~i - 1;
+                T.Transact (
+                    JSONGetElement ( ~thisObject; "baseTable" );
+                    ~method;
+                    ~thisID;
+                    ""; //notes
+                    While (
+                        [
+                            ~j = 0;
+                            ~fieldObject = JSONGetElement ( ~thisObject; "fields" );
+                            ~fieldList = JSONListKeys ( ~fieldObject; "" );
+                            ~theseTransactionFields = ""
+                        ];
+
+                        ~j < ValueCount ( ~fieldList );
+
+                        [
+                            ~j = ~j + 1;
+                            ~thisField = GetValue ( ~fieldList; ~j );
+                            ~theseTransactionFields = ~theseTransactionFields &
+                                T.SetField ( ~thisField ; "=" ; JSONGetElement ( ~fieldObject; ~thisField ) ; "" )
+                        ];
+
+                        ~theseTransactionFields
+
+                    )
+                );
+                JSONObject
+            )
+        ];
+
+        ~transactions
+
+    )
+
+)

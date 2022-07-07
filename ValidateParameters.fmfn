@@ -1,0 +1,84 @@
+/*
+ *  CUSTOM FUNCTION
+ *    MissingVariables ( variableList )
+ *
+ *  DESCRIPTION
+ *    Returns the name of and 
+ *
+ *  PARAMS
+ *    variableList: The list of variables to check to see if any are missing. If empty, will attempt to use the script name to find the variables.
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-06-18: Paul McCudden (paul@peak14.solutions): Created
+ *
+*/
+
+While (
+    [
+        ~error = Get ( UUID );
+        ~variableList= If ( not IsEmpty ( variableList ); variableList;
+            Let (
+                [
+                    ~scriptName = Get ( ScriptName );
+                    ~paramStart = Position ( ~scriptName; "("; Length ( ~scriptName ); -1 );
+                    ~paramEnd = Position ( ~scriptName; ")"; Length ( ~scriptName ); -1 );
+                    ~errorOccurred = Case (
+                        ~paramStart = 0 or ~paramEnd = 0 or ~paramStart > ~paramEnd; ~error;
+                        ""
+                    );
+                    ~allParameters = If ( $error; ""; Middle (
+                        ~scriptName;
+                        ~paramStart + 1;
+                        ~paramEnd - ~paramStart - 1
+                    ) );
+                    ~optionalParamStart = Position ( ~allParameters; "{"; Length ( ~allParameters ); -1 );
+                    ~optionalParamEnd = Position ( ~allParameters; "}"; Length ( ~allParameters ); -1 );
+                    ~errorOccurred = Case (
+                        ~optionalParamstart + ~optionalParamEnd > 0 and ~optionalParamStart > ~optionalParamEnd; ~error;
+                        ""
+                    );
+                    ~requiredParameters = Case (
+                        ~error; "";
+                        ~optionalParamStart + ~optionalParamEnd = 0; ~allParameters;
+                        Substitute (
+                            ~allParameters;
+                            Middle ( ~allParameters; ~optionalParamStart; ~optionalParamEnd - ~optionalParamStart + 1 );
+                            ""
+                        )
+                    )
+                ];
+
+                If ( ~errorOccurred; ~errorOccurred; Substitute ( ~requiredParameters; ";"; ¶ ) )
+
+            )
+        );
+        ~variableCount = ValueCount ( ~variableList );
+        ~missingVariables = "";
+        ~i = 0
+    ];
+
+    ~variableList <> ~error or ~i < ~variableCount;
+
+    [
+        ~i = ~i + 1;
+        ~thisVariable = Trim ( GetValue ( ~variableList; ~i ) );
+        ~thisVariable = If ( Left ( ~thisVariable; 1 ) <> "$" and Length ( ~thisVariable ) > 0; "$" ) & ~thisVariable;
+        ~missingVariables = List ( ~missingVariables;
+            Case (
+                Length ( ~thisVariable ) = 0; "";
+                IsEmpty ( Evaluate ( ~thisVariable ) ); ~thisVariable )
+        )
+    ];
+
+    Case (
+        ~variableList = ~error = "Improper Format"; "The script name of " & Quote ( Get ( ScriptName ) ) & " is in the improper format. Can not validate parameters.";
+        ~missingVariables
+    )
+
+)
