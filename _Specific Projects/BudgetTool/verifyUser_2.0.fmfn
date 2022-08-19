@@ -1,0 +1,92 @@
+# .  verify user account in file FOCUS (fm195.beezwax.net
+
+# 
+# Purpose:				Verify Account Exists and is Active
+# Parameters (In):		-
+# Parameters (Out):	-
+# Created:				1/30/2020 - Andrew Witschonke: Reworked from original FOCUS script
+# Modified:			2020-02-14  |  christopher_e  |  Added AppleConnect Support
+# 
+# \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 🌀
+# 
+# Exit if running on server
+If [ IsServer ] 
+	Exit Script [ Text Result:    ] 
+End If
+# 
+Perform Script [ Specified: From list ; “.  script log” ; Parameter: ScriptLogParameter ( "Start" ) ]
+# \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 🌀
+Loop
+	# 
+	# Get Account Details
+	Set Variable [ $_id_person ; Value: ExecuteSQL ( 	" SELECT " & SqField ( DATA~PERSON::ID ) & 	" FROM "   & SqTable ( DATA~PERSON::ID ) & 	" WHERE LOWER ( " & SqField ( DATA~PERSON::ACCOUNT )  & " ) = ?"; 	""; ""; 	Lower ( Get ( AccountName ) ) ) ] 
+	Set Variable [ $_privilege ; Value: ExecuteSQL ( 	" SELECT " & SqField ( DATA~PERSON::PRIVILEGE ) & 	" FROM "   & SqTable ( DATA~PERSON::ID ) & 	" WHERE LOWER ( " & SqField ( DATA~PERSON::ACCOUNT )  & ") = ?"; 	""; ""; 	Lower ( Get ( AccountName ) ) ) ] 
+	Set Variable [ $_name ; Value: ExecuteSQL ( 	" SELECT " & SqField ( DATA~PERSON::NAME ) & 	" FROM "   & SqTable ( DATA~PERSON::ID ) & 	" WHERE LOWER ( " & SqField ( DATA~PERSON::ACCOUNT )  & ") = ?"; 	""; ""; 	Lower ( Get ( AccountName ) ) ) ] 
+	Set Variable [ $_is_active ; Value: ExecuteSQL ( 	" SELECT " & SqField ( DATA~PERSON::IS_ACTIVE ) & 	" FROM "   & SqTable ( DATA~PERSON::ID ) & 	" WHERE LOWER ( " & SqField ( DATA~PERSON::ACCOUNT )  & ") = ?"; 	""; ""; 	Lower ( Get ( AccountName ) ) ) ] 
+	# 
+	# VERIFY ACCOUNT
+	If [ $_is_active or Get ( AccountName ) = "Admin" ] 
+		#  Load Values in FOCUS Globals
+		Set Field [ L_FOCUS::USER_ID_PERSON ; $_id_person ] 
+		Set Field [ L_FOCUS::USER_NAME ; $_name ] 
+		Set Field [ L_FOCUS::USER_PRIVILEGE ; $_privilege ] 
+	Else If [ not $_id_person and ( Get ( AccountType ) = "AppleConnect" or Get ( AccountType ) = "External" ) ] 
+		# Create New External or AppleConnect-Authenticated PERSON
+		Allow User Abort [ Off ]
+		# 
+		# CONTEXT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		Go to Layout [ “DATA~PERSON” (DATA~PERSON) ; Animation: None ]
+		# CONTEXT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		New Record/Request
+		Set Variable [ $_id_person ; Value: DATA~PERSON::ID ] 
+		# 
+		Set Variable [ $_audit_fields ; Value: AuditFieldStart ( $_audit_fields ; DATA~PERSON::NAME ; "" ; "" ) ] 
+		Set Field [ DATA~PERSON::NAME ; Get ( UserName ) ] 
+		Set Variable [ $_audit_fields ; Value: AuditFieldEnd ( $_audit_fields ; DATA~PERSON::NAME ) ] 
+		# 
+		Set Variable [ $_audit_fields ; Value: AuditFieldStart ( $_audit_fields ; DATA~PERSON::EMAIL ; "" ; "" ) ] 
+		Set Field [ DATA~PERSON::EMAIL ; Get ( AccountName ) ] 
+		Set Variable [ $_audit_fields ; Value: AuditFieldEnd ( $_audit_fields ; DATA~PERSON::EMAIL ) ] 
+		# 
+		Set Variable [ $_audit_fields ; Value: AuditFieldStart ( $_audit_fields ; DATA~PERSON::IS_ACTIVE ; "" ; "" ) ] 
+		Set Field [ DATA~PERSON::IS_ACTIVE ; True ] 
+		Set Variable [ $_audit_fields ; Value: AuditFieldEnd ( $_audit_fields ; DATA~PERSON::IS_ACTIVE ) ] 
+		# 
+		Set Variable [ $_audit_fields ; Value: AuditFieldStart ( $_audit_fields ; DATA~PERSON::ACCOUNT ; "" ; "" ) ] 
+		Set Field [ DATA~PERSON::ACCOUNT ; Get ( AccountName ) ] 
+		Set Variable [ $_audit_fields ; Value: AuditFieldEnd ( $_audit_fields ; DATA~PERSON::ACCOUNT ) ] 
+		# 
+		Set Variable [ $_audit_fields ; Value: AuditFieldStart ( $_audit_fields ; DATA~PERSON::PRIVILEGE ; "" ; "" ) ] 
+		Set Field [ DATA~PERSON::PRIVILEGE ; Get ( AccountPrivilegeSetName ) ] 
+		Set Variable [ $_audit_fields ; Value: AuditFieldEnd ( $_audit_fields ; DATA~PERSON::PRIVILEGE ) ] 
+		# 
+		Set Field [ DATA~PERSON::CREATED ; Get ( CurrentHostTimestamp ) ] 
+		# 
+		Commit Records/Requests [ With dialog: Off ] 
+		# 
+		# Audit this change
+		Set Variable [ $_action ; Value: "Add New Person" ] 
+		Perform Script [ Specified: From list ; “.  audit” ; Parameter: AuditRecord ( $_id_person ; $_action ; $_audit_fields ; False ) ]
+		# 
+		#  Load Values in FOCUS Globals
+		Set Field [ L_FOCUS::USER_ID_PERSON ; DATA~PERSON::ID ] 
+		Set Field [ L_FOCUS::USER_NAME ; DATA~PERSON::NAME ] 
+		Set Field [ L_FOCUS::USER_PRIVILEGE ; DATA~PERSON::PRIVILEGE ] 
+		# 
+		# CONTEXT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		Go to Layout [ original layout ; Animation: None ]
+		# CONTEXT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		Show Custom Dialog [ "New Account" ; "You may not yet have all required access. Please ask your DRI to finish configuring your account." ] 
+		Allow User Abort [ On ]
+	Else
+		Show Custom Dialog [ "Account Invalid" ; "Your account was disabled by an administrator. Application will now exit." ] 
+		Close File [ Current File ]
+	End If
+	# 
+	Exit Loop If [ True // End single-pass loop ] 
+End Loop
+# ////////////////////////////////////////////////// 🌀
+Perform Script [ Specified: From list ; “.  script log” ; Parameter: ScriptLogParameter ( "End" ) ]
+# 
+Exit Script [ Text Result:    ] 
+# 

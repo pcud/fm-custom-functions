@@ -36,7 +36,7 @@ Let (
 		~exitLoop = ~newIteration > ValueCount ( If ( ~listType = "list"; listOrArrayOrObject; JSONListKeys ( listOrArrayOrObject; "" ) ) );
         ~newIteration = If ( ~exitLoop; ""; ~newIteration );
         ~newVariableValue = If ( ~exitLoop; ""; Case (
-            ~listType = "list"; GetValue ( theList; ~newIteration );
+            ~listType = "list"; GetValue ( listOrArrayOrObject; ~newIteration );
             GetValue ( JSONListValues ( listOrArrayOrObject; "" ); ~newIteration ) )
         );
 

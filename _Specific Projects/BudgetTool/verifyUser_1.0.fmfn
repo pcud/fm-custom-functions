@@ -1,0 +1,95 @@
+# .  verify user account in file budget_tool (fm-events-uat
+
+# 
+# Purpose:				Verify Account Exists and is Active
+# Parameters (In):		-
+# Parameters (Out):	-
+# Context:				FOCUS
+# Created:				1/30/2020 - Andrew Witschonke: Reworked from original FOCUS script
+# Modified:			2020-02-14  |  christopher_e  |  Added AppleConnect Support
+# 
+# \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 🌀
+Loop
+	Exit Loop If [ IsServer // ⚠️ Never run on server ] 
+	# 
+	# Get Account Details
+	Set Variable [ $_id_person ; Value: ExecuteSQL ( 	" SELECT "	& SqField ( PERSON::ID ) & 	" FROM "		& SqTable ( PERSON::ID ) & 	" WHERE LOWER ( " & SqField ( PERSON::ACCOUNT ) & " ) = ?"; 	"¶" ; "" ; 	Lower ( Get ( AccountName ) ) ) ] 
+	Set Field [ FOCUS::USER_PRIVILEGE ; Get ( AccountPrivilegeSetName ) ] 
+	Set Variable [ $_requires_internal_authentication ; Value: PRIVILEGE__OF_USER_PRIVILEGE::INTERNALLY_AUTHENTICATED + 0 ] 
+	# 
+	#  Externally-authenticated accounts
+	Loop
+		#  Exit loop if the logged-in user has a PERSON record
+		Exit Loop If [ not IsEmpty ( $_id_person ) // 👍 Account has a person record ] 
+		# 
+		#  Exit loop if they are not AppleConnect, throw error if not an approved user
+		If [ not isDeveloperLocalAccount ] 
+			Set Variable [ $_error ; Value: Get ( AccountType ) ≠ "AppleConnect" ] 
+			Set Variable [ $_title ; Value: If ( $_error ; "Login Failed" ) ] 
+			Set Variable [ $_message ; Value: If ( $_error ; "Only AppleConnect users are able to access this system" ) ] 
+		End If
+		Exit Loop If [ $_error // ⚠️ User did not connect via AppleConnect, and is missing a person record ] 
+		# 
+		#  Exit loop if the logged-in privilege requires internal authentication
+		Set Variable [ $_error ; Value: $_requires_internal_authentication ] 
+		Set Variable [ $_title ; Value: If ( $_error ; "Login Failed" ) ] 
+		Set Variable [ $_message ; Value: If ( $_error ; "Your account needs to be set up by an administrator before logging in." ) ] 
+		Exit Loop If [ $_error // ⚠️ Account security requires internal authentication ] 
+		# 
+		#  Create PERSON record | PSoS
+		Set Variable [ $_id_person ; Value: IDCreate ( PERSON::ID ) ] 
+		Set Variable [ $_name ; Value: Get ( UserName ) ] 
+		Set Variable [ $_account ; Value: Get ( AccountName ) ] 
+		Set Variable [ $_email ; Value: If ( Get ( AccountType ) = "AppleConnect" ; Get ( AccountName ) ) ] 
+		Set Variable [ $_privilege ; Value: Get ( AccountPrivilegeSetName ) ] 
+		Set Variable [ $_is_active ; Value: True ] 
+		Set Variable [ $_is_apple_connect ; Value: True ] 
+		# 
+		Set Variable [ $_t_obj ; Value: T.Transact ( PERSON::ID ; "create" ; $_id_person ; "" ; 	  T.SetField ( PERSON::NAME             ; "=" ; $_name ; "" ) 	& T.SetField ( PERSON::ACCOUNT          ; "=" ; $_account ; "" ) 	& T.SetField ( PERSON::PRIVILEGE        ; "=" ; $_privilege ; "" ) … ] 
+		Set Variable [ $_params ; Value: JSONSetElement ( "{}" ; 	[ "TRANSACTIONS[0]" ; $_t_obj ; JSONObject ] ) ] 
+		Perform Script [ Specified: From list ; “u transaction ( ... )” ; Parameter: $_params ]
+		Set Variable [ $_void ; Value: ScriptError ] 
+		Set Variable [ $_title ; Value: "Account Creation" ] 
+		Set Variable [ $_message ; Value: If ( $_error ; 	"An error occurred while creating your account information for the first time. Please notify your DRI of this issue." ; 	"You may not yet have all required access. Please ask your DRI to finish configuring your account." ) ] 
+		Exit Loop If [ $_error // ⚠️ PERSON record creation failed ] 
+		# 
+		Exit Loop If [ True // 👍 New PERSON record successfully created ] 
+	End Loop
+	# 
+	#  Focus on PERSON record
+	Set Field [ FOCUS::ID_PERSON ; $_id_person ] 
+	# 
+	#  Internal Authentication | Local Accounts
+	Loop
+		Exit Loop If [ $_error // ⚠️ An error occurred during PERSON record creation ] 
+		# 
+		#  Determie whether account IS_ACTIVE
+		Set Variable [ $_error ; Value: not PERSON__FOCUS::IS_ACTIVE ] 
+		Set Variable [ $_title ; Value: If ( $_error ; "Account Invalid" ) ] 
+		Set Variable [ $_message ; Value: If ( $_error ; "Your account was disabled by an administrator." ) ] 
+		Exit Loop If [ $_error // ⚠️ An account is not active ] 
+		# 
+		Exit Loop If [ not $_requires_internal_authentication // 👍 No internal authentication required ] 
+		# 
+		#  Authenticate Internally
+		#  TODO: Whatever is needed to authenticate internally goes here
+		// Exit Loop If [ True // ⚠️ FAILED INTERNAL AUTHENTICATION CHECK ] 
+		# 
+		Exit Loop If [ True // 👍 Passed internal authentication ] 
+	End Loop
+	# 
+	#  Populate Global fields with logged-in USER information
+	If [ not $_error ] 
+		Set Field [ FOCUS::USER_ID_PERSON ; $_id_person ] 
+		Set Field [ FOCUS::USER_NAME ; PERSON__FOCUS::NAME ] 
+	End If
+	# 
+	#  Clear person focus
+	# Don't clear person focus so we can keep on using it
+	// Set Field [ FOCUS::ID_PERSON ; "" ] 
+	# 
+	Exit Loop If [ True // End single-pass loop ] 
+End Loop
+# ////////////////////////////////////////////////// 🌀
+Exit Script [ Text Result: JSONSetElement ( "{}" ; 	[ "ERROR" ; $_error ; JSONNumber ] ; 	[ "MESSAGE" ; $_message ; JSONString ] ) ] 
+# 

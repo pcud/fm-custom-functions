@@ -1,0 +1,127 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isValidEmail ( email )
+ *
+ *  DESCRIPTION
+ *    Use to validate email address form~atPosand syntax.
+ *    This function handles quoted text and special characters within the local-part. 
+ *    It validates the form~atPosof IPv4 IP addresses in the domain part and partially validates IPv6 addresses 
+ *      in the domain part by ensuring th~atPosit is appropriately wrapped in "[ ]" and contains ~atPosleast 2x " : ".
+ *    Top-level domain syntax and form~atPosis only partially validated, i.e. ~atPosleast one "." must exist to the 
+ *      right of the last "@" and ~atPosleast 2 characters exist to the right of the last ".".
+ *    This function does not allow bracketed comments.
+ *    While technically a valid email syntax, many popular email servers reject emails containing comments.
+ *
+ *  PARAMS
+ *    email: The email address you wish to validate.
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-07-25: Paul McCudden: Created
+*/
+
+Let (
+    [
+        ~email= Lower ( email );
+
+        // Position of the last @ symbol, multiples are allowed if quoted
+        ~atPos= Position ( ~email; "@" ; 1 ; PatternCount ( ~email; "@" ) );
+
+        // Position of the first "." to right of last "@", used to separate domain from top level domain
+        ~TLDStart = Position ( ~email; "." ; ~atPos; 1 );
+
+        // Local part of email address
+        ~userName= Left ( ~email; ~atPos- 1);
+
+        // Check if domain is IPv4 or IPv6 "[ ]"
+        IP = If ( (Middle ( ~email; ~atPos+ 1 ; 1 ) = "[") and (Right ( ~email; 1 ) = "]") ; 1 ; 0 );
+
+        // All text to right of last "@"
+        ~TLD = Right ( ~email; Length ( ~email) - ~atPos);
+
+        // Domain, different if IPv4/6 or standard
+        ~domain= If ( IP = 1 ; Middle ( ~TLD; 2 ; Length ( ~TLD ) - 2 ) ; Left ( ~TLD; Position ( ~TLD; "." ; 1 ; 1 ) - 1 ) );
+
+        // Allowable alphabet in User Name
+        ~alpha = "abcdefghijklmnopqrstuvwxyz";
+
+        // Allowable numeric in ~userNameand IP addresses
+        ~numeric= "0123456789";
+
+        // Allowable special characters in User Name
+        ~special1 = ".!#$%&'*+-/=?^_`{|}~";
+
+        // Allowable special characters in ~userNameif quoted
+        ~special2 = " (),:;<>@[\]";
+
+        // Allowable special character in domain
+        ~special3 = "-";
+
+        // Double quote " for count functions later
+        ~quote = "\"";
+
+        // Escaped double quote \" required if double quotes exist inside quoted User Name
+        ~escapedQuote = "\\\"";
+
+        // Count of quotes " in User Name
+        ~countQuote = PatternCount ( ~userName; ~quote );
+
+        // count of escaped quotes \" in User Name
+        ~countEscapedQuote = PatternCount ( ~userName; ~escapedQuote ) 
+    ];
+
+    Case ( 
+        // Check if there is a value to be evaluated
+        IsEmpty ( ~email ); True;
+
+        // Pass if this is a quoted User Name
+        ( ~countQuote > 0 ) and
+
+        // Pass if any double quotes inside the quoted ~userNameare properly escaped
+        ( ~countEscapedQuote = ~countQuote - 2 ) and
+
+        // Pass if the quoted User Name begins with a double quote as required
+         (Left ( ~userName; 1 ) = ~quote ) and
+
+        // Pass if the quoted User Name ends with a double quote as required
+        ( Right ( ~userName; 1 ) = ~quote ) and
+        ( Right ( ~userName; 2 ) ≠ ~escapedQuote ) and /* pass = the quoted ~userNamedoes not end with an escaped double quote, not allowed */
+        ( Filter ( ~userName; ~alpha & ~numeric&  ~special1 & ~special2 & ~quote ) = LP ) ; 1 ; /* pass = the quoted ~userNamedoes not contain special characters which are not allowed within a quoted ~userName*/
+        ( ~countQuote = 0 ) and /* pass = this is not a quoted ~userName*/
+        ( Left ( ~userName; 1 ) ≠ "." ) and /* pass = the ~userNamedoes not begin with a "." */
+        ( Right ( ~userName; 1 ) ≠ "." ) and /* pass = the ~userNamedoes not end with a "." */
+        ( PatternCount ( ~userName; ".." ) = 0 ) and /* pass = the ~userNamedoes not contain a double ".." */
+        ( Filter ( ~userName; ~alpha & ~numeric&  ~special1 ) = ~userName ) ; 1 ; /* pass = the ~userNamedoes not contain special characters th~atPosare not allowed in a non-quoted ~userName*/
+        0 ) /* default case function result - failed */
+        * /* multiply Boolean results, must pass all: 1*1*0*1*1 = 0 (fail) */
+        ( ~atPos > 0 ) /* There is an @ symbol in the string */
+        * /* multiply Boolean results, must pass all: 1*1*0*1*1 = 0 (fail) */
+        If ( IP = 1 ; /* this is an IP formatted domain */
+        Case (
+        (PatternCount ( ~domain; ":" ) > 1 ) ; 1 ; /* this is an IPv6 formatted domain and contains ~atPosleast 2 ":" */
+        (PatternCount ( ~domain; "." ) = 3) and /* this is an IPv4 formatted domain and contains 3 "." */
+        Let ( [
+        DMval = Substitute ( ~domain; "." ; "¶" ) ; /* turn IP address into a 4 value list */
+        val1 = GetValue ( DMval ; 1 ) ; /* set variables for each value */
+        val2 = GetValue ( DMval ; 2 ) ;
+        val3 = GetValue ( DMval ; 3 ) ;
+        val4 = GetValue ( DMval ; 4 ) ] ;
+        IsEmpty ( Filter ( DMval ; ~alpha &  ~special1 & ~special2 ) ) and /* check the list contains only numerical values, 0 is allowed */
+        not IsEmpty ( val1 ) and /* check each value is not empty */
+        not IsEmpty ( val2 ) and
+        not IsEmpty ( val3 ) and
+        not IsEmpty ( val4 )
+        ) ; 1 ;
+        0 ) ; /* default case function result - failed */
+        /* value if domain is not IP formatted */
+        (Filter ( ~domain; ~alpha & ~numeric& ~special3 ) = DM) and /* domain does not contain special characters th~atPosare not allowed */
+        (~TLD> 0) and /*~atPosleast one "." exists to the right of the last @ symbol */
+        (Length ( Right ( ~TLD; Length ( ~TLD) - Position ( ~TLD; "." ; 1 ; PatternCount ( ~TLD; "." ) ) ) ) > 1 ) /* ~atPosleast 2 characters exist to the right of the last "." in the top level domain */
+    )
+
+)

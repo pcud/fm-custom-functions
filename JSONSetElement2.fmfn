@@ -1,0 +1,42 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONSetElementWithAnyPath ( json ; keyOrIndexOrPath ; value ; type )
+ *
+ *  DESCRIPTION
+ *    Creates a JSON from a list. Meant to be used before FM 16
+ *
+ *  PARAMS
+ *    json: The JSON to add the value to
+ *    keyOrIndexOrPath: The key or index or path the set the value to
+ *    value: What to set at the key, index, or path
+ *    type: The data type to set
+ *
+ *  RETURNS
+ *    JSON
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-08-03: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~json = If ( IsEmpty ( json ); "{}"; json );
+        ~insertPoint = Position ( ~json ; "}" ; Length ( ~json ) ; -1 ) - 1;
+        ~quoted = not GetAsBoolean ( type = JSONNumber or type = JSONBoolean )
+    ];
+
+        Left ( ~json; ~insertPoint ) & 
+        "\"" & keyOrIndexOrPath & "\":" &
+        If ( ~quoted; "\"" ) &
+        Case ( 
+            type = JSONNumber; If ( IsEmpty ( GetAsNumber ( value ) ); 0; GetAsNumber ( value ) );
+            type = JSONBoolean; If ( GetAsBoolean ( value ); "true"; "false");
+            
+            // Else
+            Substitute ( value; "\""; "\\\"" ) ) &
+        If ( ~quoted; "\"" ) &
+        "}"
+)

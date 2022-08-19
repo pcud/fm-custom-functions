@@ -32,10 +32,10 @@
 Let (
   [
     //Initial Variables
-    ~wName = Get ( WindowName );
+    ~wName = GetValue ( Get ( WindowName ); 1 );
     ~thisHistory = JSONGetElement ( $$nav_history ; ~wName );
     ~thisHistoryExists = GetAsBoolean ( Left ( ~thisHistory ; 1 ) <> "?" );
-    $$nav_history = If ( ~thisHistoryExists ; $$nav_history ; JSONSetElement ( "" ; ~wName & ".currentIndex" ; -1 ; JSONNumber ) ) ;
+    $$nav_history = If ( ~thisHistoryExists ; $$nav_history ; JSONSetElement ( $$nav_history ; ~wName & ".currentIndex" ; -1 ; JSONNumber ) ) ;
 
     ~lName = Get ( LayoutName );
     ~lNumber = Get ( LayoutNumber );
@@ -58,4 +58,5 @@ Let (
 
   //Result for hide logic
   False
+
 )

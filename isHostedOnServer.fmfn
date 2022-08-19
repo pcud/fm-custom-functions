@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isHostedOnServer ()
+ *
+ *  DESCRIPTION
+ *    Use when you want to know if the current file is hosted on a server or not
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-02-26: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+LeftWords ( Get ( HostApplicationVersion ); 1 ) = "Server"

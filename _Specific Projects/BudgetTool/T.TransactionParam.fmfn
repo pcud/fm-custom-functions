@@ -21,12 +21,11 @@
 
 Let (
     [
-        ~transactions = $transaction;
-        ~transactionsType = JSONGetElementType ( ~transactions; "" );
+        ~transactionsType = JSONGetElementType ( transactions; "" );
         ~transactions = If ( 
-            not ( ~transactionsType = JSONArray );
-            JSONSetElement ( "[]"; 0; ~transactions; ~transactionsType );
-            ~transactions
+            ~transactionsType <> JSONArray;
+            JSONSetElement ( "[]"; 0; transactions; ~transactionsType );
+            transactions
         )
     ];
 

@@ -31,8 +31,8 @@ While (
             method = "delete"; method;
             "edit"
         );
-	    ~moreFields = "";
-	    ~lessFields = "";
+	    ~moreFields = moreFields;
+	    ~lessFields = lessFields;
         ~idFieldName = "ID";
         ~unique = Get ( UUID );
         ~list = List (
@@ -71,6 +71,7 @@ While (
             not ~isObject;
                 ~objectOrField
         );
+        ~skip = not IsEmpty ( FilterValues ( ~lessFields; ~fieldName ) );
         ~tableName = If ( not IsEmpty ( ~fieldName ); GetValue ( Substitute ( ~fieldName; "::"; ¶ ); 1 ) );
         ~baseTableName = If ( not IsEmpty ( ~fieldName ); ExecuteSQL (
             "SELECT DISTINCT BaseTableName " &
@@ -145,9 +146,6 @@ While (
             )
         )
     ];
-
-    // JSONFormatElements ( ~transactionKeys )
-    
 
     // Assemble the transaction object using the Transaction custom functions
     While (
