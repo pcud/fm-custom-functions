@@ -29,7 +29,7 @@ While (
         ~start = Case (
             IsEmpty ( ~start ); 0;
             ~start
-        )
+        );
         ~step = Case (
             not IsEmpty ( ~step ); ~step;
             ~start < ~stop; 1;
@@ -55,7 +55,7 @@ While (
 
     [
         ~list = List ( ~list; ~currentNumber );
-        ~currentNumber = ~currentNumber + step
+        ~currentNumber = ~currentNumber + ~step
     ];
 
     Case (
