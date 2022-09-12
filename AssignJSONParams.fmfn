@@ -17,12 +17,14 @@
  *  CHANGELOG
  *    2022-02-07: Paul McCudden (paul@peak14.solutions): Created
  *    2022-06-16: Paul McCudden (paul@peak14.solutions): Update to loop if necessary
+ *    2022-09-11: Paul McCudden (paul@peak14.solutions): Have it unformat the JSON to make it not run into parse errors
 */
 
 Let (
     [
         ~params = If ( IsEmpty ( params ); Get ( ScriptParameter ); params );
-        ~params = If ( Left ( JSONFormatElements ( ~params ); 1 ) = "?"; "{}"; ~params )
+        ~params = If ( Left ( JSONFormatElements ( ~params ); 1 ) = "?"; "{}"; ~params );
+        ~params = JSONDeleteElement ( ~param; Get ( UUID ) )
     ];
 
     If ( PatternCount ( ~params; "{" ) + PatternCount ( ~params; "[" ) = 1;

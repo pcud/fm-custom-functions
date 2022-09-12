@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    Navigation ( order; type )
+ *    Navigation ( location; order; type )
  *
  *  DESCRIPTION
  *    A place where all of the navigation variables can live so they are easily changeable
@@ -13,35 +13,30 @@
  *    Text
  *
  *  DEPENDENCIES
- *    --NONE--
+ *    GetFieldNameOnly (https://github.com/pcud/fm-custom-functions/blob/master/GetFieldNameOnly.fmfn)
  *
  *  CHANGELOG
- *    2022-0512: Paul McCudden: Created
+ *    2022-08-23: Paul McCudden: Created
 */
 
-Case (
-    order = 1;
-        Case (
-            type = "label"; "POs";
-            type = "parameter"; JSONSEtElement ( "{}"; "key"; "POs"; JSONString );
-            type = "isActive"; PatternCount ( Get ( LayoutName ); "POs" ) > 0
-        );
-    order = 2;
-        Case (
-            type = "label"; "Events";
-            type = "parameter"; JSONSEtElement ( "{}"; "key"; "events"; JSONString );
-            type = "isActive"; PatternCount ( Get ( LayoutName ); "Events" ) > 0
-        );
-    order = 3;
-        Case (
-            type = "label"; "Reports";
-            type = "parameter"; JSONSEtElement ( "{}"; "key"; "reports"; JSONString );
-            type = "isActive"; PatternCount ( Get ( LayoutName ); "Reports" ) > 0
-        );
-    order = 4;
-        Case (
-            type = "label"; "Admin";
-            type = "parameter"; JSONSEtElement ( "{}"; "key"; "admin"; JSONString );
-            type = "isActive"; PatternCount ( Get ( LayoutName ); "Admin" ) > 0
+Let (
+    [
+        ~location = If ( IsEmpty ( location ); Get ( LayoutName ); location );
+        ~tableOccurance = Case (
+            ~location = "Admin - Home"; "ADMIN_NAVIGATION"
         )
+        ~labelFieldName = GetFieldNameOnly ( NAVIGATION::labelName );
+        ~layoutFieldName = GetFieldNameOnly ( NAVIGATION::layoutName );
+        ~objectFieldName = GetFieldNameOnly ( NAVIGATION::objectName )
+    ];
+
+    Case (
+        type = "label"; GetNthRecord ( ~tableOccurance & "::" ~labelFieldName; order );
+        type = "parameter"; JSONSetElement ( "";
+                ["LAYOUT"; GetNthRecord ( ~tableOccurance & "::" ~layoutFieldName; order ); JSONString];
+                ["OBJECT"; GetNthRecord ( ~tableOccurance & "::" ~objectFieldName; order ); JSONString]
+            );
+        type = "isActive"; False;
+        type = "hide"; GetNthRecord ( ADMIN_NAVIGATION::ID ; 3 ) = "?"
+    )
 )
