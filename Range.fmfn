@@ -1,0 +1,69 @@
+/*
+ *  CUSTOM FUNCTION
+ *    Range ( start, stop, step )
+ *
+ *  DESCRIPTION
+ *    Returns a list of numbers given the parameters
+ *
+ *  PARAMS
+ *    start (optional): The number to start the range at. Default is 0.
+ *    stop: The number to stop the range at
+ *    step (optional): What to increment by. Default is 1 or -1.
+ *
+ *  RETURNS
+ *    A list of numbers
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2022-09-12: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+    [
+        ~start = GetAsNumber ( start );
+        ~stop = GetAsNumber ( stop );
+        ~step = GetAsNumber ( step );
+
+        ~start = Case (
+            IsEmpty ( ~start ); 0;
+            ~start
+        )
+        ~step = Case (
+            not IsEmpty ( ~step ); ~step;
+            ~start < ~stop; 1;
+            ~start > ~stop; -1
+        );
+        ~list = "";
+        ~currentNumber = ~start;
+
+        ~noLoop = Case (
+            ~step = 0; True;
+            ~start = ~stop; True;
+            ~start < ~stop and ~step < 0; True;
+            ~start > ~stop and ~step > 0; True;
+            False
+        )
+    ];
+
+    Case (
+        ~noLoop; False;
+        ~start < ~stop; ~currentNumber <= ~stop;
+        ~start > ~stop; ~currentNumber >= ~stop;
+    );
+
+    [
+        ~list = List ( ~list; ~currentNumber );
+        ~currentNumber = ~currentNumber + step
+    ];
+
+    Case (
+        ~step = 0; Evaluate ( "Factorial ( -1 )" ); // Simulate an out of range error - will never reach stop
+        ~start < ~stop and ~step < 0; Evaluate ( "Factorial ( -1 )" ); // Simulate an out of range error - will never reach stop
+        ~start > ~stop and ~step > 0; Evaluate ( "Factorial ( -1 )" ); // Simulate an out of range error - will never reach stop
+        ~start = ~stop; ~start;
+        ~list
+    )
+
+)
