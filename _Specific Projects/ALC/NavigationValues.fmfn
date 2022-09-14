@@ -24,80 +24,204 @@ Let (
     [
         ~menu = menu;
         ~value = value;
-        ~order = order
+        ~order = order;
+        ~json = If ( ~value = "script"; JSONSetElement ( "{}"
+            ; ["ORDER"; ~order; JSONNumber]
+            ; ["MENU"; ~menu; JSONString]
+        ) )
     ];
 
     Case (
+        ~value = "activeButton"; JSONGetElement ( $$navigation; ~menu & ".activeButton" );
         ~menu = "mainMenu";
             Case (
                 ~order = 1; Case (
-                    ~value = "label"; "progress tracker"
+                    ~value = "label"; "progress tracker";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "people"; JSONString]
+                    );
+                    ~value = "hide"; False
                 );
                 ~order = 2; Case (
-                    ~value = "label"; "cohorts"
+                    ~value = "label"; "cohorts";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "cohorts"; JSONString]
+                    );
+                    ~value = "hide"; False
                 );
                 ~order = 3; Case (
-                    ~value = "label"; "events"
+                    ~value = "label"; "events";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "events"; JSONString]
+                    );
+                    ~value = "hide"; False
                 );
                 ~order = 4; Case (
-                    ~value = "label"; "admin"
+                    ~value = "label"; "admin";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "admin"; JSONString]
+                    );
+                    ~value = "hide"; False
+                );
+                ~order = 5; Case (
+                    ~value = "label"; "logs";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "logs"; JSONString]
+                    );
+                    ~value = "hide"; False
+                );
+                ~order = 6; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
+                );
+                ~order = 7; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
+                );
+                ~order = 7; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
                 )
             );
         ~menu = "adminMenu";
             Case (
                 ~order = 1; Case (
                     ~value = "label"; "regions";
-                    ~value = "script"; JSONSetElement ( "{}"
+                    ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "regions"; JSONString]
-                    )
+                    );
+                    ~value = "hide"; False
                 );
                 ~order = 2; Case (
                     ~value = "label"; "countries";
-                    ~value = "script"; JSONSetElement ( "{}"
+                    ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "countries"; JSONString]
-                    )
+                    );
+                    ~value = "hide"; False
                 );
                 ~order = 3; Case (
                     ~value = "label"; "users";
-                    ~value = "script"; JSONSetElement ( "{}"
+                    ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "users"; JSONString]
-                    )
+                    );
+                    ~value = "hide"; False
                 );
                 ~order = 4; Case (
                     ~value = "label"; "units";
-                    ~value = "script"; JSONSetElement ( "{}"
+                    ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "units"; JSONString]
-                    )
+                    );
+                    ~value = "hide"; False
                 );
                 ~order = 5; Case (
                     ~value = "label"; "event import";
-                    ~value = "script"; JSONSetElement ( "{}"
+                    ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "imports"; JSONString]
-                    )
+                    );
+                    ~value = "hide"; False
                 );
                 ~order = 6; Case (
-                    ~value = "label"; "cohort file¶sync log";
-                    ~value = "script"; JSONSetElement ( "{}"
-                        ; ["NAV_KEY"; "syncLog"; JSONString]
-                    )
+                    ~value = "label"; "event types";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "event types"; JSONString]
+                    );
+                    ~value = "hide"; False
                 );
                 ~order = 7; Case (
-                    ~value = "label"; "box sync log";
-                    ~value = "script"; JSONSetElement ( "{}"
-                        ; ["NAV_KEY"; "boxSyncLog"; JSONString]
-                    )
-                ); 
+                    ~value = "label"; "email template";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "emails"; JSONString]
+                    );
+                    ~value = "hide"; False
+                );
                 ~order = 8; Case (
-                    ~value = "label"; "event types";
-                    ~value = "script"; JSONSetElement ( "{}"
-                        ; ["NAV_KEY"; "event types"; JSONString]
-                    )
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
                 );
                 ~order = 9; Case (
-                    ~value = "label"; "Email Template";
-                    ~value = "script"; JSONSetElement ( "{}"
-                        ; ["NAV_KEY"; "emails"; JSONString]
-                    )
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
+                )
+            );
+        ~menu = "logMenu";
+            Case (
+                ~order = 1; Case (
+                    ~value = "label"; "cohort file¶sync log";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "syncLog"; JSONString]
+                    );
+                    ~value = "hide"; False
+                );
+                ~order = 2; Case (
+                    ~value = "label"; "box sync log";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "boxSyncLog"; JSONString]
+                    );
+                    ~value = "hide"; False
+                );
+                ~order = 3; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
+                );
+                ~order = 4; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
+                );
+                ~order = 5; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
+                );
+                ~order = 6; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
+                );
+                ~order = 7; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
+                );
+                ~order = 8; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
+                );
+                ~order = 9; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
                 )
             )
     )
