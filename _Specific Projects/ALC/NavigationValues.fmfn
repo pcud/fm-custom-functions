@@ -1,12 +1,13 @@
 /*
  *  CUSTOM FUNCTION
- *    NavigationValues ( type; order )
+ *    NavigationValues ( menu; value; order )
  *
  *  DESCRIPTION
  *    Gets a list of the region IDs based off the current user
  *
  *  PARAMS
- *    type: The type of menu
+ *    menu: The type of menu
+ *    value: The type of value to return
  *    order: The order number
  *
  *  RETURNS
@@ -21,27 +22,83 @@
 
 Let (
     [
-        ~type = type;
+        ~menu = menu;
+        ~value = value;
         ~order = order
     ];
 
     Case (
-        ~type = "mainMenu";
+        ~menu = "mainMenu";
             Case (
-                ~order = 1; "progress tracker";
-                ~order = 2; "cohorts";
-                ~order = 3; "events";
-                ~order = 4; "admin"
+                ~order = 1; Case (
+                    ~value = "label"; "progress tracker"
+                );
+                ~order = 2; Case (
+                    ~value = "label"; "cohorts"
+                );
+                ~order = 3; Case (
+                    ~value = "label"; "events"
+                );
+                ~order = 4; Case (
+                    ~value = "label"; "admin"
+                )
             );
-        ~type = "adminMenu";
+        ~menu = "adminMenu";
             Case (
-                ~order = 1; "regions";
-                ~order = 2; "countries";
-                ~order = 3; "users";
-                ~order = 4; "units";
-                ~order = 5; "registration imports";
-                ~order = 6; "cohort file¶sync log";
-                ~order = 7; "box sync log"
+                ~order = 1; Case (
+                    ~value = "label"; "regions";
+                    ~value = "script"; JSONSetElement ( "{}"
+                        ; ["NAV_KEY"; "regions"; JSONString]
+                    )
+                );
+                ~order = 2; Case (
+                    ~value = "label"; "countries";
+                    ~value = "script"; JSONSetElement ( "{}"
+                        ; ["NAV_KEY"; "countries"; JSONString]
+                    )
+                );
+                ~order = 3; Case (
+                    ~value = "label"; "users";
+                    ~value = "script"; JSONSetElement ( "{}"
+                        ; ["NAV_KEY"; "users"; JSONString]
+                    )
+                );
+                ~order = 4; Case (
+                    ~value = "label"; "units";
+                    ~value = "script"; JSONSetElement ( "{}"
+                        ; ["NAV_KEY"; "units"; JSONString]
+                    )
+                );
+                ~order = 5; Case (
+                    ~value = "label"; "event import";
+                    ~value = "script"; JSONSetElement ( "{}"
+                        ; ["NAV_KEY"; "imports"; JSONString]
+                    )
+                );
+                ~order = 6; Case (
+                    ~value = "label"; "cohort file¶sync log";
+                    ~value = "script"; JSONSetElement ( "{}"
+                        ; ["NAV_KEY"; "syncLog"; JSONString]
+                    )
+                );
+                ~order = 7; Case (
+                    ~value = "label"; "box sync log";
+                    ~value = "script"; JSONSetElement ( "{}"
+                        ; ["NAV_KEY"; "boxSyncLog"; JSONString]
+                    )
+                ); 
+                ~order = 8; Case (
+                    ~value = "label"; "event types";
+                    ~value = "script"; JSONSetElement ( "{}"
+                        ; ["NAV_KEY"; "event types"; JSONString]
+                    )
+                );
+                ~order = 9; Case (
+                    ~value = "label"; "Email Template";
+                    ~value = "script"; JSONSetElement ( "{}"
+                        ; ["NAV_KEY"; "emails"; JSONString]
+                    )
+                )
             )
     )
 
