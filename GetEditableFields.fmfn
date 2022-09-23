@@ -1,0 +1,71 @@
+NOT COMPLETE! NEEDS WORK
+
+/*
+ *  CUSTOM FUNCTION
+ *    GetEditableFields ( tableOrField; fieldNameOnly )
+ *
+ *  DESCRIPTION
+ *    Returns a list of fields that are editable (ie not calculation fields) that are a part of the passed table.
+ *
+ *  PARAMS
+ *    tableOrField: The table occurance, field name or field reference of the table to grab the fields for.
+ *      ~~!! Base Table won't work if there isn't a Table Occurance with the same name !!~~
+ *    fieldNameOnly: True to return only a list of field names
+ *
+ *  RETURNS
+ *    List
+ *
+ *  DEPENDANCIES
+ *    GetBaseTableName (https://www.briandunning.com/cf/2532)
+ *
+ *  CHANGELOG
+ *    2022-09-22: Paul McCudden: Created
+*/
+
+While (
+    [
+		tableOrField = EVENT::ID;
+		fieldNameOnly = "1";
+        ~tableOccurance = GetTOName ( tableOrField );
+        ~fieldList = ExecuteSQL ( "SELECT FieldName FROM FileMaker_Fields WHERE TableName = '" & ~tableOccurance & "'"; ""; "" );
+        ~count = ValueCount ( ~fieldList );
+        ~i = 0;
+        ~newList = ""
+    ];
+
+    ~i < ~count;
+
+    [
+        ~iteration = ~i + 1;
+        ~thisField = GetValue ( ~fieldList; ~i );
+        ~thisFQFN = ~tableOccurance & "::" & ~thisField;
+        ~fieldType = MiddleWords ( FieldType ( "" ; ~thisFQFN ); 1; 1 );
+        ~add = ~fieldType = "Standard" or ~fieldType = "Global";
+        ~newList = While (
+            [
+                ~repetitions = MiddleWords ( FieldType ( "" ; ~thisFQFN ); 4; 1 );
+                ~j = 0;
+                ~thisList = ""
+            ];
+
+            ~j < ~repetitions and ~add;
+
+            [
+                ~j = ~j + 1;
+                ~thisList = List (
+                    ~thisList;
+                    If ( not fieldNameOnly; ~tableOccurance ) &
+                    ~thisField &
+                    If ( ~repetitions > 1; "[" & ~j & "]" )
+                )
+            ];
+
+            List (
+                ~newList;
+                ~thisList
+            )
+        )
+    ];
+
+    ~newList
+)

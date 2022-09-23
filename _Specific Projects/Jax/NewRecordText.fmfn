@@ -1,0 +1,32 @@
+/*
+ *  CUSTOM FUNCTION
+ *    NewRecordText ( item )
+ *
+ *  DESCRIPTION
+ *    Returns what the header should be based on the layout name
+ *
+ *  PARAMS
+ *    item: The name of the item. If not passed, will use the current base table name
+ *
+ *  RETURNS
+ *    The passed number with superscrtiped ordinal text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-09-19: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+	[
+		~baseTable = GetBaseTableName ( "" )
+	];
+
+	"New " &
+	Case (
+		IsEmpty ( item ); If ( Right ( ~baseTable; 1 ) = "s"; Left ( ~baseTable; Length ( ~baseTable ) - 1 ) );
+		item
+	)
+
+)

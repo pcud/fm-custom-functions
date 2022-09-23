@@ -1,0 +1,26 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetTableFields ( tableOccurance )
+ *
+ *  DESCRIPTION
+ *    Returns a list of fields that are in the passed table
+ *
+ *  PARAMS
+ *    tableOccurance: The table to grab the fields of. If blank will use current layout table name
+ *
+ *  RETURNS
+ *    Returns the parameter
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2020-04-04: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+ExecuteSQL (
+	"SELECT FieldName" &
+	"¶FROM FileMaker_Fields" &
+	"¶WHERE TableName = ?"
+	; ""; ""; If ( IsEmpty ( tableOccurance ); Get ( LayoutTableName ); tableOccurance )
+)

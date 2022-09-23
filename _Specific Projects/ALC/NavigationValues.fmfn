@@ -137,7 +137,7 @@ Let (
                     ~value = "hide"; False
                 );
                 ~order = 7; Case (
-                    ~value = "label"; "email template";
+                    ~value = "label"; "email¶templates";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "emails"; JSONString]
                     );
