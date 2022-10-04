@@ -1,0 +1,31 @@
+/*
+ *  CUSTOM FUNCTION
+ *    SetScriptEnvironmentObject ( additionalJSON )
+ *
+ *  DESCRIPTION
+ *    A list of things that should be passed to the exit script environment script
+ *
+ *  PARAMS
+ *    additionalJSON: More JSON to pass
+ *
+ *  RETURNS
+ *    JSON
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-09-26: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~json = If ( IsEmpty ( additionalJSON ); "{}"; additionalJSON )
+    ];
+
+    JSONSetElement ( ~json
+        ;["script"; Get ( ScriptName ); JSONString]
+        ;["file"; Get ( FileName ); JSONString]
+        ;["return"; $return; JSONObject]
+    )
+)

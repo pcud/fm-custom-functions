@@ -12,7 +12,7 @@
  *    A list of all objects that front panels
  *
  *  DEPENDENCIES
- *    Custom Function: CullNulls (https://www.briandunning.com/cf/897)
+ *    --None--
  *
  *  CHANGELOG
  *    2020-03-04: Paul McCudden (paul@peak14.solutions): Created
@@ -21,10 +21,18 @@
 While (
   //initialVariable
   [
-    ~objectList = If ( IsEmpty ( objectNameList ) ; CullNulls ( Substitute ( LayoutObjectNames ( Get ( FileName ) ; Get ( LayoutName ) ) ; 
+    ~unique = Get ( UUID );
+    ~objectList = If ( IsEmpty ( objectNameList ) ; Substitute ( ~unique & LayoutObjectNames ( "" ; Get ( LayoutName ) ) & ~unique ; 
       ["<" ; ""];
-      [">" ; ""]
-    ) ) ; objectNameList ) ;
+      [">" ; ""];
+
+      // Get rid of empty values
+      [ "¶¶"; ¶ & ~unique & ¶ ];
+      [ "¶¶"; ¶ & ~unique & ¶ ];
+      [ ~unique & ¶; "" ];
+      [ ¶ & ~unique; "" ];
+      [ ~unique; "" ]
+    ); objectNameList ) ;
     ~i = 0;
     ~count = ValueCount ( ~objectList );
     ~frontList = ""
@@ -41,6 +49,6 @@ While (
   ]; 
 
   //result
-  CullNulls ( ~frontList )
+  ~frontList
 
 )

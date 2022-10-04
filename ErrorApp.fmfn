@@ -55,8 +55,8 @@ Let ( [
 
       //Parameter Errors
 			theErrorCode = -10 ; "Invalid Script Parameters" ;
-                        theErrorCode = -11 ; "Unexpected Value" ;
-                        theErrorCode = -12 ; "Value not found" ;
+            theErrorCode = -11 ; "Unexpected Value" ;
+            theErrorCode = -12 ; "Value not found" ;
 
       //If not listed above
 			"Unknown error code"

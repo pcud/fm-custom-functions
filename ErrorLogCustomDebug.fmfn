@@ -1,8 +1,4 @@
  /*
- *  CUSTOM FUNCTION
- *    Error ( theErrorType ; theErrorCode ; theErrorDescription ; theErrorInfo )
- *
- *  DESCRIPTION
  *		This function is used to gather environmental data. You may choose
  *		to add or remove name/value pairs from this function as you see fit
  *		for your solution. All error generating custom functions call this
@@ -11,109 +7,83 @@
  *
  *		Environmental data that is likely to change from the time the error occurs
  *		to the time log data is collected should be included in this function.
- *
- *  PARAMS
- *    errorType: origin of the error
- *			(e.g., "Fmp", "App", "Plugin: ScriptMaster", "mFM: JSON", etc.)
- *		errorNumber: the number/code of the error
- *		errorDescription = (text) description of the error, preferably human readable
- *		errorInfo: some text describing the particular instance of this error. 
- *      This should help a developer locate where
- *			in a script the error occured.
- *			(e.g., "create new invoice record")
- *
- *  RETURNS
- *    JSON containing information about the error and the environment it occurred in.
- *
- *  DEPENDENCIES
- *    --NONE--
- *
- *  CHANGELOG
- 2020-03-19: Paul McCudden (paul@peak14.solutions): Created
- *    2013-10-11: Daniel Smith (dansmith65@gmail.com): Created
- *    2013-11-22: Daniel Smith (dansmith65@gmail.com):
- *			- change name to Error, update documentation
- *    2018-06-06: Mick Crozier (mick@backstagesolutions.com.au):
- *      - Completely revamped for JSON rather than Let Notation
- *    2018-11-15: Paul McCudden (paul@peak14.solutions):
- *      - Added comprehensive system data
- *    2020-04-28: Paul McCudden (paul@peak14.solutions):
- *      - Changed to use while loop for easier readability
- *
- * REFERENCES:
- *		http://filemakerstandards.org/x/AoA-/
 */
 
 While ( 
   [
     ~i = 0 ;
-    ~stateJson = "" ;
-    ~stateList = List (
+    ~text = "" ;
+    ~list = List (
+
 
       //<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
       // Comment or uncomment what you'd like to recieve here.
       //<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
-
-      //-- High priority values moved to top for easy viewing --
-      "AccountName" ;
-      "CurrentHostTimestamp" ;
-      "CurrentTimestamp" ;
-      "Device" ;
-      "FileName" ;
-      "ScriptName" ;
-      "ScriptParameter" ;
-      "ScriptResult" ;
-
-      //-- Lower priority items --
       "AccountExtendedPrivileges" ;
+      "AccountGroupName" ;
+      //"AccountName" ; // Logged by default
       "AccountPrivilegeSetName" ;
+      "AccountType" ;
       "ActiveFieldContents" ;
       "ActiveFieldName" ;
       "ActiveFieldTableName" ;
       "ActiveLayoutObjectName" ;
       "ActiveModifierKeys" ; 
+      "ActivePortalRowNumber" ;
+      "ActiveRecordNumber" ;
       //"ActiveRepetitionNumber" ;
       //"ActiveSelectionSize" ;
       //"ActiveSelectionStart" ;
+      //"AllowAbortState" ;
       //"AllowFormattingBarState" ;
-      "AllowAbortState" ;
-      "ApplicationLanguage" ;
+      "ApplicationArchitecture" ;
+      //"ApplicationLanguage" ;
       "ApplicationVersion" ;
       //"CalculationRepetitionNumber" ;
       //"ConnectionAttributes" ;
       "ConnectionState" ;
-      "CurrentDate" ;
-      "CurrentTime" ;
+      //"CurrentDate" ;
+      "CurrentExtendedPrivileges" ;
+      "CurrentHostTimestamp" ;
+      "CurrentPrivilegeSetName" ;
+      //"CurrentTime" ;
+      //"CurrentTimestamp" ; // Logged By default
+      "CurrentTimeUTCMilliseconds" ;
       "CustomMenuSetName" ;
       //"DesktopPath" ;
+      "Device" ;
       //"DocumentsPath" ;
       //"DocumentsPathListing" ;
-      "EncryptionState" ;
+      //"EncryptionState" ;
       "ErrorCaptureState" ;
+      //"FileLocaleElements"
       //"FileMakerPath" ;
+      //"FileName" // Logged by default
       "FilePath" ;
-      "FileSize" ;
+      //"FileSize" ;
       "FoundCount" ;
-      //"HighContrastColor" ;
       //"HighContrastState" ;
       "HostApplicationVersion" ;
       "HostIPAddress" ;
       "HostName" ;
       "InstalledFMPlugins" ;
+      "InstalledFMPluginsAsJSON" ;
       "LastError" ;
       "LastExternalErrorDetail" ;
       "LastMessageChoice" ;
-      "LastODBCError" ;
       "LayoutAccess" ;
       //"LayoutCount" ;
       "LayoutName" ;
       "LayoutNumber" ;
       "LayoutTableName" ;
       "LayoutViewState" ;
+      "MenubarState" ;
+      "ModifiedFields" ;
       "MultiUserState" ;
       "NetworkProtocol" ;
       "NetworkType" ;
       //"PageNumber" ;
+      "PersistentID" ;
       //"PreferencesPath" ;
       //"PrinterName" ;
       //"QuickFindText" ;
@@ -123,30 +93,42 @@ While (
       //"RecordNumber" ;
       "RecordOpenCount" ;
       "RecordOpenState" ;
+      "RegionMonitorEvents" ;
       //"RequestCount" ;
       //"RequestOmitState" ;
       //"ScreenDepth" ;
+      //"ScreenHeight" ;
+      //"ScreenScaleFactor" ;
       //"ScreenWidth" ;
       //"ScriptAnimationState" ;
+      //"ScriptName"; // Logged by default
+      "ScriptParameter" ;
+      "ScriptResult" ;
+      "SessionIdentifier" ;
       "SortState" ;
       "StatusAreaState" ;
       "SystemDrive" ;
       "SystemIPAddress" ;
       "SystemLanguage" ;
+      "SystemLocaleElements" ;
       //"SystemNICAddress" ;
       "SystemPlatform" ;
       "SystemVersion" ;
       //"TemporaryPath" ;
       //"TextRulerVisible" ;
-      "TotalRecordCount" ;
+      //"TotalRecordCount" ;
+      "TouchKeyboardState" ;
+      //"TriggerCurrentPanel" ;
+      //"TriggerExternalEvent" ;
       //"TriggerGestureInfo" ;
       //"TriggerKeystroke" ;
-      //"TriggerCurrentPanel" ;
       "TriggerModifierKeys" ;
       //"TriggerTargetPanel" ;
       "UserCount" ;
       "UserName" ;
       //"UseSystemFormatsState" ;
+      //"UUID" ;
+      //"UUIDNumber" ;
       //"WindowContentHeight" ;
       //"WindowContentWidth" ;
       //"WindowDesktopHeight" ;
@@ -164,22 +146,15 @@ While (
     ) 
   ] ; 
 
-   ~i < ValueCount ( ~stateList ) ;
+   ~i < ValueCount ( ~list ) ;
 
    [
     ~i = ~i + 1 ;
-    ~thisItem = GetValue ( ~stateList ; ~i ) ;
-    ~stateJSON = JSONSetElement ( ~stateJSON ;
-      [~thisItem ; Evaluate ( "Get ( " & ~thisItem & " )" ) ; JSONString]
-    )
+    ~thisItem = GetValue ( ~list ; ~i ) ;
+    ~text = If ( not IsEmpty ( ~text ); ~text & ", " ) &
+      ~thisItem & ": " & Evaluate ( "Get ( " & ~thisItem & " )" )
   ];
 
-  JSONSetElement ( "{}" ;
-    [ "errorType" ; theErrorType ; JSONString];
-    [ "errorNum" ; theErrorCode ; JSONNumber];
-    [ "errorDescription" ; theErrorDescription ; JSONString];
-    [ "errorInfo" ; theErrorInfo ; JSONString];
-    [ "systemState"; ~stateJSON; JSONObject]
-  )
-
+  ~text
+  
 )
