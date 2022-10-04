@@ -19,13 +19,14 @@
  *  CHANGELOG
  *    2022-10-04: Paul McCudden (paul@peak14.solutions): Created
 */
+
  Let (
     [
         ~unique = Get ( UUID )
     ];
 
     GetValue (
-        Substitute ( values
+        Substitute ( values;
             [¶; ~unique];
             [divider; ¶]
         ); number
