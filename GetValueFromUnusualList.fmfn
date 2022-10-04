@@ -1,0 +1,34 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetValueFromUnusualList ( values ; number; divider )
+ *
+ *  DESCRIPTION
+ *    For when you have a list not seperated by ¶ and want to use GetValue () on it
+ *
+ *  PARAMS
+ *    values: The values
+ *    number: The number of the value you'd like to get
+ *    divier: What divides the values. In a normal list, this is ¶
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-10-04: Paul McCudden (paul@peak14.solutions): Created
+*/
+ Let (
+    [
+        ~unique = Get ( UUID )
+    ];
+
+    GetValue (
+        Substitute ( values
+            [¶; ~unique];
+            [divider; ¶]
+        ); number
+    )
+
+ )
