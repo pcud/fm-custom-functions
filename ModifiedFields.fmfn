@@ -1,0 +1,61 @@
+/*
+ *  CUSTOM FUNCTION
+ *    StoreModifiedFields ( fieldList ; currentList )
+ *
+ *  DESCRIPTION
+ *    Takes the modified fields and creates a unique list. Be sure to modify the below variables to fit your solution:
+ *      ~changeLogExclusions: the field names you don't want to be included in the log
+ *
+ *  PARAMS
+ *    fieldList: A list of field names to check the values of
+ *    currentList: The current modified fields created by this function
+ *
+ *  RETURNS
+ *    A list of fields that have been modified
+ *
+ *  DEPENDENCIES
+ *
+ *  CHANGELOG
+ *    2022-10-06: Paul McCudden: Created
+*/
+
+While ( 
+    //initialVariable
+    [
+        
+        //--------------SETTINGS------------------
+        ~changeLogExclusions = List (
+            "CreationTimestampOnHost";
+            "CreatedBy";
+            "ChangeLog";
+            "ModificationTimestampOnHost";
+            "ModifiedBy";
+            "MODIFIED_FIELDS"
+	    );
+        //------------END OF SETTINGS--------------
+
+        ~newList = currentList;
+        ~fieldCount = ValueCount ( fieldList );
+        ~i = 0
+    ];
+    
+    //condition
+    ~i < ~fieldCount;
+    
+    //logic
+    [
+        ~i = ~i + 1;
+        ~thisField = GetValue ( fieldList ; ~i );
+        ~thisList = UniqueValues ( List ( ~newList; ~thisField ) );
+        
+        //Ignore this field if it's a calc field or in our exclusion list
+        ~newList = If ( ( IsEmpty ( FilterValues ( ~changeLogExclusions ; ~thisField ) ) and ( Right ( LeftWords ( FieldType ( Get ( FileName ) ; ~thisField ) ; 1 ) ; 4 ) <> "Calc" ) );
+            //Update
+            Left ( ~thisList; Length ( ~thisList ) - 1 );
+            //Don't update
+            ~newList )
+    ];
+    
+    //result
+    ~newList
+)
