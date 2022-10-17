@@ -39,24 +39,24 @@ Let (
         ~userName= Left ( ~email; ~atPos- 1);
 
         // Check if domain is IPv4 or IPv6 "[ ]"
-        IP = If ( (Middle ( ~email; ~atPos+ 1 ; 1 ) = "[") and (Right ( ~email; 1 ) = "]") ; 1 ; 0 );
+        ~IP = If ( (Middle ( ~email; ~atPos+ 1 ; 1 ) = "[") and (Right ( ~email; 1 ) = "]") ; 1 ; 0 );
 
         // All text to right of last "@"
         ~TLD = Right ( ~email; Length ( ~email) - ~atPos);
 
         // Domain, different if IPv4/6 or standard
-        ~domain= If ( IP = 1 ; Middle ( ~TLD; 2 ; Length ( ~TLD ) - 2 ) ; Left ( ~TLD; Position ( ~TLD; "." ; 1 ; 1 ) - 1 ) );
+        ~domain= If ( ~IP = 1 ; Middle ( ~TLD; 2 ; Length ( ~TLD ) - 2 ) ; Left ( ~TLD; Position ( ~TLD; "." ; 1 ; 1 ) - 1 ) );
 
         // Allowable alphabet in User Name
         ~alpha = "abcdefghijklmnopqrstuvwxyz";
 
-        // Allowable numeric in ~userNameand IP addresses
+        // Allowable numeric in ~userName and IP addresses
         ~numeric= "0123456789";
 
         // Allowable special characters in User Name
         ~special1 = ".!#$%&'*+-/=?^_`{|}~";
 
-        // Allowable special characters in ~userNameif quoted
+        // Allowable special characters in ~userName if quoted
         ~special2 = " (),:;<>@[\]";
 
         // Allowable special character in domain
@@ -90,34 +90,71 @@ Let (
 
         // Pass if the quoted User Name ends with a double quote as required
         ( Right ( ~userName; 1 ) = ~quote ) and
-        ( Right ( ~userName; 2 ) ≠ ~escapedQuote ) and /* pass = the quoted ~userNamedoes not end with an escaped double quote, not allowed */
-        ( Filter ( ~userName; ~alpha & ~numeric&  ~special1 & ~special2 & ~quote ) = LP ) ; 1 ; /* pass = the quoted ~userNamedoes not contain special characters which are not allowed within a quoted ~userName*/
-        ( ~countQuote = 0 ) and /* pass = this is not a quoted ~userName*/
-        ( Left ( ~userName; 1 ) ≠ "." ) and /* pass = the ~userNamedoes not begin with a "." */
-        ( Right ( ~userName; 1 ) ≠ "." ) and /* pass = the ~userNamedoes not end with a "." */
-        ( PatternCount ( ~userName; ".." ) = 0 ) and /* pass = the ~userNamedoes not contain a double ".." */
-        ( Filter ( ~userName; ~alpha & ~numeric&  ~special1 ) = ~userName ) ; 1 ; /* pass = the ~userNamedoes not contain special characters th~atPosare not allowed in a non-quoted ~userName*/
-        0 ) /* default case function result - failed */
-        * /* multiply Boolean results, must pass all: 1*1*0*1*1 = 0 (fail) */
-        ( ~atPos > 0 ) /* There is an @ symbol in the string */
-        * /* multiply Boolean results, must pass all: 1*1*0*1*1 = 0 (fail) */
-        If ( IP = 1 ; /* this is an IP formatted domain */
-        Case (
-        (PatternCount ( ~domain; ":" ) > 1 ) ; 1 ; /* this is an IPv6 formatted domain and contains ~atPosleast 2 ":" */
-        (PatternCount ( ~domain; "." ) = 3) and /* this is an IPv4 formatted domain and contains 3 "." */
-        Let ( [
-        DMval = Substitute ( ~domain; "." ; "¶" ) ; /* turn IP address into a 4 value list */
-        val1 = GetValue ( DMval ; 1 ) ; /* set variables for each value */
-        val2 = GetValue ( DMval ; 2 ) ;
-        val3 = GetValue ( DMval ; 3 ) ;
-        val4 = GetValue ( DMval ; 4 ) ] ;
-        IsEmpty ( Filter ( DMval ; ~alpha &  ~special1 & ~special2 ) ) and /* check the list contains only numerical values, 0 is allowed */
-        not IsEmpty ( val1 ) and /* check each value is not empty */
-        not IsEmpty ( val2 ) and
-        not IsEmpty ( val3 ) and
-        not IsEmpty ( val4 )
-        ) ; 1 ;
-        0 ) ; /* default case function result - failed */
+
+        // Pass = the quoted ~userNamedoes not end with an escaped double quote, not allowed
+        ( Right ( ~userName; 2 ) ≠ ~escapedQuote ) and
+        
+        // Pass = the quoted ~userNamedoes not contain special characters which are not allowed within a quoted ~userName
+        ( Filter ( ~userName; ~alpha & ~numeric&  ~special1 & ~special2 & ~quote ) = LP ) ; 1 ;
+        
+        // Pass = this is not a quoted ~userName
+        ( ~countQuote = 0 ) and
+
+        // Pass = the ~userName does not begin with a "."
+        ( Left ( ~userName; 1 ) ≠ "." ) and
+        
+        // Pass = the ~userName does not end with a "."
+        ( Right ( ~userName; 1 ) ≠ "." ) and
+        
+        // Pass = the ~userNamedoes not contain a double ".."
+        ( PatternCount ( ~userName; ".." ) = 0 ) and
+        
+        // pass = the ~userNamedoes not contain special characters th~atPosare not allowed in a non-quoted ~userName
+        ( Filter ( ~userName; ~alpha & ~numeric&  ~special1 ) = ~userName ) ; 1 ;
+        
+        // default case function result - failed
+        0 )
+
+        // Multiply Boolean results, must pass all: 1*1*0*1*1 = 0 (fail)
+        *
+
+        // There is an @ symbol in the string
+        ( ~atPos > 0 ) 
+        
+        // Multiply Boolean results, must pass all: 1*1*0*1*1 = 0 (fail)
+        *
+
+        // This is an IP formatted domain
+        If ( ~IP = 1 ; 
+            Case (
+
+                // This is an IPv6 formatted domain and contains ~atPosleast 2 ":"
+                ( PatternCount ( ~domain; ":" ) > 1 ) ; 1 ;
+
+                // This is an IPv4 formatted domain and contains 3 "." */
+                ( PatternCount ( ~domain; "." ) = 3) and
+                Let (
+                    [
+                        //  Turn IP address into a 4 value list
+                        ~DMval = Substitute ( ~domain; "." ; "¶" ) ;
+
+                        // Set variables for each value
+                        ~DMval1 = GetValue ( ~DMval ; 1 ) ;
+                        ~DMval2 = GetValue ( ~DMval ; 2 ) ;
+                        ~DMval3 = GetValue ( ~DMval ; 3 ) ;
+                        ~DMval4 = GetValue ( ~DMval ; 4 )
+                    ];
+
+                    //  Check the list contains only numerical values, 0 is allowed
+                    IsEmpty ( Filter ( ~DMval ; ~alpha &  ~special1 & ~special2 ) ) and
+
+                    // Check each value is not empty
+                    not IsEmpty ( ~DMval1 ) and
+                    not IsEmpty ( ~DMval2 ) and
+                    not IsEmpty ( ~DMval3 ) and
+                    not IsEmpty ( ~DMval4 )
+                ) ; 1 ;
+            0 ) ; /* default case function result - failed */
         /* value if domain is not IP formatted */
         (Filter ( ~domain; ~alpha & ~numeric& ~special3 ) = DM) and /* domain does not contain special characters th~atPosare not allowed */
         (~TLD> 0) and /*~atPosleast one "." exists to the right of the last @ symbol */

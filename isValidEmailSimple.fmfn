@@ -3,7 +3,7 @@
  *    isValidEmail ( email )
  *
  *  DESCRIPTION
- *    Use when you want to know if the current context is on the server or not
+ *    Use when you want to know if a value is a valid email or not
  *
  *  PARAMS
  *    email: The email address you wish to validate.

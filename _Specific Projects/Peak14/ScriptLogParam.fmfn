@@ -1,0 +1,36 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ScriptLogParam ( additionalJSON )
+ *
+ *  DESCRIPTION
+ *    Creates the parameter for the script log
+ *
+ *  PARAMS
+ *    additionalJSON: the list the contains the values you want to average
+ *
+ *  RETURNS
+ *    Number
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2021-10-20: Paul McCudden (paul@peak14.solutions): Created
+ *
+ *  CREDITS
+ *    Credit goes to Debi Fuchs of Aptworks Consulting, debi@aptworks.com for the strategy of getting rid of null list values
+*/
+
+Let (
+    [
+        ~json = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON )
+    ];
+
+    JSONSetElement ( ~json
+        ;["UUID"; Get ( UUIDNumber ); JSONString]
+        ;["scriptName"; Get ( ScriptName ); JSONString]
+        ;["timestamp"; GetCurrentUTCTimestamp; JSONString]
+        ;["result"; $return; JSONRaw]
+    )
+
+)

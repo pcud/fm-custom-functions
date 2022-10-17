@@ -36,7 +36,7 @@ Let (
         ~menu = "mainMenu";
             Case (
                 ~order = 1; Case (
-                    ~value = "label"; "progress tracker";
+                    ~value = "label"; "learning progression";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "people"; JSONString]
                     );
@@ -175,11 +175,11 @@ Let (
                     ~value = "hide"; False
                 );
                 ~order = 3; Case (
-                    ~value = "label"; "";
+                    ~value = "label"; "email Log";
                     ~value = "script"; JSONSetElement ( ~json
-                        ; ["NAV_KEY"; ""; JSONString]
+                        ; ["NAV_KEY"; "emailLog"; JSONString]
                     );
-                    ~value = "hide"; True
+                    ~value = "hide"; False
                 );
                 ~order = 4; Case (
                     ~value = "label"; "";

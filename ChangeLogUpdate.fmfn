@@ -40,19 +40,43 @@ While (
         
         //--------------SETTINGS------------------
         ~changeLogExclusions = List (
-            "zzChangeLog" ;
-		    "zzCreatedBy" ;
-		    "zzCreatedOnLocalTime" ;
-		    "zzCreatedOnUTC";
-            "zzLastModifiedBy";
-            "zzLastModifiedOn";
-            "zzLastModifiedOnLocalTime";
-            "zzLastModifiedOnUTC"
+            "zz_changeLog" ;
+            "zz_changeLogDisplay" ;
+            "zz_createdOnLocalTime" ;
+            "zz_lastModifiedOn";
 	    );
         ~dotEscape = "~dot~";
         //------------END OF SETTINGS--------------
 
-        ~ISOTimestamp = ISOFromTimestamp ( GetCurrentUTCTimestamp () );
+        ~utcTimestamp = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 );
+        ~ISOTimestamp = 
+            // Year
+            Right ( "0000" & Year ( ~utcTimestamp ) ; 4 )
+			& "-"
+
+            // Month
+			& Right ( "00" & Month ( ~utcTimestamp ) ; 2 )
+			& "-"
+
+            // Day
+			& Right ( "00" & Day ( ~utcTimestamp ) ; 2 )
+            & "T"
+
+            // Hour
+            & Right ( "00" & Hour ( ~utcTimestamp ) ; 2 )
+
+            // Minute
+			& ":" & Right ( "00" & Minute ( ~utcTimestamp ) ; 2 )
+
+            // Seconds
+			& If ( Seconds ( ~utcTimestamp ) > 0 ;
+				":" & Right ( "00" & Div ( Seconds ( ~utcTimestamp ) ; 1 ) ; 2 )
+			)
+
+            // Miliseconds
+			& If ( Mod ( Seconds ( ~utcTimestamp ) ; 1 ) > 0 ;
+				"," & Replace ( Mod ( Seconds ( ~utcTimestamp ) ; 1 ) ; 1 ; 1 ; "" )
+			);
         ~fieldCount = ValueCount ( fieldList );
         ~i = 0;
         ~account = Get ( AccountName );
@@ -75,12 +99,20 @@ While (
         //Ignore this field if it's a calc field or in our exclusion list
         ~newJSON = If ( ( IsEmpty ( FilterValues ( ~changeLogExclusions ; ~thisOriginalField ) ) and ( Right ( LeftWords ( FieldType ( Get ( FileName ) ; ~thisOriginalField ) ; 1 ) ; 4 ) <> "Calc" ) );
             //Update
-            JSONSetElement ( ~newJSON ; ~thisEscapedField & "." & ~ISOTimestamp ; JSONSetElement ( "" ;
-                ["val" ; GetField ( ~thisOriginalField ) ; JSONString];
-                ["acct" ; ~account ; JSONString]
-            ) ; JSONObject ) ;
+            If ( IsEmpty ( Get ( ScriptName ) );
+                JSONSetElement ( ~newJSON ; ~thisEscapedField & "." & ~ISOTimestamp ; JSONSetElement ( "" ;
+                    ["val" ; GetField ( ~thisOriginalField ) ; JSONString];
+                    ["acct" ; ~account ; JSONString]
+                ) ; JSONObject ) ;
+                JSONSetElement ( ~newJSON ; ~thisEscapedField & "." & ~ISOTimestamp ; JSONSetElement ( "" ;
+                    ["val" ; GetField ( ~thisOriginalField ) ; JSONString];
+                    ["acct" ; ~account ; JSONString];
+                    ["script"; Get ( ScriptName ); JSONString ]
+                ) ; JSONObject )
+            );
             //Don't update
-            ~newJSON )
+            ~newJSON
+        )
     ];
     
     //result
