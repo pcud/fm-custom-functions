@@ -1,0 +1,52 @@
+/*
+ *  CUSTOM FUNCTION
+ *    CamelBreaker ( camelCase )
+ *
+ *  DESCRIPTION
+ *    Breaks camel case into readable words
+ *
+ *  PARAMS
+ *    camelCase: Any text string in the camel case format
+ *
+ *  RETURNS
+ *    string
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2021-09-30: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+TrimAll ( Proper (
+    Substitute (
+        camelCase;
+        ["A"; " A"]; 
+        ["B"; " B"];
+        ["C"; " C"];
+        ["D"; " D"];
+        ["E"; " E"];
+        ["F"; " F"];
+        ["G"; " G"];
+        ["H"; " H"];
+        ["I"; " I"];
+        ["J"; " J"];
+        ["K"; " K"];
+        ["L"; " L"];
+        ["M"; " M"];
+        ["N"; " N"];
+        ["O"; " O"];
+        ["P"; " P"];
+        ["Q"; " Q"];
+        ["R"; " R"];
+        ["S"; " S"];
+        ["T"; " T"];
+        ["U"; " U"];
+        ["V"; " V"];
+        ["W"; " W"];
+        ["X"; " X"];
+        ["Y"; " Y"];
+        ["Z"; " Z"]  
+    ) );
+    1; 0
+)

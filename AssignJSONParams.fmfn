@@ -24,7 +24,7 @@ Let (
     [
         ~params = If ( IsEmpty ( params ); Get ( ScriptParameter ); params );
         ~params = If ( Left ( JSONFormatElements ( ~params ); 1 ) = "?"; "{}"; ~params );
-        ~params = JSONDeleteElement ( ~param; Get ( UUID ) )
+        ~params = JSONDeleteElement ( ~params; Get ( UUID ) )
     ];
 
     If ( PatternCount ( ~params; "{" ) + PatternCount ( ~params; "[" ) = 1;

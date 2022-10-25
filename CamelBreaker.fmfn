@@ -18,35 +18,28 @@
  *    2021-09-30: Paul McCudden (paul@peak14.solutions): Created
 */
 
-TrimAll ( Proper (
-    Substitute (
-        camelCase;
-        ["A"; " A"]; 
-        ["B"; " B"];
-        ["C"; " C"];
-        ["D"; " D"];
-        ["E"; " E"];
-        ["F"; " F"];
-        ["G"; " G"];
-        ["H"; " H"];
-        ["I"; " I"];
-        ["J"; " J"];
-        ["K"; " K"];
-        ["L"; " L"];
-        ["M"; " M"];
-        ["N"; " N"];
-        ["O"; " O"];
-        ["P"; " P"];
-        ["Q"; " Q"];
-        ["R"; " R"];
-        ["S"; " S"];
-        ["T"; " T"];
-        ["U"; " U"];
-        ["V"; " V"];
-        ["W"; " W"];
-        ["X"; " X"];
-        ["Y"; " Y"];
-        ["Z"; " Z"]  
-    ) );
-    1; 0
+While (
+    [
+        ~camelCase = camelCase;
+        ~length = Length ( ~camelCase );
+        ~i = 0;
+        ~broken = "";
+        ~alpha = "abcdefghijklmnopqrstuvwxyz"
+    ];
+
+    ~i < ~length;
+
+    [
+        ~i = ~i + 1;
+        ~thisChar = Middle ( ~camelCase; ~i; 1 );
+        ~lastChar = If ( ~i = 1; ""; Middle ( ~camelCase; ~i - 1; 1 ) );
+        ~addSpace = Exact ( ~thisChar; Upper ( ~thisChar ) ) and
+            Exact ( ~lastChar; Lower ( ~lastChar ) ) and 
+            not IsEmpty ( Filter ( ~alpha ; ~lastChar )  ) and
+            not IsEmpty ( Filter ( ~alpha ; ~thisChar )  )
+        ;
+        ~broken = ~broken & If ( ~addSpace and ~i > 1; " " ) & ~thisChar
+    ];
+
+    ~broken
 )

@@ -1,0 +1,22 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ConvertUTCtoLocalTimestamp ( theTimestamp )
+ *
+ *  DESCRIPTION
+ *    Converts the passed timestamp (assumed to be in UTC) to local time
+ *
+ *  PARAMS
+ *    theTimestamp (optional): The timestamp to convert. If not passed, will use local time
+ *
+ *  RETURNS
+ *    Timestamp
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2022-10-21: Paul McCudden: Created
+ *
+*/
+
+If ( IsEmpty ( theTimestamp ); GetCurrentUTCTimestamp; theTimestamp ) + GetCurrentTimeZoneUTCOffset ()

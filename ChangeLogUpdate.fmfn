@@ -32,6 +32,7 @@
  *    2020-03-09: Paul McCudden (paul@peak14.solutions): Created
  *    2020-03-11: Paul McCudden (paul@peak14.solutions): Now doesn't log the field if it's a calc field and escapes "." in the field name
  *    2021-07-21: Paul McCudden (paul@peak14.solutions): Updated to use UTC timestamp
+ *    2022-10-17: Paul McCudden (paul@peak14.solutions): Added in a script parameter if record is commited in a script
 */
 
 While ( 
@@ -41,9 +42,12 @@ While (
         //--------------SETTINGS------------------
         ~changeLogExclusions = List (
             "zz_changeLog" ;
-            "zz_changeLogDisplay" ;
-            "zz_createdOnLocalTime" ;
-            "zz_lastModifiedOn";
+            "zz_creationAccount" ;
+            "zz_creationTimestampLocal_c" ;
+            "zz_creationTimestampUTC";
+            "zz_modificationAccount";
+            "zz_modificationTimestampLocal_c";
+            "zz_modificationTimestampUTC"
 	    );
         ~dotEscape = "~dot~";
         //------------END OF SETTINGS--------------

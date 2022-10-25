@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    CreateID ( feield )
+ *    CreateID ( field )
  *
  *  DESCRIPTION
  *    Creates a unique ID with a human readble way to understand which table it's from

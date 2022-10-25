@@ -154,11 +154,20 @@ Let (
                     not IsEmpty ( ~DMval3 ) and
                     not IsEmpty ( ~DMval4 )
                 ) ; 1 ;
-            0 ) ; /* default case function result - failed */
-        /* value if domain is not IP formatted */
-        (Filter ( ~domain; ~alpha & ~numeric& ~special3 ) = DM) and /* domain does not contain special characters th~atPosare not allowed */
-        (~TLD> 0) and /*~atPosleast one "." exists to the right of the last @ symbol */
-        (Length ( Right ( ~TLD; Length ( ~TLD) - Position ( ~TLD; "." ; 1 ; PatternCount ( ~TLD; "." ) ) ) ) > 1 ) /* ~atPosleast 2 characters exist to the right of the last "." in the top level domain */
+
+            // Default case function result - failed
+            0 ) ;
+
+        // Value if domain is not IP formatted
+
+        // Domain does not contain special characters th~atPosare not allowed
+        (Filter ( ~domain; ~alpha & ~numeric& ~special3 ) = DM) and
+
+        // ~atPosleast one "." exists to the right of the last @ symbol
+        (~TLD> 0) and
+
+        
+        (Length ( Right ( ~TLD; Length ( ~TLD) - Position ( ~TLD; "." ; 1 ; PatternCount ( ~TLD; "." ) ) ) ) > 1 )
     )
 
 )
