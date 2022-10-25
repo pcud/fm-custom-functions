@@ -24,10 +24,11 @@ While (
         ~length = Length ( ~camelCase );
         ~i = 0;
         ~broken = "";
-        ~alpha = "abcdefghijklmnopqrstuvwxyz"
+        ~alpha = "abcdefghijklmnopqrstuvwxyz";
+        ~allAlpha = ~length = Length ( Filter ( ~camelCase ; ~alpha ) )
     ];
 
-    ~i < ~length;
+    ~i < ~length and not ~allAlpha;
 
     [
         ~i = ~i + 1;
@@ -41,5 +42,38 @@ While (
         ~broken = ~broken & If ( ~addSpace and ~i > 1; " " ) & ~thisChar
     ];
 
-    ~broken
+    Case (
+        ~allAlpha; TrimAll ( Proper (
+            Substitute ( camelCase;
+                ["A"; " A"]; 
+                ["B"; " B"];
+                ["C"; " C"];
+                ["D"; " D"];
+                ["E"; " E"];
+                ["F"; " F"];
+                ["G"; " G"];
+                ["H"; " H"];
+                ["I"; " I"];
+                ["J"; " J"];
+                ["K"; " K"];
+                ["L"; " L"];
+                ["M"; " M"];
+                ["N"; " N"];
+                ["O"; " O"];
+                ["P"; " P"];
+                ["Q"; " Q"];
+                ["R"; " R"];
+                ["S"; " S"];
+                ["T"; " T"];
+                ["U"; " U"];
+                ["V"; " V"];
+                ["W"; " W"];
+                ["X"; " X"];
+                ["Y"; " Y"];
+                ["Z"; " Z"]  
+            ) );
+            1; 0
+        );
+        ~broken
+    )
 )
