@@ -1,0 +1,35 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ScriptEnvironmentObject ( additionalJSON )
+ *
+ *  DESCRIPTION
+ *    Has the default JSONObject that should be the parameter for the enter script enviornment and exit script envrionemnt steps
+ *
+ *  PARAMS
+ *    additonalJSON: More json that you wish to include in the object
+ *
+ *  RETURNS
+ *    Object
+ *
+ *  DEPENDENCIES
+ *    None
+ *
+ *  CHANGELOG
+ *    2022-12-05: Paul McCudden: Created
+ *
+*/
+
+Let (
+    [
+        ~json = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
+        $scriptLogID = If ( IsEmpty ( $scriptLogID ); "ScriptLog-" & Get ( UUID ); $scriptLogID )
+    ];
+
+    JSONSetElement ( additionalJSON
+        ;["scriptLogID"; $scriptLogID; JSONString]
+        ;["return"; $return; JSONRaw]
+        ;["file"; Get ( FileName ); JSONString]
+        ;["script"; Get ( ScriptName ); JSONString]
+    )
+
+)

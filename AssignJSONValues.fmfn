@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    AssignJSONParams ( params )
+ *    AssignJSONValues ( params )
  *
  *  DESCRIPTION
  *    Assigns what is stored in params as FileMaker variables
@@ -32,12 +32,12 @@ Let (
         // If no nested JSON variables, we don't need to loop
         Let (
             [
-                ~s = Get ( UUID );
-                ~params = ~s & ¶ & ~params & ¶ & ~s
+                ~unique = Get ( UUID );
+                ~params = ~unique & ¶ & ~params & ¶ & ~unique
             ];
 
             Evaluate ( "Let([¶" & Substitute ( ~params;
-                // Strip out uneeded json info and seperate each variable onto it's own line
+                // Strip out uneeded json wrappers and seperate each variable onto it's own line
                 ["{"; ""];
                 ["}"; ""];
                 [","; ¶];
@@ -47,11 +47,11 @@ Let (
                 ["\":"; "="];
 
                 // Eliminate any empty lines
-                ["¶¶"; ¶ & ~s & ¶];
-                ["¶¶"; ¶ & ~s & ¶];
-                [~s & ¶; ""];
-                [¶ & ~s; ""];
-                [~s; ""];
+                ["¶¶"; ¶ & ~unique & ¶];
+                ["¶¶"; ¶ & ~unique & ¶];
+                [~unique & ¶; ""];
+                [¶ & ~unique; ""];
+                [~unique; ""];
 
                 // Format each line for the let request
                 [¶; ";¶"];
