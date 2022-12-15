@@ -1,0 +1,213 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorAppend ( errorType; errorCode ; errorInfo )
+ *
+ *  DESCRIPTION
+ *    Appends an error to the current error information
+ *
+ *  PARAMS
+ *    type (text): Either "app" or "fmp" if it is an application specific error or a naitvie FileMaker/System error
+ *	  code (number): The numeric represntation for this error. Negative errors are developer defined
+ *	  info (text) optional: Some text describing the particular instance of this error. This should help a developer locate where in a script the error occured.
+ *
+ *  RETURNS
+ *    A JSON array which contains information about this new error
+ *
+ *  DEPENDENCIES
+ *    ErrorDescription
+ *
+ *  CHANGELOG
+ *    2022-12-02: Paul McCudden (paul@peak14.solutions): Combined from the previous error custom functions that can be found at the below reference
+ *
+ * REFERENCES:
+ *		http://filemakerstandards.org/x/AoA-/
+*/
+
+While ( 
+  [
+    $errorData = If ( IsEmpty ( $errorData ); "[]"; $errorData );
+    ~index = If ( $errorData = "[]"; 0; ValueCount ( JSONListKeys ( $errorData; "" ) ) );
+    ~errorDescription = Case (
+      errorType = "fmp"; ErrorDescription ( errorCode );
+        Case (
+
+          // Generic Errors
+          errorCode = -1 ; "Unknown error" ;
+          errorCode = 0 ; "No error" ;
+          errorCode = 1 ; "User canceled action" ;
+
+          // Parameter/Variable Errors
+          errorCode = 10 ; "Invalid Script Parameters" ;
+          errorCode = 11 ; "Unexpected Value" ;
+          errorCode = 12 ; "Value not found" ;
+
+          // If not listed above
+          "Unknown error code"
+        )
+    );
+    ~i = 0 ;
+    ~stateJson = "" ;
+    ~stateList = List (
+
+      //<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+      // Comment or uncomment what you'd like to recieve here.
+      //<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+      // -- High priority values moved to top for easy viewing --
+      "AccountName" ;
+      "CurrentHostTimestamp" ;
+      "CurrentTimestamp" ;
+      "Device" ;
+      "FileName" ;
+      "ScriptName" ;
+      "ScriptParameter" ;
+      "ScriptResult" ;
+
+      // -- Lower priority items --
+      "AccountExtendedPrivileges" ;
+      "AccountGroupName" ;
+      "AccountPrivilegeSetName" ;
+      "AccountType" ;
+      "ActiveFieldContents" ;
+      "ActiveFieldName" ;
+      "ActiveFieldTableName" ;
+      "ActiveLayoutObjectName" ;
+      "ActiveModifierKeys" ; 
+      // "ActiveRepetitionNumber" ;
+      // "ActiveSelectionSize" ;
+      // "ActiveSelectionStart" ;
+      "AllowAbortState" ;
+      // "AllowFormattingBarState" ;
+      "ApplicationArchitecture" ;
+      "ApplicationLanguage" ;
+      "ApplicationVersion" ;
+      // "CalculationRepetitionNumber" ;
+      // "ConnectionAttributes" ;
+      "ConnectionState" ;
+      // "CurrentDate" ;
+      "CurrentExtendedPrivileges" ;
+      "CurrentPrivilegeSetName" ;
+      // "CurrentTime" ;
+      // "CurrentTimeUTCMilliseconds"
+      "CustomMenuSetName" ;
+      // "DesktopPath" ;
+      "Device" ;
+      // "DocumentsPath" ;
+      // "DocumentsPathListing" ;
+      // "EncryptionState" ;
+      "ErrorCaptureState" ;
+      //"FileMakerPath" ;
+      "FilePath" ;
+      "FileSize" ;
+      "FoundCount" ;
+      // "HighContrastState" ;
+      "HostApplicationVersion" ;
+      "HostIPAddress" ;
+      "HostName" ;
+      // "InstalledFMPlugins" ;
+      "InstalledFMPluginsAsJSON" ;
+      "LastError" ;
+      "LastExternalErrorDetail" ;
+      "LastMessageChoice" ;
+      "LayoutAccess" ;
+      // "LayoutCount" ;
+      "LayoutName" ;
+      // "LayoutNumber" ;
+      "LayoutTableName" ;
+      "LayoutViewState" ;
+      "MenubarState" ;
+      "ModifiedFields" ;
+      "MultiUserState" ;
+      "NetworkProtocol" ;
+      "NetworkType" ;
+      "OpenDataFileInfo" ;
+      // "PageCount" ;
+      //"PageNumber" ;
+      "PersistentID" ;
+      // "PreferencesPath" ;
+      // "PrinterName" ;
+      // "QuickFindText" ;
+      "RecordAccess" ;
+      "RecordID" ;
+      // "RecordModificationCount" ;
+      // "RecordNumber" ;
+      "RecordOpenCount" ;
+      "RecordOpenState" ;
+      // "RegionMonitorEvents" ;
+      // "RequestCount" ;
+      // "RequestOmitState" ;
+      // "ScreenDepth" ;
+      "ScreenHeight" ;
+      // "ScreenScaleFactor" ;
+      "ScreenWidth" ;
+      // "ScriptAnimationState" ;
+      "SessionIdentifier" ;
+      "SortState" ;
+      "StatusAreaState" ;
+      // "SystemAppearance" ;
+      "SystemDrive" ;
+      "SystemIPAddress" ;
+      "SystemLanguage" ;
+      // "SystemLocaleElements" ;
+      //"SystemNICAddress" ;
+      "SystemPlatform" ;
+      "SystemVersion" ;
+      // "TemporaryPath" ;
+      // "TextRulerVisible" ;
+      "TotalRecordCount" ;
+      // "TriggerGestureInfo" ;
+      // "TriggerKeystroke" ;
+      // "TriggerCurrentPanel" ;
+      "TriggerModifierKeys" ;
+      // "TriggerGestureInfo" ;
+      // "TriggerTargetPanel" ;
+      "UserCount" ;
+      "UserName" ;
+      // "UseSystemFormatsState" ;
+      // "UUID" ;
+      // "UUIDNumber" ;
+      // "WindowContentHeight" ;
+      // "WindowContentWidth" ;
+      // "WindowDesktopHeight" ;
+      // "WindowDesktopWidth" ;
+      "WindowHeight" ;
+      "WindowLeft" ;
+      "WindowMode" ;
+      "WindowName" ;
+      // "WindowOrientation" ;
+      "WindowStyle" ;
+      "WindowTop" ;
+      "WindowVisible" ;
+      "WindowWidth" ;
+      "WindowZoomLevel"
+    ) 
+  ] ; 
+
+   ~i < ValueCount ( ~stateList ) ;
+
+   [
+    ~i = ~i + 1 ;
+    ~thisItem = GetValue ( ~stateList ; ~i ) ;
+    ~thisData = Evaluate ( "Get ( " & ~thisItem & " )" );
+    ~stateJSON = JSONSetElement ( ~stateJSON ;
+      [~thisItem ; ~thisData ; JSONRaw]
+    )
+  ];
+
+  Let (
+    [
+      ~thisErrorData = JSONSetElement ( "{}"
+        ;[ "errorType" ; errorType ; JSONString]
+        ;[ "errorCode" ; errorCode ; JSONNumber]
+        ;[ "errorDescription" ; ~errorDescription ; JSONString]
+        ;[ "errorInfo" ; errorInfo ; JSONString]
+        ;[ "systemState"; ~stateJSON; JSONObject]
+      );
+      $errorData = JSONSetElement ( $errorData; "[" & ~index & "]"; ~thisErrorData; JSONObject )
+    ];
+
+    ~thisErrorData
+
+  )
+  
+)

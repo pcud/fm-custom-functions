@@ -25,11 +25,11 @@
         ~unique = Get ( UUID )
     ];
 
-    GetValue (
+    Substitue ( GetValue (
         Substitute ( values;
             [¶; ~unique];
             [divider; ¶]
         ); number
-    )
+    ); ~unique; ¶ )
 
  )
