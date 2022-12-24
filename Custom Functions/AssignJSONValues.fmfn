@@ -18,6 +18,7 @@
  *    2022-02-07: Paul McCudden (paul@peak14.solutions): Created
  *    2022-06-16: Paul McCudden (paul@peak14.solutions): Update to loop if necessary
  *    2022-09-11: Paul McCudden (paul@peak14.solutions): Have it unformat the JSON to make it not run into parse errors
+ *    2022-12-23: Paul McCudden (paul@peak14.solutions): Updated script to catch multiple different quote characters ("“”)
 */
 
 Let (
@@ -45,6 +46,8 @@ Let (
                 // Format each line to have the proper syntax
                 ["¶\""; "¶$"];
                 ["\":"; "="];
+                ["\“"; "\\\""];
+                ["\”"; "\\\""];
 
                 // Eliminate any empty lines
                 ["¶¶"; ¶ & ~unique & ¶];
@@ -65,7 +68,8 @@ Let (
                 ~paramList = JSONListKeys ( ~params; "" );
                 ~paramCount = ValueCount ( ~paramList );
                 ~i = 0;
-                ~setVariable = ""
+                ~setVariable = "";
+                ~statementList = ""
             ];
 
             ~i < ~paramCount;
@@ -75,13 +79,15 @@ Let (
                 ~thisParam = GetValue ( ~paramList; ~i );
                 ~thisValue = Substitute ( JSONGetElement ( ~params; ~thisParam );
                     ["\""; "\\\""];
+                    ["\“"; "\\\""];
+                    ["\”"; "\\\""];
                     ["\\r"; "\¶"]
                 );
                 ~thisParam = If ( Left ( ~thisParam; 1 ) <> "$"; "$") & ~thisParam;
                 ~setVariable = Evaluate ( "Let([" & ~thisParam & "=\"" & ~thisValue & "\"];1)" )
             ];
 
-            "Used While() Method"
+            "Used While Method"
         )
 
     )
