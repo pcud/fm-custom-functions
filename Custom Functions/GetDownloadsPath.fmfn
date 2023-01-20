@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetDownloadsPath (  )
+ *
+ *  DESCRIPTION
+ *    Returns the download path for the current computer
+ *
+ *  PARAMS
+ *    --None--
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2023-01-10: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Substitute ( Get ( DesktopPath ); "Desktop"; "Downloads" )
