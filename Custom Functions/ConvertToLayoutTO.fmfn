@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ConvertToLayoutTO ( fieldRefOrFieldName )
+ *
+ *  DESCRIPTION
+ *    Converts the passed field to have the layout table occurance name
+ *
+ *  PARAMS
+ *    fieldRefOrFieldName: The field reference or field name to convert
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    GetFieldNameOnly
+ *
+ *  CHANGELOG
+ *    2021-09-18: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Get ( LayoutTableName ) & "::" & GetOnlyFieldName ( fieldRefOrFieldName )

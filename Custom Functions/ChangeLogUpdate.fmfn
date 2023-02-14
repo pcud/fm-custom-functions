@@ -47,12 +47,16 @@ While (
             "zz_creationTimestampUTC";
             "zz_modificationAccount";
             "zz_modificationTimestampLocal_c";
-            "zz_modificationTimestampUTC"
+            "zz_modificationTimestampUTC";
+            "zzModificationTimestampHost";
+            "zzModificationTimestampUTC";
+            "zzModifiedBy";
+            "zzChangeLog_ae"
 	    );
         ~dotEscape = "~dot~";
         //------------END OF SETTINGS--------------
 
-        ~utcTimestamp = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 );
+        ~utcTimestamp = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ) - Time (7;0;0);
         ~ISOTimestamp = 
             // Year
             Right ( "0000" & Year ( ~utcTimestamp ) ; 4 )

@@ -19,4 +19,4 @@
  *
 */
 
-If ( IsEmpty ( theTimestamp ); GetCurrentUTCTimestamp; theTimestamp ) + GetCurrentTimeZoneUTCOffset ()
+If ( IsEmpty ( theTimestamp ); GetCurrentUTCTimestamp; theTimestamp ) + GetCurrentTimeZoneUTCOffset () - Time ( hours ; minutes ; seconds )
