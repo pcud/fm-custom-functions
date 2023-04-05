@@ -40,7 +40,7 @@ Let (
             GetValue ( JSONListValues ( listOrArrayOrObject; "" ); ~newIteration ) )
         );
 
-       ~letStatement = "Let([" & thisVariableName & "=\"" & ~newVariableValue & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
+       ~letStatement = "Let([" & thisVariableName & "=\"" & Substitute ( ~newVariableValue; "\""; "\\\"" ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
     ];
 
     Evaluate ( ~letStatement )

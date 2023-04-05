@@ -1,12 +1,15 @@
 /*
  *  CUSTOM FUNCTION
- *    FormatNumberAsCurrency ( number; currency; separator; precision )
+ *    FormatNumberAsCurrency ( number; currency; precision )
  *
  *  DESCRIPTION
  *    Filters only the characters that are allowed in variable names
  *
  *  PARAMS
- *    varName: The variable name to return the filter of
+ *    number: The number to convert into currency
+ *    currency: The currency symbol to use
+ *    separator: What to seperate the 1,000s place with. Default is current system settings
+ *    precision: How many decimal places to go to. Default is 2
  *
  *  RETURNS
  *    Text
@@ -20,6 +23,7 @@
  *    2015-09-10: Geoffrey Gerhard: Fixed a bug that resulted in malformed numbers ( like "€10..05,05" ) in some European FMP 12 (and higher) files.
 Modified Decimal to use the correct integer/fraction separator [ "." or "," ] for the file's region when the decimal parameter is null.
  *    2022-06-02: Paul McCudden (paul@peak14.solutions): Converted to standards and eliminated some parameters
+ *    2023-04-04: Paul McCudden (paul@peak14.solutions): Eliminated need for seperator parameter
 */
 
 
@@ -28,15 +32,16 @@ Let (
         ~precision = Int ( GetAsNumber ( precision ) );
         ~precision = Case ( Length ( ~precision ); ~precision ; 2 );
         ~decimal = Filter ( 1/2; ".," );
+        ~separator = Filter ( NumToJText ( 1000; 1; 0 ); ".," );
         ~number = Round ( number + 0; ~precision );
-        ~sign = Case ( ~number <> 0; "-" );
+        ~sign = Case ( ~number < 0; "-" );
         ~number = Abs ( ~number );
         x = NumToJText ( Int ( ~number ); 1; 0 );
         y = NumToJText ( ~number * 10 ^ ~precision; 0; 0 )
     ] ;
 
     ~sign & currency &
-    Substitute ( x; ","; separator ) &
+    Substitute ( x; ","; ~separator ) &
     Case (
         ~precision > 0 ;
         ~decimal & Right ( 10^ ~precision & y ; ~precision )

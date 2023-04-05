@@ -1,0 +1,27 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ConvertFromUnixTimestamp ( UnixTimestamp )
+ *
+ *  DESCRIPTION
+ *    Returns the passed Unix Timestamp as a FileMaker Timestamp
+ *
+ *  PARAMS
+ *    UnixTimestamp (optional): the Unix timestamp. Will use the current timestamp if empty
+ *
+ *  RETURNS
+ *    Timestamp
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-03-21: Paul McCudden: Created
+ *
+*/
+
+If ( IsEmpty ( UnixTimestamp ); Get ( CurrentTimestamp ); 
+    GetAsTimestamp ( ( GetAsNumber ( UnixTimestamp ) )
+    + GetAsNumber ( Timestamp ( Date ( 1 ; 1 ; 1970 ) ; Time ( 0 ; 0 ; 0 ) ) )
+    + GetAsNumber ( Get ( CurrentTimestamp ) )
+    - Floor ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ) )
+)
