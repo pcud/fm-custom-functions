@@ -12,7 +12,7 @@
 
   	- Json :			JSON input
   	- TargetPath :		JSON path to Target Value, relative to a direct child of supplied JSON.
-  	- Operator:		See below
+  	- Operator:			See below
   	- ComparisonValue:	Value to which the value at TargetPath is compared.
   	- ValueType:		Data-type of Target/Comparison values
   	- ResultPath:		Optional JSON path, relative to each child, specifying the value to return for matches.
@@ -27,8 +27,8 @@
   	- BEGINS_WITH:				Leading substring match
   	- ENDS_WITH:				Trailing substring match
   	- IN:						Match against up to 20 return-delimited values.
-  	- CONTAINS				Pattern-match test
-    	- CONTAINS_CASE_SENSITIVE	Case-sensitive pattern-match test
+  	- CONTAINS:					Pattern-match test
+    - CONTAINS_CASE_SENSITIVE:	Case-sensitive pattern-match test
   	- MATCH_ALL:				Output every JSON child.
 
   Version: EXP 0.1.232

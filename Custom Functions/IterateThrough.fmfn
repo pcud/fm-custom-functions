@@ -37,8 +37,9 @@ Let (
         ~newIteration = If ( ~exitLoop; ""; ~newIteration );
         ~newVariableValue = If ( ~exitLoop; ""; Case (
             ~listType = "list"; GetValue ( listOrArrayOrObject; ~newIteration );
-            GetValue ( JSONListValues ( listOrArrayOrObject; "" ); ~newIteration ) )
-        );
+            ~listType = "array"; GetValue ( JSONListValues ( listOrArrayOrObject; "" ); ~newIteration );
+            ~listType = "object"; GetValue ( JSONListKeys ( listOrArrayOrObject; "" ); ~newIteration )
+        ) );
 
        ~letStatement = "Let([" & thisVariableName & "=\"" & Substitute ( ~newVariableValue; "\""; "\\\"" ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
     ];

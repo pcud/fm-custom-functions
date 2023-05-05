@@ -1,0 +1,51 @@
+/*
+    JSON.GetWildcardElements ( ~json ; ~path )
+	Purpose:	Exact same as JSONGetElement, except allows for a wildcard '*' substitution, returning recursive results across the breadth of your JSON.
+	History:	Created feb-2-2023 Brendan Pierce
+*/
+
+While ( [
+
+	~json_obj		= JSONSetElement ( "" ; "" ; ~json ; 3 ) ;
+	~json_clean	= If ( ~json_obj = "{}"
+					; JSONSetElement ( "" ; "" ; ~json ; 4 )
+					; ~json_obj ) ;
+
+	~path		= Substitute ( ~path
+					; [ "["  ; "." ]
+					; [ "]"  ; "." ]
+					; [ ".." ; "." ]
+					; [ "."  ; "¶" ] ) ;                    
+	~path		= If ( Left ( ~path ; 1 ) = "¶"
+					; Right ( ~path ; Length ( ~path ) - 1 )
+					; ~path ) ;
+	~path		= If ( Right ( ~path ; 1 ) = "¶"
+					; Left ( ~path ; Length ( ~path ) - 1 )
+					; ~path ) ;
+
+	~key			= GetValue ( ~path ; 1 ) ;
+	~path		= Middle ( ~path ; Length ( ~key ) + 2 ; 999999 ) ;
+	~key_list		= If ( ~key = "*" and not IsEmpty ( ~path )
+					; JSONListKeys ( ~json_clean ; "" ) ) ;
+
+	~result		= Case (
+					not IsEmpty ( ~key_list )
+						; "" ;
+					~key = "*" and IsEmpty ( ~path )
+						; JSONListValues ( ~json_clean ; "" ) ;
+					IsEmpty ( ~path )
+						; JSONGetElement ( ~json_clean ; ~key ) ;
+					JSON.GetWildcardElements ( JSONGetElement ( ~json_clean ; ~key ) ; ~path ) ) ;
+
+	~i			= 0 ;
+	~i_max		= ValueCount ( ~key_list ) + 0
+
+] ; ~i < ~i_max ; [
+
+	~i			= ~i + 1 ;
+	~key			= GetValue ( ~key_list ; ~i ) ;
+	~this_json		= JSONGetElement ( ~json_clean ; ~key ) ;
+	~result		= List ( ~result ;
+					JSON.GetWildcardElements ( ~this_json ; ~path ) )
+
+] ; ~result )

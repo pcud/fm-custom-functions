@@ -1,0 +1,32 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FindWindowWhere ( attribute ; value; operator )
+ *
+ *  DESCRIPTION
+ *    Return the window ID(s) where the attribute matches the value
+ *
+ *  PARAMS
+ *    attribute: The attribute where the value lives
+ *    value: The value to find match
+ *    ValueType: The JSONType to match with
+ *    operator: One of the following:
+ *      EQUALS:					    Equality matching based on ValueType
+ * 	    NUMERIC_EQUALS			    Equality matching as Number
+ * 	    EXACT:					    Case-sensitive match
+ * 	    BEGINS_WITH:				Leading substring match
+ * 	    ENDS_WITH:				    Trailing substring match
+ * 	    IN:						    Match against up to 20 return-delimited values.
+ * 	    CONTAINS:				    Pattern-match test
+ *   	CONTAINS_CASE_SENSITIVE:	Case-sensitive pattern-match test
+ * 	    MATCH_ALL:				    Output every JSON child.
+ *
+ *  RETURNS
+ *    Data
+ *
+ *  DEPENDENCIES
+ *    JSONQuery (https://filemakerhacks.com/2021/10/29/jsonquery-part-1/)
+ *
+ *  CHANGELOG
+ *    2023-04-25: Paul McCudden: Created
+*/
+

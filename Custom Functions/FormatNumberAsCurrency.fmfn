@@ -8,7 +8,6 @@
  *  PARAMS
  *    number: The number to convert into currency
  *    currency: The currency symbol to use
- *    separator: What to seperate the 1,000s place with. Default is current system settings
  *    precision: How many decimal places to go to. Default is 2
  *
  *  RETURNS

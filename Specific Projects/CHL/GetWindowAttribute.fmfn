@@ -1,0 +1,29 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetWindowAttribute ( windowID ; attribute )
+ *
+ *  DESCRIPTION
+ *    Get an attribute of a specific window
+ *
+ *  PARAMS
+ *    windowID: The window id. If blank will use current window ID
+ *    attribute: The attribute key to grab
+ *
+ *  RETURNS
+ *    Data
+ *
+ *  DEPENDENCIES
+ *    $$_window_data variable and scripts
+ *
+ *  CHANGELOG
+ *    2023-04-25: Paul McCudden: Created
+*/
+
+Let (
+    [
+        ~windowID = If ( IsEmpty ( windowID ); GetValue ( Get ( WindowName ); 2 ) )
+    ];
+
+    JSONGetElement ( $$_window_data; ~windowID & ".attributes." & attribute )
+
+)

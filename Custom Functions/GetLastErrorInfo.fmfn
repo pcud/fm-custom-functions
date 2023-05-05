@@ -1,0 +1,34 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetLastErrorInfo
+ *
+ *  DESCRIPTION
+ *    Get all info of the last error and package it up in a JSON
+ *
+ *  PARAMS
+ *    --None--
+ *
+ *  RETURNS
+ *    JSONObject
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2023-04-23: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+	[
+		~location = Get ( LastErrorLocation )
+	];
+
+	JSONSetElement ( "{}"
+		;["number"; Get ( LastError ); JSONNumber]
+		;["detail"; Get ( LastErrorDetail ); JSONString]
+		;["script"; GetValue ( ~location; 1 ); JSONString]
+		;["step"; GetValue ( ~location; 2 ); JSONString]
+		;["line"; GetValue ( ~location; 3 ); JSONNumber]
+	)
+
+)
