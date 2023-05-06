@@ -8,7 +8,7 @@ While (
         ~fyqFieldList = List (
             GetFieldName ( INVOICE__PO::FYQ );
             GetFieldName ( "" );
-        )
+        );
         ~totalFieldList = List (
             GetFieldName ( INVOICE__PO::TOTAL_USD );
             GetFieldName ( "" )
@@ -22,6 +22,7 @@ While (
         ~i = ~i + 1;
         ~thisKey = GetValue ( ~keyList; ~i );
         ~thisFYQField = GetValue ( ~fyqFieldList; ~i );
+        ~thisFY = "";
         ~thisTotalField = GetValue ( ~totalFieldList; ~i );
         ~json = If ( IsEmpty ( ~thisKey ) or IsEmpty ( ~thisFYQField ) or IsEmpty ( ~thisTotalField ); ~json; While (
             [
@@ -32,13 +33,15 @@ While (
 
             [
                 ~j = ~j + 1;
-                ~thisQuarter = GetNthRecord ( ~thisFYQField; ~i );
-                ~total = GetNthRecord ( ~thisTotalField; ~i );
+                ~thisQuarter = GetNthRecord ( GetField ( ~thisFYQField ); ~i );
+                ~total = GetNthRecord ( GetField ( ~thisTotalField ); ~i );
                 ~currentTotal = JSONGetElement ( ~json; ~thisQuarter & "." & ~thisKey);
                 ~json = JSONSetElement ( ~json
                     ;[~thisQuarter & "." & ~thisKey; ~currentTotal + ~total; JSONNumber]
                 )
             ];
+
+            ~json
 
         ) )
        
