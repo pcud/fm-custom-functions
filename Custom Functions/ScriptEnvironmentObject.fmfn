@@ -16,6 +16,7 @@
  *
  *  CHANGELOG
  *    2022-12-05: Paul McCudden: Created
+ *    2023-05-09: Paul McCudden: Added error data
  *
 */
 
@@ -30,6 +31,7 @@ Let (
         ;["return"; $return; JSONRaw]
         ;["file"; Get ( FileName ); JSONString]
         ;["script"; Get ( ScriptName ); JSONString]
+        ;["errorData"; $errorData; JSONArray]
     )
 
 )

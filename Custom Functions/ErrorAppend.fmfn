@@ -41,6 +41,9 @@ While (
           errorCode = 11 ; "Unexpected Value" ;
           errorCode = 12 ; "Value not found" ;
 
+          // Other Errors
+          errorCode = 404; "No Found" ;
+
           // If not listed above
           "Unknown error code"
         )

@@ -1,0 +1,34 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ExitScriptObject ( additionalJSON )
+ *
+ *  DESCRIPTION
+ *    Has the default JSONObject that should be the contain the data sent back on the exit script step
+ *
+ *  PARAMS
+ *    additonalJSON: More json that you wish to include in the object
+ *
+ *  RETURNS
+ *    Object
+ *
+ *  DEPENDENCIES
+ *    None
+ *
+ *  CHANGELOG
+ *    2022-12-05: Paul McCudden: Created
+ *
+*/
+
+Let (
+    [
+        ~json = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON )
+    ];
+
+    JSONSetElement ( additionalJSON
+        ;["return"; $return; JSONRaw]
+        ;["file"; Get ( FileName ); JSONString]
+        ;["script"; Get ( ScriptName ); JSONString]
+        ;["errorData"; ErrorGetMinimalInfo; JSONArray]
+    )
+
+)

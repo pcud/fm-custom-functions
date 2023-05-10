@@ -1,0 +1,42 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorGetMinimalInfo
+ *
+ *  DESCRIPTION
+ *    Gets an array of the current error information but doesn't include the system state information
+ *
+ *  PARAMS
+ *    --None--
+ *
+ *  RETURNS
+ *    Object
+ *
+ *  DEPENDENCIES
+ *    None
+ *
+ *  CHANGELOG
+ *    2023-05-09: Paul McCudden: Created
+ *
+*/
+
+If ( IsEmpty ( $errorData ); "[]"; While (
+    [
+        ~newErrorData = "[]";
+        ~oldErrorData = If ( Left ( JSONFormatElements ( $errorData ); 1 ) = "?"; "{}"; $errorData );
+        ~count = ValueCount ( JSONListKeys ( ~oldErrorData; "" ) );
+        ~i = 0
+    ];
+
+    ~i < ~count;
+
+    [
+        ~i = ~i + 1;
+        ~thisError = JSONGetElement ( ~oldErrorData; "[" & ~i - 1 & "]" );
+        ~newErrorData = JSONSetElement ( ~newErrorData
+            ;["[" & ~i - 1 & "]"; JSONDeleteElement ( ~thisError; "systemState" ); JSONObject]
+        )
+    ];
+
+    ~newErrorData
+
+) )
