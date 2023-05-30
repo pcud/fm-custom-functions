@@ -1,0 +1,66 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FoundSetToArray ( fieldNameList )
+ *
+ *  DESCRIPTION
+ *    Returns an array of objects who's key is the fully qualified field name and value is the field value
+ *
+ *  PARAMS
+ *    fieldNameList: A list of field names to save to the array. If no passed, will grab all fields on the current layout that are a part of the layout table
+ *
+ *  RETURNS
+ *    Array
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2023-05-25: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+    [
+        // Settings
+        ~useBaseTable = True; // Set to True to use the base table for all field names or false
+
+        ~foundCount = Get ( FoundCount );
+        ~i = 0;
+        ~array = "[]"
+
+    ];
+
+    ~i < ~foundCount;
+
+    [
+        ~i = ~i + 1;
+        ~thisObject = While (
+            [
+                ~j = 0;
+                ~count = ValueCount ( fieldNameList );
+                ~object = "{}"
+            ];
+
+            ~j < ~count;
+
+            [
+                ~j = ~j + 1;
+                ~thisField = GetValue ( fieldNameList; ~j );
+                ~thisFieldName = Case (
+                    not EvaluationError ( GetFieldName ( ~thisField ) ) ;
+                        GetFieldName ( ~thisField ) ;
+                    not EvaluationError ( GetField ( ~thisField ) ) or EvaluationError ( Evaluate ( ~thisField ) ) = 103 ;
+                        ~thisField
+                );
+                ~thisValue = GetNthRecord ( GetField ( ~thisFieldName ) ; ~j );
+                ~object = JSONSetElement ( ~object; ~thisFieldName; ~thisValue; JSONRaw )
+            ];
+
+            ~object
+            
+        );
+        ~array = JSONSetElement ( ~array; "[" & ~i - 1 & "]"; ~thisObject; JSONObject )
+    ];
+
+    ~array
+
+)

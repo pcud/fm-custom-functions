@@ -1,0 +1,37 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FoundSetFieldToList ( fieldName )
+ *
+ *  DESCRIPTION
+ *    Returns a list of values in the current found set for the passed field
+ *
+ *  PARAMS
+ *    fieldName: A single field name to populate the list with
+ *
+ *  RETURNS
+ *    List
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2023-05-25: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+While (
+    [
+        ~foundCount = Get ( FoundCount );
+        ~i = 0;
+        ~list = ""
+    ];
+
+    ~i < ~foundCount;
+
+    [
+        ~i = ~i + 1;
+        ~list = If ( ~i > 1; "¶" ) & GetNthRecord ( GetField ( fieldName ); ~i )
+    ];
+
+    ~list
+
+)
