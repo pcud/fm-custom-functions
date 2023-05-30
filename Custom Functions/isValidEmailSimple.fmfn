@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    isValidEmail ( email )
+ *    isValidEmail ( email; allowEmpty )
  *
  *  DESCRIPTION
  *    Use when you want to know if a value is a valid email or not
@@ -19,7 +19,7 @@
 */
 
 // Allow null values
-IsEmpty ( email ) or
+If ( allowEmpty; IsEmpty ( email ) ) or
 
 Let (
     [
