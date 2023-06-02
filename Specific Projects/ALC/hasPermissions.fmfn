@@ -1,0 +1,49 @@
+/*
+ *  CUSTOM FUNCTION
+ *    hasPermissions
+ *
+ *  DESCRIPTION
+ *    Used in conjugation with hasAccessTo
+ *    Should explicitly grant access and not negating who does not have access
+ *    If additional roles get added they would automatically be granted that access
+ *
+ *  PARAMS
+ *    --None--
+ *
+ *  RETURNS
+ *    JSON
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2022-??-??: Max_P: Created
+ *    2023-06-02: Paul McCudden: Added comments and added view as permissions
+*/
+
+Let (
+	[
+		¢isAdmin = isAdmin;  // Also includes Developers
+		¢isUser = isUser;
+		¢isAppleUser = isAppleUser;
+		¢all =¢isUser or ¢isAdmin or ¢isAppleUser;
+		¢isSuperAdminViewingAs = FOCUS::USER_ACCOUNT = "z_barazani@apple.com" or IsDeveloperViewingAs; // Currently only Zalima and devs
+		¢isSuperAdminLoggedIn = Get ( AccountName ) = "z_barazani@apple.com" or IsDeveloperLoggedIn // Currently only Zalima and devs
+
+	];
+
+	JSONSetElement( "{}"
+		; ["MENU.LEARNING_PROGRESSION"; ¢all ; JSONBoolean]
+        ; ["EDIT.LEARNING_PROGRESSION"; ¢isAdmin or ¢isAppleUser ; JSONBoolean]
+		; ["MENU.COHORTS"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
+		; ["ADD.COHORTS"; ¢isAdmin ; JSONBoolean]
+		; ["MENU.EVENTS"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
+		; ["MENU.LOGS";  ¢isAdmin; JSONBoolean]
+		; ["MENU.ADMIN"; ¢isAdmin ; JSONBoolean]
+
+		; ["EXPORT"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
+		; ["VIEW_AS.LOGGED_IN_AS"; ¢isSuperAdminLoggedIn; JSONBoolean]
+		; ["VIEW_AS.VIEWING_AS"; ¢isSuperAdminViewingAs; JSONBoolean]
+	)
+
+)

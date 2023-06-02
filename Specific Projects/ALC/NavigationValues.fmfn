@@ -14,10 +14,11 @@
  *    Text
  *
  *  DEPENDENCIES
- *    --NONE--
+ *    hasAccessTo: Custom function to dynamically define privileges
  *
  *  CHANGELOG
  *    2022-07-07: Paul McCudden: Created
+ *    2023-06-02: Paul McCudden: Added compatibility with hasAccessTo*() CF
 */
 
 Let (
@@ -40,35 +41,35 @@ Let (
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "people"; JSONString]
                     );
-                    ~value = "hide"; False
+                    ~value = "hide"; not hasAccessTo ( "MENU.LEARNING_PROGRESSION" )
                 );
                 ~order = 2; Case (
                     ~value = "label"; "cohorts";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "cohorts"; JSONString]
                     );
-                    ~value = "hide"; False
+                    ~value = "hide"; not hasAccessTo ( "MENU.COHORTS" )
                 );
                 ~order = 3; Case (
                     ~value = "label"; "events";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "events"; JSONString]
                     );
-                    ~value = "hide"; False
+                    ~value = "hide"; not hasAccessTo ( "MENU.EVENTS" )
                 );
                 ~order = 4; Case (
                     ~value = "label"; "admin";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "admin"; JSONString]
                     );
-                    ~value = "hide"; False
+                    ~value = "hide"; not hasAccessTo ( "MENU.ADMIN" )
                 );
                 ~order = 5; Case (
                     ~value = "label"; "logs";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "logs"; JSONString]
                     );
-                    ~value = "hide"; False
+                    ~value = "hide"; not hasAccessTo ( "MENU.LOGS" )
                 );
                 ~order = 6; Case (
                     ~value = "label"; "";
@@ -84,7 +85,7 @@ Let (
                     );
                     ~value = "hide"; True
                 );
-                ~order = 7; Case (
+                ~order = 8; Case (
                     ~value = "label"; "";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; ""; JSONString]
