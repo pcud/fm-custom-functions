@@ -16,6 +16,7 @@
  *
  *  CHANGELOG
  *    2021-11-09: Paul McCudden (paul@peak14.solutions): Created
+ *    2023-06-07: Paul McCudden: Fixed an issue where "ext:" would show up even when there was no ext
 */
 
 Let (
@@ -28,6 +29,6 @@ Let (
     "(" & Middle ( ~numbers; Length ( ~countryCode ) + 1; 3 ) & ") " &
     Middle ( ~numbers ; Length ( ~countryCode ) + 4 ; 3 ) & "-" &
     Middle ( ~numbers ; Length ( ~countryCode ) + 7 ; 4 ) &
-    If ( Length ( ~numbers ) + Length ( ~countryCode ) > 11 ; " ext: " & Right ( ~numbers ; Length ( ~numbers ) - 10 - Length ( ~countryCode ) ) )
+    If ( Length ( ~numbers ) + Length ( ~countryCode ) > 12 ; " ext: " & Right ( ~numbers ; Length ( ~numbers ) - 10 - Length ( ~countryCode ) ) )
 
 )

@@ -1,0 +1,28 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FormatPossibleJSON ( possibleJSON )
+ *
+ *  DESCRIPTION
+ *    Formats the JSON if it's JSON, other returns it unformatted
+ *
+ *  PARAMS
+ *    possibleJSON: Anything that may or may not be JSON
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2023-06-07: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+    [
+        ~formatted = JSONFormatElements ( possibleJSON )
+    ];
+
+    If ( Left ( ~formatted; 1 ) = "?"; possibleJSON; ~formatted )
+
+)
