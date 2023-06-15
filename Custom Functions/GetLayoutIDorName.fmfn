@@ -20,20 +20,21 @@
 
 Let ( 
    [ 
+      ~layout = If ( IsEmpty ( layout ); Get ( LayoutName ); layout );
+
       //Lists of all layouts
-      ~currentLayout = Get ( LayoutName ) ;
       ~ids = LayoutIDs ( Get ( FileName ) ) ; 
       ~names = LayoutNames ( Get ( FileName ) ) ;
       
       //New Variable 
       ~newLayout =
-         If ( Length ( GetAsNumber ( ~currentLayout ) ) = Length ( ~currentLayout ) ;
+         If ( Length ( GetAsNumber ( ~layout ) ) = Length ( ~layout ) ;
             
             //Entered Value is a Number
             MiddleValues ( ~names ;
                PatternCount (
                   Middle ( ~ids ; 1 ; 
-                     Position ( ~ids ; ~currentLayout ; 1 ; 1 )
+                     Position ( ~ids ; ~layout ; 1 ; 1 )
                   ) ;
                "¶") + 1 ;
             1) ;
@@ -42,14 +43,14 @@ Let (
             MiddleValues ( ~ids ;
                PatternCount (
                   Middle ( ~names ; 1 ; 
-                     Position ( ~names ; ~currentLayout ; 1 ; 1 )
+                     Position ( ~names ; ~layout ; 1 ; 1 )
                   ) ;
                "¶") + 1 ;
             1) 
          )
    ];
 
-   If ( FilterValues ( ~ids ; ~currentLayout ) ≠ "" or FilterValues ( ~names ; ~currentLayout ) ≠ "" ;
+   If ( FilterValues ( ~ids ; ~layout ) <> "" or FilterValues ( ~names ; ~layout ) <> "" ;
       Substitute ( ~newLayout ; ¶ ; "" ) ;
       ""
    )
