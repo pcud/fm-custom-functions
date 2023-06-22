@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONIsValid ( json )
+ *
+ *  DESCRIPTION
+ *    Returns true is a JSON is valid
+ *
+ *  PARAMS
+ *    json: The JSON
+ *
+ *  RETURNS
+ *    Boolean
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-06-15: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Left ( JSONFormatElements ( json ); 1 ) <> "?"

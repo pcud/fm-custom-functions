@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ui.GetPlanDetails ( path )
+ *
+ *  DESCRIPTION
+ *    Gets data that has been set for the current plan
+ *
+ *  PARAMS
+ *    path: The path to get for this plan excluding the plan ID
+ *
+ *  RETURNS
+ *    String
+ *
+ *  DEPENDENCIES
+ *    GetOnlyFieldName: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/GetFieldNameOnly.fmfn
+ *
+ *  CHANGELOG
+ *    2023-06-21: Paul McCudden: Created
+*/
+
+JSONGetElement ( $$_plan_details; GetField ( Get ( LayoutTableName ) & "::" & GetOnlyFieldName ( FORECAST_ROLLUP::ID ) ) & "." & path )
