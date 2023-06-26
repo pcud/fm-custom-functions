@@ -1,0 +1,28 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetAccountID ( Account )
+ *
+ *  DESCRIPTION
+ *    Returns the ID of a specific account. Useful since this is a non-case senestive query for the account ID 
+ *
+ *  PARAMS
+ *    AccountName: The account name to return the ID of. Leave blank for current account
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-06-26: Paul McCudden: Created
+*/
+
+EasySQL (
+   USER::ID;
+   USER::ACCOUNT;
+   GetValue ( FilterValues (
+      EasySql ( USER::ACCOUNT; ""; "" );
+      If ( IsEmpty ( Account ); Get ( AccountName ); Account )
+   ); 1 )
+)
