@@ -19,6 +19,7 @@
  *  CHANGELOG
  *    2022-07-07: Paul McCudden: Created
  *    2023-06-02: Paul McCudden: Added compatibility with hasAccessTo*() CF
+ *    2023-06-30: Paul McCudden: Removed event import from navigation
 */
 
 Let (
@@ -124,25 +125,25 @@ Let (
                     ~value = "hide"; False
                 );
                 ~order = 5; Case (
-                    ~value = "label"; "event import";
-                    ~value = "script"; JSONSetElement ( ~json
-                        ; ["NAV_KEY"; "imports"; JSONString]
-                    );
-                    ~value = "hide"; False
-                );
-                ~order = 6; Case (
                     ~value = "label"; "event types";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "event types"; JSONString]
                     );
                     ~value = "hide"; False
                 );
-                ~order = 7; Case (
+                ~order = 6; Case (
                     ~value = "label"; "email¶templates";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "emails"; JSONString]
                     );
                     ~value = "hide"; False
+                );
+                ~order = 7; Case (
+                    ~value = "label"; "";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; ""; JSONString]
+                    );
+                    ~value = "hide"; True
                 );
                 ~order = 8; Case (
                     ~value = "label"; "";

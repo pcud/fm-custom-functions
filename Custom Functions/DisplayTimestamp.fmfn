@@ -1,0 +1,39 @@
+/*
+ *  CUSTOM FUNCTION
+ *    DisplayTimestamp ( theTimestamp; isUTC )
+ *
+ *  DESCRIPTION
+ *    Formats a timestamp to display in a user friendly way. Follows the macOS convention used in the Finder for "Date Modified"
+ *
+ *  PARAMS
+ *    theTimestamp: The timestamp to format
+ *    isUTC: True if the timestamp is in UTC time and should be converted to the local time zone
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    ConvertUTCtoLocalTimestamp: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/ConvertUTCtoLocalTime.fmfn
+ *
+ *  CHANGELOG
+ *    2023-07-06: Paul McCudden (paul@peak14.solutions): Created
+ *
+*/
+
+Let (
+	[
+		~timestamp = If ( isUTC; ConvertUTCtoLocalTimestamp ( theTimestamp); theTimestamp );
+		~dayName = DayName ( ~timestamp );
+		~dateFormatted = MonthName ( ~timestamp ) & " " & Day ( ~timestamp ) & ", " & Year ( ~timestamp );
+		~timeFormatted = If ( Hour ( ~timestamp ) > 12 ; Hour ( ~timestamp ) - 12 ; Hour ( ~timestamp ) ) & ":" & Right ( "00" & Minute ( ~timestamp ); 2 ) & " " & Choose ( Int ( Hour ( ~timestamp ) / 12 ); "AM"; "PM" );
+		~days = Int ( Get ( CurrentTimestamp ) / 86400 ) - Int ( ~timestamp / 86400 )
+	];
+
+	Case (
+		IsEmpty ( ~timestamp ); "";
+		~days = 0; "Today at " & ~timeFormatted;
+		~days = 1; "Yesterday at " & ~timeFormatted;
+		~days > 1 and ~days < 8 ; ~dayName & " at " & ~timeFormatted;
+		~dateFormatted & " at " & ~timeFormatted
+	)
+)
