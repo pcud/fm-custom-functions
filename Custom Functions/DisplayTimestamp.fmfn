@@ -14,6 +14,7 @@
  *
  *  DEPENDENCIES
  *    ConvertUTCtoLocalTimestamp: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/ConvertUTCtoLocalTime.fmfn
+ *    GetCurrentUTCTimestamp: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/GetCurrentUTCTimestamp.fmfn
  *
  *  CHANGELOG
  *    2023-07-06: Paul McCudden (paul@peak14.solutions): Created
@@ -22,18 +23,24 @@
 
 Let (
 	[
+		~now = Case (
+			isUTC; GetCurrentUTCTimestamp;
+			LeftWords ( Get ( HostApplicationVersion ); 1 ) = "Server"; Get ( CurrentHostTimestamp ) ); // Get host timestamp if hosted
+			Get ( CurrentTimestamp )
+		);
 		~timestamp = If ( isUTC; ConvertUTCtoLocalTimestamp ( theTimestamp); theTimestamp );
+		~days = Int ( ~now / 86400 ) - Int ( ~timestamp / 86400 );
 		~dayName = DayName ( ~timestamp );
-		~dateFormatted = MonthName ( ~timestamp ) & " " & Day ( ~timestamp ) & ", " & Year ( ~timestamp );
-		~timeFormatted = If ( Hour ( ~timestamp ) > 12 ; Hour ( ~timestamp ) - 12 ; Hour ( ~timestamp ) ) & ":" & Right ( "00" & Minute ( ~timestamp ); 2 ) & " " & Choose ( Int ( Hour ( ~timestamp ) / 12 ); "AM"; "PM" );
-		~days = Int ( Get ( CurrentTimestamp ) / 86400 ) - Int ( ~timestamp / 86400 )
+		~dateFormatted = MonthName ( ~timestamp ) & " " & Day ( ~timestamp ) & If ( Year ( ~timestamp ) <> Year ( ~now ); ", " & Year ( ~timestamp ) );
+		~timeFormatted = If ( Hour ( ~timestamp ) > 12 ; Hour ( ~timestamp ) - 12 ; Hour ( ~timestamp ) ) & ":" & Right ( "00" & Minute ( ~timestamp ); 2 ) & " " & Choose ( Int ( Hour ( ~timestamp ) / 12 ); "AM"; "PM" )
+		
 	];
 
 	Case (
 		IsEmpty ( ~timestamp ); "";
 		~days = 0; "Today at " & ~timeFormatted;
 		~days = 1; "Yesterday at " & ~timeFormatted;
-		~days > 1 and ~days < 8 ; ~dayName & " at " & ~timeFormatted;
+		~days > 1 and ~days < 7 ; ~dayName & " at " & ~timeFormatted;
 		~dateFormatted & " at " & ~timeFormatted
 	)
 )
