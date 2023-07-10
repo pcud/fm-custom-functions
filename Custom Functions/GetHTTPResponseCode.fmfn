@@ -23,25 +23,30 @@
 
 While (
     [
+        responseHeaders = ERROR_LOG::DESCRIPTION;
         ~stop = False;
         ~lineCount = ValueCount ( responseHeaders );
         ~i = 0;
-        ~responseCodeStart = "HTTP/1.1"
+        ~responseCodeStart = "HTTP/"
 
     ];
 
     not ~stop;
 
     [
-        // Count from the bottom line up since we only want the last code
+        // Countfrom the bottom line up since we only want the last code
         ~thisLine = GetValue ( responseHeaders; ~lineCount - ~i );
         ~i = ~i + 1;
         ~isResponseCode = Left ( ~thisLine; Length ( ~responseCodeStart ) ) = ~responseCodeStart;
-        ~responseCode = If ( ~isResponseCode; Middle ( ~thisLine ; Length ( ~responseCodeStart ) + 2 ; 3 ) );
-        ~responseDescription = If ( ~isResponseCode; Right ( ~thisLine ; Length ( ~thisLine ) - ( Length ( ~responseCodeStart ) + 5 ) ) );
+
+		// Can't use MiddleWords() because "/" is considered a seperator
+		~responseList = Substitute ( ~thisLine ; " " ; ¶ );
+        ~responseCode = If ( ~isResponseCode; GetValue ( ~responseList; 2 ) );
+        ~responseDescription = If ( ~isResponseCode; GetValue ( ~responseList; 3 ) );
         ~stop = ~isResponseCode
 
     ];
 
-    ~responseCode
+	List ( ~responseCode; ~responseDescription )
+    
 )

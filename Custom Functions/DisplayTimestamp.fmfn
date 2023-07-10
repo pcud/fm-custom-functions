@@ -38,7 +38,7 @@ Let (
 
 	Case (
 		IsEmpty ( ~timestamp ); "";
-		~days < -1 and ~days < -8; ~dayName & " at " & ~timeFormatted;
+		~days < -1 and ~days > -8; ~dayName & " at " & ~timeFormatted;
 		~days = -1; "Tomorrow at " & ~timeFormatted;
 		~days = 0; "Today at " & ~timeFormatted;
 		~days = 1; "Yesterday at " & ~timeFormatted;
