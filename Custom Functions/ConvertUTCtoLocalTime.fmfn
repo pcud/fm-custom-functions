@@ -12,7 +12,7 @@
  *    Timestamp
  *
  *  DEPENDENCIES
- *    --NONE--
+ *    GetCurrentUTCTimestamp: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/GetCurrentUTCTimestamp.fmfn
  *
  *  CHANGELOG
  *    2022-10-21: Paul McCudden: Created
