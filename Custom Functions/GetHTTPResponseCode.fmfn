@@ -3,13 +3,13 @@
  *    GetHTTPResponseCode ( responseHeaders )
  *
  *  DESCRIPTION
- *    Gets the last HHTP Response Code from the passed response headers
+ *    Gets the last HHTP Response Code and description from the passed response headers
  *
  *  PARAMS
  *    responseHeaders: the response header(s) returned by an API call
  *
  *  RETURNS
- *    Number
+ *    List ( code; response )
  *
  *  DEPENDENCIES
  *    --NONE--
@@ -39,7 +39,7 @@ While (
         ~i = ~i + 1;
         ~isResponseCode = Left ( ~thisLine; Length ( ~responseCodeStart ) ) = ~responseCodeStart;
 
-		// Can't use MiddleWords() because "/" is considered a seperator
+		// Safer to use Substitute over MiddleWords() because "/" is considered a seperator (do all responses have "/" in it?)
 		~responseList = Substitute ( ~thisLine ; " " ; ¶ );
         ~responseCode = If ( ~isResponseCode; GetValue ( ~responseList; 2 ) );
         ~responseDescription = If ( ~isResponseCode; GetValue ( ~responseList; 3 ) );
@@ -48,5 +48,5 @@ While (
     ];
 
 	List ( ~responseCode; ~responseDescription )
-    
+
 )

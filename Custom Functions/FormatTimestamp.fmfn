@@ -159,7 +159,7 @@ While (
             Exact ( ~processing; "HH"  ); Hour ( ~time );
             Exact ( ~processing; "hh" ); Hour ( ~time ) - If ( Hour ( ~time ) > 12; 12 );
 
-            // Minuets
+            // Minutes
             ~processing = "ii"; Right ( "0" & Minute ( ~time ); 2 );
 
             // Seconds
