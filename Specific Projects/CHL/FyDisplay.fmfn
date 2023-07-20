@@ -1,0 +1,22 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FyDisplay ( fy )
+ *
+ *  DESCRIPTION
+ *    Takes the 4 or 2 digit financial year and converts it to be displayed
+ *
+ *  PARAMS
+ *    fy: The financial year
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2023-07-20: Paul McCudden: Created
+*/
+
+
+"FY" & Right ( "0" & fy; 2 )
