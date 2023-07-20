@@ -16,7 +16,8 @@
  *
  *  CHANGELOG
  *    2022-10-21: Paul McCudden: Created
+ *    2023-07-10: Paul McCudden: Changed to be blank if no timestamp passed (in cased it's intentional).
  *
 */
 
-GetAsTimestamp ( If ( IsEmpty ( theTimestamp ); GetCurrentUTCTimestamp; theTimestamp ) + GetCurrentTimeZoneUTCOffset () )
+If ( not IsEmpty ( theTimestamp ); GetAsTimestamp ( theTimestamp + GetCurrentTimeZoneUTCOffset () ) )
