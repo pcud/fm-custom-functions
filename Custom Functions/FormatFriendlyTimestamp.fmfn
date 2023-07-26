@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    DisplayTimestamp ( theTimestamp; isUTC )
+ *    FormatFriendlyTimestamp ( theTimestamp; isUTC )
  *
  *  DESCRIPTION
  *    Formats a timestamp to display in a user friendly way. Follows the macOS convention used in the Finder for "Date Modified"
@@ -25,10 +25,14 @@ Let (
 	[
 		~now = Case (
 			isUTC; GetCurrentUTCTimestamp;
-			LeftWords ( Get ( HostApplicationVersion ); 1 ) = "Server"; Get ( CurrentHostTimestamp ) ); // Get host timestamp if hosted
+			LeftWords ( Get ( HostApplicationVersion ); 1 ) = "Server"; Get ( CurrentHostTimestamp ); // Get host timestamp if hosted
 			Get ( CurrentTimestamp )
 		);
-		~timestamp = If ( isUTC; ConvertUTCtoLocalTimestamp ( theTimestamp); theTimestamp );
+		~timestamp = Case (
+			IsEmpty ( theTimestamp ); "";
+			isUTC; ConvertUTCtoLocalTimestamp ( theTimestamp );
+			theTimestamp
+		);
 		~days = Int ( ~now / 86400 ) - Int ( ~timestamp / 86400 );
 		~dayName = DayName ( ~timestamp );
 		~dateFormatted = MonthName ( ~timestamp ) & " " & Day ( ~timestamp ) & If ( Year ( ~timestamp ) <> Year ( ~now ); ", " & Year ( ~timestamp ) );
