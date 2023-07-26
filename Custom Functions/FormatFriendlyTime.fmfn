@@ -1,0 +1,35 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FormatFriendlyTime ( theTime )
+ *
+ *  DESCRIPTION
+ *    Formats time to display in a user friendly way.
+ *
+ *  PARAMS
+ *    theTimestamp: The timestamp to format
+ *    isUTC: True if the timestamp is in UTC time and should be converted to the local time zone
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    —None—
+ *
+ *  CHANGELOG
+ *    2023-07-26: Paul McCudden (paul@peak14.solutions): Created
+ *
+*/
+
+Let (
+	[
+		~hours = Hour ( theTime );
+        ~min = Minute ( theTime );
+        ~sec = Round ( Seconds ( theTime ); 0 )
+	];
+
+	Trim (
+		If ( ~hours > 0; ~hours & "h " ) &
+		If ( ~min > 0; Right ( "0" & ~min; 2 ) & "m " ) &
+        If ( ~sec > 0; Right ( "0" & ~sec; 2 ) & "s " )
+	)
+)
