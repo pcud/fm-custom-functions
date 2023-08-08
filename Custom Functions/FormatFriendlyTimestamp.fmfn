@@ -42,11 +42,11 @@ Let (
 
 	Case (
 		IsEmpty ( ~timestamp ); "";
-		~days < -1 and ~days > -8; ~dayName & " at " & ~timeFormatted;
+		~days < -1 and ~days > -8; "this upcomming " & ~dayName & " at " & ~timeFormatted;
 		~days = -1; "Tomorrow at " & ~timeFormatted;
 		~days = 0; "Today at " & ~timeFormatted;
 		~days = 1; "Yesterday at " & ~timeFormatted;
-		~days > 1 and ~days < 7 ; ~dayName & " at " & ~timeFormatted;
+		~days > 1 and ~days < 7 ; "this past " & ~dayName & " at " & ~timeFormatted;
 		~dateFormatted & " at " & ~timeFormatted
 	)
 )

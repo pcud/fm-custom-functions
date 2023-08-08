@@ -1,0 +1,41 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FormatFriendlyDate ( theDate )
+ *
+ *  DESCRIPTION
+ *    Formats a date to display in a user friendly way.
+ *
+ *  PARAMS
+ *    theDate: The timestamp to format
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2023-08-08: Paul McCudden (paul@peak14.solutions): Created
+ *
+*/
+
+Let (
+	[
+		~now = Get ( currentDate );
+		~date = theDate;
+		~days = Int ( ~now ) - Int ( ~date );
+		~dayName = DayName ( ~date );
+		~dateFormatted = MonthName ( ~date ) & " " & Day ( ~date ) & If ( Year ( ~date ) <> Year ( ~now ); ", " & Year ( ~date ) )
+		
+	];
+
+	Case (
+		IsEmpty ( ~date ); "";
+		~days < -1 and ~days > -8; "this upcomming " & ~dayName;
+		~days = -1; "Tomorrow";
+		~days = 0; "Today";
+		~days = 1; "Yesterday";
+		~days > 1 and ~days < 7 ; "this past " & ~dayName;
+		~dateFormatted
+	)
+)

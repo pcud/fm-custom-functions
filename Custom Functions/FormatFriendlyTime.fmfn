@@ -6,8 +6,7 @@
  *    Formats time to display in a user friendly way.
  *
  *  PARAMS
- *    theTimestamp: The timestamp to format
- *    isUTC: True if the timestamp is in UTC time and should be converted to the local time zone
+ *    theTime: The time to format
  *
  *  RETURNS
  *    Text
