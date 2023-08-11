@@ -9,7 +9,10 @@
  *    responseHeaders: the response header(s) returned by an API call
  *
  *  RETURNS
- *    List ( code; response )
+ *    {
+ *        "code": number,
+ *        "description": string
+ *    }
  *
  *  DEPENDENCIES
  *    --NONE--
@@ -23,7 +26,6 @@
 
 While (
     [
-        responseHeaders = ERROR_LOG::DESCRIPTION;
         ~stop = False;
         ~lineCount = ValueCount ( responseHeaders );
         ~i = 0;
@@ -47,6 +49,9 @@ While (
 
     ];
 
-	List ( ~responseCode; ~responseDescription )
+	JSONSetElement ( "{}"
+        ;["code"; ~responseCode; JSONNumber]
+        ;["description"; ~responseDescription; JSONString]
+    )
 
 )

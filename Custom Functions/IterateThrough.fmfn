@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    iterateThrough ( listOrArrayOrObject; thisVariableName; iterationVariableName )
+ *    IterateThrough ( listOrArrayOrObject; thisVariableName; iterationVariableName )
  *
  *  DESCRIPTION
  *    To be used in the "Exit Loop If" Script step and will return true or false
@@ -19,12 +19,13 @@
  *  CHANGELOG
  *    2022-03-28: Paul McCudden: Created
  *    2022-07-07: Paul McCudden: Updated to work with arrays and objects
+ *    2023-08-11: Paul McCudden: $ not needed in variable name declaration
 */
 
 Let (
     [
         thisVariableName = If ( IsEmpty ( thisVariableName ); "$thisValue"; If ( Left ( thisVariableName; 1 ) <> "$"; "$" ) & thisVariableName );
-        iterationVariableName = If ( IsEmpty ( iterationVariableName ); "$i"; iterationVariableName );
+        iterationVariableName = If ( IsEmpty ( iterationVariableName ); "$i"; If ( Left ( iterationVariableName; 1 ) <> "$"; "$" ) & iterationVariableName );
         
         ~listType = Case (
             Left ( JSONFormatElements ( listOrArrayOrObject ); 1 ) = "?"; "list";
