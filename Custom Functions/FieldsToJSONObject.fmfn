@@ -1,0 +1,49 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FieldsToJSONObject ( fieldNameList )
+ *
+ *  DESCRIPTION
+ *    Turns a list of field names into a JSON object where the key is the field name only and the value is that field's value
+ *
+ *  PARAMS
+ *    fieldNameList: A list of fully qualified field names (including TO). If no TO name is included, will assume the current layout's TO
+ *
+ *  RETURNS
+ *    JSONObject
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-08-16: Paul McCudden: Created
+*/
+
+While (
+
+  // initialVariable
+  [
+    ~fieldList = fieldNameList;
+    ~layoutTO = Get ( LayoutTableName );
+    ~i = 0;
+    ~json = "{}"
+  ];
+
+  // condition
+  ~i < ValueCount ( ~fieldList );
+
+  // logic
+  [
+    ~i = ~i + 1;
+    ~thisFieldName = GetValue ( ~fieldList ; ~i );
+    ~thisFQFN = If ( PatternCount ( ~thisFieldName; "::" ) = 0; ~layoutTO & "::" ) & ~thisFieldName;
+    ~onlyThisFieldName = If ( PatternCount ( ~thisFieldName; "::" ) > 0;
+        GetValue ( Substitute ( ~thisFieldName; "::"; ¶ ); 2 );
+        ~thisFieldName
+    );
+    ~json = JSONSetElement ( ~json
+        ;[~onlyThisFieldName; GetField ( ~thisFQFN ); JSONRaw]
+    )
+  ];
+
+    ~json
+)
