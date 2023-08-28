@@ -40,12 +40,14 @@ While (
         GetValue ( Substitute ( ~thisFieldName; "::"; ¶ ); 2 );
         ~thisFieldName
     );
+    ~thisValue = GetField ( ~thisFQFN )
     ~jsonType = Case (
       MiddleWords ( FieldType ( "" ; ~thisFQFN ); 2; 1 ) = "Number"; JSONNumber;
+      Left ( JSONFormatElements ( ~thisValue ); 1 ) <> "?"; JSONGetElementType ( ~thisValue ; "" );
       JSONString
     );
     ~json = JSONSetElement ( ~json
-        ;[~onlyThisFieldName; GetField ( ~thisFQFN ); ~jsonType]
+        ;[~onlyThisFieldName; ~thisValue; ~jsonType]
     )
   ];
 
