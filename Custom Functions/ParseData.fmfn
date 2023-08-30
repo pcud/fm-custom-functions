@@ -1,0 +1,93 @@
+// ParseData ( theText; theStartTag; theEndTag; theOccurance)
+
+// UPD angeline 08/25/22 - added the ability to extract string from the beginning until theEndTag using the STARTKEYWORD
+//
+
+// Extract the text between two strings.
+
+//
+
+// Parameters:
+
+// theText = the text to parse
+
+// theStartTag = the string that comes before the text to extract
+
+// theEndTag = the string that comes after the text to extract
+
+// theOccurance = the instance of the text to extract
+
+//
+
+// Return Value:
+
+// the instance of text found in theText between theStartTag and theEndTag based on theOccurance
+
+//
+
+
+
+Let ( [
+
+
+
+theStartPos = If ( theStartTag = "STARTKEYWORD" ; 1 ; Position ( theText ; theStartTag ; 1 ; theOccurance ) ) ;
+theResult = Case ( 
+
+
+
+
+
+// ------------------------------
+
+// If theStartTag was not found, return an empty string.
+
+theStartPos = 0 ; "" ;
+
+// ------------------------------
+
+
+
+
+
+// ------------------------------
+
+// If theStartTag was found, get the string we are looking for.
+
+theStartPos > 0 ; 
+
+Let ( [
+
+theStartPos = If ( theStartTag = "STARTKEYWORD" ; 1 ; theStartPos + Length ( theStartTag ) ) ;
+
+theEndPos = Position ( theText ; theEndTag ; theStartPos ; 1 ) ;
+
+theLengthToKeep = theEndPos - theStartPos;
+
+theResult = Middle ( theText ; theStartPos ; theLengthToKeep ) 
+
+] ; 
+
+theResult
+
+)
+
+// ------------------------------
+
+
+
+
+
+) // End case
+
+
+
+] ; 
+
+
+
+theResult
+
+
+
+)

@@ -1,12 +1,12 @@
 /*
  *  CUSTOM FUNCTION
- *    OnWindowTransaction
+ *    OnWindowTransaction ( idField )
  *
  *  DESCRIPTION
  *    Packages up all the record modification data and schema for this window transaction
  *
  *  PARAMS
- *    --NONE--
+ *    idField: The primary ID field for this table
  *
  *  RETURNS
  *    A giant JSON blob
@@ -16,14 +16,22 @@
  *
  *  CHANGELOG
  *    2023-04-25: Alec Gregory (https://blog.beezwax.net/lets-make-an-audit-log-with-claris-filemaker/): Created
- *    2023-08-30: Paul McCudden: Adjust into CF and updated a few variables
-*/
+ *    2023-08-30: Paul McCudden: Adjust into CF and updated for to add more information
+ */
 
 Let (
 	[
+        // Settings
+
+        // Any field name that matches one of the below won't be logged
+        ~fieldNameIgnore = List (
+            "zz_changeLog";
+            ""
+        );
+
 		// Get base table name and convert it to a unique number
 		// for use as $fieldInfo repetition number
-		~baseTableName = GetBaseTableName ( Self );
+		~baseTableName = GetBaseTableName ( idField );
 		~baseTableId =
 			Let (
 				[
@@ -172,7 +180,7 @@ Let (
 		[
 			~i = 1;
 			~field = "";
-			~table = GetValue ( Substitute ( GetFieldName ( Self ); "::"; ¶ ); 1 );
+			~table = GetValue ( Substitute ( GetFieldName ( idField ); "::"; ¶ ); 1 );
 			~fieldType = "";
 			~dataObjects = ""
 		];
@@ -181,6 +189,7 @@ Let (
 			~field = GetValue ( ~fieldList; ~i );
 			~fieldType = LeftWords ( JSONGetElement ( $fieldInfo[~schemaId]; ~field & ".FieldType" ); 1 );
 			~dataObjects =
+                If ( not IsEmpty ( FilterValues ( ~field; ~fieldNameIgnore ) ); ~dataObjects;
 				List (
 					~dataObjects;
 					Quote ( ~field ) & ":"
@@ -195,7 +204,21 @@ Let (
 						// loss of precision for large numbers.
 						~fieldType = "varchar"
 							or ~fieldType = "decimal";
-								Quote ( Substitute ( GetField ( ~table & "::" & ~field ); ¶; "\r" ) );
+                                
+                                // Store as a JSON if this data is a JSON Object or Array
+                                Let (
+                                    [
+                                        ~fieldData = Substitute ( GetField ( ~table & "::" & ~field ); ¶; "\r" );
+                                        ~jsonType = JSONGetElementType ( ~fieldData ; "" )
+                                    ];
+
+                                    If (
+                                        ~jsonType = JSONArray or ~jsonType = JSONObject;
+                                        ~fieldData;
+                                        Quote ( ~fieldData )
+                                    )
+
+                                );
 
 						// Date, Time, and Timestamp fields are stored as numbers
 						~fieldType = "date"
@@ -221,7 +244,7 @@ Let (
 							);
 						Quote ( Substitute ( GetField ( ~table & "::" & ~field ); ¶; "\r" ) )
 					)
-				);
+                ) );
 			~i = ~i + 1
 		];
 
@@ -239,7 +262,7 @@ Let (
 					"{}";
 					[
 						"recordPrimaryKey";
-						_ID;
+						idField;
 						JSONString
 					];
 					[
@@ -266,14 +289,55 @@ Let (
 				JSONObject
 			];
             [
-                "account";
-                Get ( AccountName );
-                JSONString
-            ];
-            [
-                "script";
-                Get ( ScriptName );
-                JSONString
+                "systemstate";
+                JSONSetElement (
+					"{}";
+                    [
+                        "applicationVersion";
+                        Get ( ApplicationVersion );
+                        JSONString
+                    ];
+					[
+						"account";
+						Get ( AccountName );
+						JSONString
+					];
+					[
+						"device";
+						Get ( Device );
+						JSONNumber
+					];
+					[
+						"layout";
+						Get ( LayoutName );
+						JSONString
+					];
+                    [
+						"persistentID";
+						Get ( PersistentID );
+						JSONString
+					];
+                    [
+						"script";
+						Get ( ScriptName );
+						JSONString
+					];
+                    [
+						"systemPlatform";
+						Get ( SystemPlatform );
+						JSONString
+					];
+                    [
+						"systemVersion";
+						Get ( SystemVersion );
+						JSONString
+					];
+                    [
+						"userName";
+						Get ( UserName );
+						JSONString
+					]
+                ); JSONObject
             ]
 		)
 	)
