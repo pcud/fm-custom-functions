@@ -1,0 +1,280 @@
+/*
+ *  CUSTOM FUNCTION
+ *    OnWindowTransaction
+ *
+ *  DESCRIPTION
+ *    Packages up all the record modification data and schema for this window transaction
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    A giant JSON blob
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2023-04-25: Alec Gregory (https://blog.beezwax.net/lets-make-an-audit-log-with-claris-filemaker/): Created
+ *    2023-08-30: Paul McCudden: Adjust into CF and updated a few variables
+*/
+
+Let (
+	[
+		// Get base table name and convert it to a unique number
+		// for use as $fieldInfo repetition number
+		~baseTableName = GetBaseTableName ( Self );
+		~baseTableId =
+			Let (
+				[
+					~baseTableNames = ¶ & BaseTableNames ( "" ) & ¶;
+					~valueNumber =
+						PatternCount (
+							Left (
+								~baseTableNames;
+								Position (
+									~baseTableNames;
+									¶ & ~baseTableName & ¶;
+									1;
+									1			
+								)
+							);
+							¶
+						)						
+				];
+				GetValue ( BaseTableIDs ( "" ); ~valueNumber )
+			);
+
+		~baseTableModificationCount =
+			ExecuteSQL (
+				"SELECT
+					ModCount
+				FROM
+					FileMaker_BaseTables
+				WHERE
+					BaseTableId = ?";
+				"";
+				"";
+				~baseTableId
+			);
+	
+		~schemaId = GetAsNumber ( ~baseTableId & 1000000 & ~baseTableModificationCount );
+
+		// Get the list of fields we are interested in logging
+		// Criteria: all fields excluding summaries, globals,
+		// and unstored calcs
+		~fieldListAll =
+			JSONListKeys (
+
+				// We store schema information in a local variable cache
+				// This means we only need to generate this information
+				// once per transaction
+				If ( not IsEmpty ( $fieldInfo[~baseTableId] );
+					$fieldInfo[~schemaId];
+					Let (
+						$fieldInfo[~schemaId] =
+							While (
+								[
+									// We get most field info from the FileMaker_BaseTableFields
+									// metadata table.
+									// Here we can exclude summary and global fields  
+									~fieldInfo =
+										"{" & ExecuteSQL (
+											"SELECT
+												'\"' || FieldName || '\":{\"FieldClass\":\"' || FieldClass || '\"',
+												'\"FieldId\":' || FieldId,
+												'\"FieldName\":\"' || FieldName || '\"',
+												'\"FieldType\":\"' || FieldType || '\"',
+												'\"ModCount\":' || ModCount
+											FROM
+												FileMaker_BaseTableFields
+											WHERE
+												BaseTableName = ?
+											AND
+												FieldClass <> ?
+											AND
+												FieldType NOT LIKE ?";
+											"";
+											"},";
+											~baseTableName;
+											"Summary";
+											"global%"
+										)
+										& "}}";
+									// ~fullFieldList = JSONListKeys ( ~fieldInfo; "" );
+									~fieldObjects = JSONListValues ( ~fieldInfo; "" );
+									~fieldList = "";
+									~finalObjects = "";
+									~i = 1;
+									~fieldObject = GetValue ( ~fieldObjects; ~i )
+								];
+									not IsEmpty ( ~fieldObject );
+								[
+									// In order to exclude unstored calculation fields
+									// and add field repetitions we need to check each field's type
+									~fieldName = JSONGetElement ( ~fieldObject; "FieldName" );
+									~fieldType = FieldType ( ""; ~baseTableName & "::" & ~fieldName );
+									~repetitions = GetAsNumber ( RightWords ( ~fieldType; 1 ) );
+									~finalObjects =
+										List (
+											~finalObjects;
+											If ( LeftWords ( ~fieldType; 1 ) ≠ "UnstoredCalc";
+												List (
+												Quote ( ~fieldName ) & ":" & ~fieldObject;
+			 									If ( ~repetitions > 1;
+												While (
+												[
+												~objects = "";
+												~i = 2
+												];
+												~i ≤ ~repetitions;
+												[
+												~objects =
+												List (
+												~objects;
+												Quote ( ~fieldName & "[" & ~i & "]" ) & ":{}"
+												);
+												~i = ~i + 1
+												];
+												~objects
+												)
+												)
+												)
+											)
+										);
+									~i = ~i + 1;
+									~fieldObject = GetValue ( ~fieldObjects; ~i )
+								];
+									"{" & Substitute ( ~finalObjects; ¶; "," ) & "}"
+							);
+						$fieldInfo[~schemaId]
+					)
+				);
+				""
+			);
+
+		// Get the final field list based on the type of change we are logging.
+		// For a new record or a deleted record we log all fields in our field list.
+		// For a modified record we log only modified fields in our field list.
+		~fieldList =
+			If (
+				Get ( RecordOpenState ) = 2;
+				FilterValues (
+					Get ( ModifiedFields );
+					~fieldListAll
+				);
+				~fieldListAll
+			)
+	];
+	
+	// Build the data object to log by looping through the field list
+	While (
+		[
+			~i = 1;
+			~field = "";
+			~table = GetValue ( Substitute ( GetFieldName ( Self ); "::"; ¶ ); 1 );
+			~fieldType = "";
+			~dataObjects = ""
+		];
+			not IsEmpty ( GetValue ( ~fieldList; ~i ) );
+		[
+			~field = GetValue ( ~fieldList; ~i );
+			~fieldType = LeftWords ( JSONGetElement ( $fieldInfo[~schemaId]; ~field & ".FieldType" ); 1 );
+			~dataObjects =
+				List (
+					~dataObjects;
+					Quote ( ~field ) & ":"
+					& Case (
+
+						// Blank fields of any type are null
+						IsEmpty ( GetField ( ~table & "::" & ~field ) );
+							"null";
+
+						// Text fields are stored as text.
+						// Number fields are also stored as text to prevent
+						// loss of precision for large numbers.
+						~fieldType = "varchar"
+							or ~fieldType = "decimal";
+								Quote ( Substitute ( GetField ( ~table & "::" & ~field ); ¶; "\r" ) );
+
+						// Date, Time, and Timestamp fields are stored as numbers
+						~fieldType = "date"
+							or ~fieldType = "time"
+							or ~fieldType = "timestamp";
+								GetAsNumber ( GetField ( ~table & "::" & ~field ) );
+
+						// Container fields are stored as arrays holding container data in
+						// Base64 format and file name
+						~fieldType = "binary";
+							JSONSetElement (
+								"[]";
+								[
+									0;
+									Base64EncodeRFC ( 4648; GetField ( ~table & "::" & ~field ) );
+									JSONString
+								];
+								[
+									1;
+									GetField ( ~table & "::" & ~field );
+									JSONString
+								]
+							);
+						Quote ( Substitute ( GetField ( ~table & "::" & ~field ); ¶; "\r" ) )
+					)
+				);
+			~i = ~i + 1
+		];
+
+		// Our final output is a JSON object including data and metadata
+		JSONSetElement (
+			"{}";
+			[
+				"data";
+				"{" & Substitute ( ~dataObjects; ¶; "," ) & "}";
+				JSONObject
+			];
+			[
+				"metadata";
+				JSONSetElement (
+					"{}";
+					[
+						"recordPrimaryKey";
+						_ID;
+						JSONString
+					];
+					[
+						"recordModificationCount";
+						Get ( RecordModificationCount );
+						JSONNumber
+					];
+					[
+						"schema";
+						$fieldInfo[~schemaId];
+						JSONObject
+					];
+					[
+						"baseTableId";
+						~baseTableId;
+						JSONNumber
+					];
+					[
+						"baseTableModificationCount";
+						~baseTableModificationCount;
+						JSONNumber
+					]
+				);
+				JSONObject
+			];
+            [
+                "account";
+                Get ( AccountName );
+                JSONString
+            ];
+            [
+                "script";
+                Get ( ScriptName );
+                JSONString
+            ]
+		)
+	)
+)
