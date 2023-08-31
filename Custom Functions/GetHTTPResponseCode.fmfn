@@ -22,6 +22,8 @@
  *
  *  CHANGELOG
  *    2021-07-17: Paul McCudden (paul@peak14.solutions): Created
+ *    2023-06-15: Paul McCudden: Updated to output both code and description as JSON
+ *    2023-08-31: Paul McCudden: Update to grab the full response description
 */ 
 
 While (
@@ -44,7 +46,7 @@ While (
 		// Safer to use Substitute over MiddleWords() because "/" is considered a seperator (do all responses have "/" in it?)
 		~responseList = Substitute ( ~thisLine ; " " ; ¶ );
         ~responseCode = If ( ~isResponseCode; GetValue ( ~responseList; 2 ) );
-        ~responseDescription = If ( ~isResponseCode; GetValue ( ~responseList; 3 ) );
+        ~responseDescription = If ( ~isResponseCode; Right ( ~thisLine ; Length ( ~thisLine ) - Position ( ~thisLine ; ~responseCode ; 1 ; 1 ) - Length ( ~responseCode ) ) );
         ~stop = ~isResponseCode
 
     ];
