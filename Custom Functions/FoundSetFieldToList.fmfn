@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    FoundSetFieldToList ( fieldName )
+ *    FoundSetFieldToList ( fieldRefOrFieldName )
  *
  *  DESCRIPTION
  *    Returns a list of values in the current found set for the passed field
@@ -16,10 +16,17 @@
  *
  *  CHANGELOG
  *    2023-05-25: Paul McCudden (paul@peak14.solutions): Created
+ *    2023-08-31: Paul McCudden: Updated to be able to use field references
 */
 
 While (
     [
+        ~fieldName = Case (
+            not EvaluationError ( GetFieldName ( fieldRefOrFieldName ) ) ;
+                GetFieldName ( fieldRefOrFieldName ) ;
+            not EvaluationError ( GetField ( fieldRefOrFieldName ) ) or EvaluationError ( Evaluate ( fieldRefOrFieldName ) ) = 103;
+                fieldRefOrFieldName
+        );
         ~foundCount = Get ( FoundCount );
         ~i = 0;
         ~list = ""
@@ -29,7 +36,7 @@ While (
 
     [
         ~i = ~i + 1;
-        ~list = If ( ~i > 1; "¶" ) & GetNthRecord ( GetField ( fieldName ); ~i )
+        ~list = If ( ~i > 1; "¶" ) & GetNthRecord ( GetField ( ~fieldName ); ~i )
     ];
 
     ~list
