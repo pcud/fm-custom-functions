@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isValidJSON ( json )
+ *
+ *  DESCRIPTION
+ *    Use when you want to know if a value is a valid json or not
+ *
+ *  PARAMS
+ *    json: The value that you want to know if it's a json or not
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-09-05: Paul McCudden: Created
+*/
+
+Left ( JSONFormatElements ( json ); 1 ) <> "?"
