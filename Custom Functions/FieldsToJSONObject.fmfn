@@ -35,6 +35,12 @@ While (
   [
     ~i = ~i + 1;
     ~thisFieldName = GetValue ( ~fieldList ; ~i );
+    ~thisFieldName = Case (
+      not EvaluationError ( GetFieldName ( ~thisFieldName ) ) ;
+          GetFieldName ( ~thisFieldName ) ;
+      not EvaluationError ( GetField ( ~thisFieldName ) ) or EvaluationError ( Evaluate ( ~thisFieldName ) ) = 103 ;
+          ~thisFieldName
+    )
     ~thisFQFN = If ( PatternCount ( ~thisFieldName; "::" ) = 0; ~layoutTO & "::" ) & ~thisFieldName;
     ~onlyThisFieldName = If ( PatternCount ( ~thisFieldName; "::" ) > 0;
         GetValue ( Substitute ( ~thisFieldName; "::"; ¶ ); 2 );
