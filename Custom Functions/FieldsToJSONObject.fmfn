@@ -40,13 +40,13 @@ While (
           GetFieldName ( ~thisFieldName ) ;
       not EvaluationError ( GetField ( ~thisFieldName ) ) or EvaluationError ( Evaluate ( ~thisFieldName ) ) = 103 ;
           ~thisFieldName
-    )
+    );
     ~thisFQFN = If ( PatternCount ( ~thisFieldName; "::" ) = 0; ~layoutTO & "::" ) & ~thisFieldName;
     ~onlyThisFieldName = If ( PatternCount ( ~thisFieldName; "::" ) > 0;
         GetValue ( Substitute ( ~thisFieldName; "::"; ¶ ); 2 );
         ~thisFieldName
     );
-    ~thisValue = GetField ( ~thisFQFN )
+    ~thisValue = GetField ( ~thisFQFN );
     ~jsonType = Case (
       MiddleWords ( FieldType ( "" ; ~thisFQFN ); 2; 1 ) = "Number"; JSONNumber;
       Left ( JSONFormatElements ( ~thisValue ); 1 ) <> "?"; JSONGetElementType ( ~thisValue ; "" );
