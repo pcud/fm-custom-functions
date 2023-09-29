@@ -14,37 +14,51 @@
  *    True or False
  *
  *  DEPENDENCIES
- *    FileMaker 19.5+
+ *    Preferable to have FileMaker 19.5+
+ *    FileMaker 16+ required
  *
  *  CHANGELOG
  *    2022-03-28: Paul McCudden: Created
  *    2022-07-07: Paul McCudden: Updated to work with arrays and objects
  *    2023-08-11: Paul McCudden: $ not needed in variable name declaration
+ *    2023-09-29: Paul McCudden: Added backward compatibility for v16+
 */
 
-Let (
-    [
-        thisVariableName = If ( IsEmpty ( thisVariableName ); "$thisValue"; If ( Left ( thisVariableName; 1 ) <> "$"; "$" ) & thisVariableName );
-        iterationVariableName = If ( IsEmpty ( iterationVariableName ); "$i"; If ( Left ( iterationVariableName; 1 ) <> "$"; "$" ) & iterationVariableName );
-        
-        ~listType = Case (
-            Left ( JSONFormatElements ( listOrArrayOrObject ); 1 ) = "?"; "list";
-            JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONArray; "array";
-            JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONObject; "object";
-            ""
-        );
-        ~newIteration = Evaluate ( iterationVariableName ) + 1;
-		~exitLoop = ~newIteration > ValueCount ( If ( ~listType = "list"; listOrArrayOrObject; JSONListKeys ( listOrArrayOrObject; "" ) ) );
-        ~newIteration = If ( ~exitLoop; ""; ~newIteration );
-        ~newVariableValue = If ( ~exitLoop; ""; Case (
-            ~listType = "list"; GetValue ( listOrArrayOrObject; ~newIteration );
-            ~listType = "array"; GetValue ( JSONListValues ( listOrArrayOrObject; "" ); ~newIteration );
-            ~listType = "object"; GetValue ( JSONListKeys ( listOrArrayOrObject; "" ); ~newIteration )
-        ) );
+If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires FileMaker version 16+";
+    Let (
+        [
+            thisVariableName = If ( IsEmpty ( thisVariableName ); "$thisValue"; If ( Left ( thisVariableName; 1 ) <> "$"; "$" ) & thisVariableName );
+            iterationVariableName = If ( IsEmpty ( iterationVariableName ); "$i"; If ( Left ( iterationVariableName; 1 ) <> "$"; "$" ) & iterationVariableName );
+            
+            ~listType = If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 19.5; 
+                // Don't have access to JSONGetElementType - there are better ways to check JSONType, but don't want to use dependancies
+                Case (
+                    Left ( JSONFormatElements ( listOrArrayOrObject ); 1 ) = "?"; "list";
+                    Left ( listOrArrayOrObject; 1 ) = "[" and Right ( listOrArrayOrObject; 1 ) = "]"; "array";
+                    Left ( listOrArrayOrObject; 1 ) = "{" and Right ( listOrArrayOrObject; 1 ) = "}"; "object";
+                    ""
+                );
+                // Do have access to JSONGetElementType - use evaluate to hide <Function Missing> in v19.4-
+                Case (
+                    Left ( JSONFormatElements ( listOrArrayOrObject ); 1 ) = "?"; "list";
+                    Evaluate ( "JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONArray" ); "array";
+                    Evaluate ( "JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONObject" ); "object";
+                    ""
+                )
+            );
+            ~newIteration = Evaluate ( iterationVariableName ) + 1;
+            ~exitLoop = ~newIteration > ValueCount ( If ( ~listType = "list"; listOrArrayOrObject; JSONListKeys ( listOrArrayOrObject; "" ) ) );
+            ~newIteration = If ( ~exitLoop; ""; ~newIteration );
+            ~newVariableValue = If ( ~exitLoop; ""; Case (
+                ~listType = "list"; GetValue ( listOrArrayOrObject; ~newIteration );
+                ~listType = "array"; GetValue ( JSONListValues ( listOrArrayOrObject; "" ); ~newIteration );
+                ~listType = "object"; GetValue ( JSONListKeys ( listOrArrayOrObject; "" ); ~newIteration )
+            ) );
 
-       ~letStatement = "Let([" & thisVariableName & "=\"" & Substitute ( ~newVariableValue; "\""; "\\\"" ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
-    ];
+        ~letStatement = "Let([" & thisVariableName & "=\"" & Substitute ( ~newVariableValue; "\""; "\\\"" ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
+        ];
 
-    Evaluate ( ~letStatement )
+        Evaluate ( ~letStatement )
 
+    )
 )
