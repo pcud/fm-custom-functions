@@ -27,7 +27,7 @@ Let (
     ~fn = Case (
       not EvaluationError ( GetFieldName ( ~field ) ) ;
         GetFieldName ( ~field ) ;
-      not EvaluationError ( GetField ( field ) ) or EvaluationError ( Evaluate ( field ) ) = 103 ;
+      not EvaluationError ( GetField ( ~field ) ) or EvaluationError ( Evaluate ( ~field ) ) = 103 ;
         ~field
     )
   ];

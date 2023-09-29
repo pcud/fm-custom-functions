@@ -1,0 +1,36 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ShowThisSortIcon ( field ; direction )
+ *
+ *  DESCRIPTION
+ *    Used with a sort script and used as the hide calc for objects
+ *
+ *  PARAMS
+ *    field: The field reference of the field that this icon is displaying
+ *    direction: "asc" or "desc" based on which direction this icon is displaying
+ *
+ *  RETURNS
+ *    Boolean
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-09-21: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+Let (
+	[
+        ~field = Case (
+            not EvaluationError ( GetFieldName ( field ) ) ;
+                GetFieldName ( field ) ;
+            not EvaluationError ( GetField ( field ) ) or EvaluationError ( Evaluate ( field ) ) = 103 ;
+                field
+        );
+        ~thisField = JSONGetElement ( $$sortJSON; Get ( LayoutNumber ) & ".field" );
+        ~thisDirection = JSONGetElement ( $$sortJSON; Get ( LayoutNumber ) & ".direction" )
+	];
+
+	not ( ~field = ~thisField and direction = ~thisDirection )
+
+)

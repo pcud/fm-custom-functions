@@ -1,0 +1,26 @@
+/*
+ *  CUSTOM FUNCTION
+ *    LastErrorData ( )
+ *
+ *  DESCRIPTION
+ *    Stores the GetLastError function results as a JSON
+ *
+ *  PARAMS
+ *    --None--
+ *
+ *  RETURNS
+ *    A JSONObject
+ *
+ *  DEPENDENCIES
+ *    ErrorDescription: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/ErrorDescription.fmfn
+ *
+ *  CHANGELOG
+ *    2023-09-28: Paul McCudden (paul@peak14.solutions): Created
+*/
+
+JSONSetElement ( "{}"
+    ;["error"; Get ( LastError ); JSONNumber]
+    ;["detail"; Get ( LastErrorDetail ); JSONString]
+    ;["description"; ErrorDescription ( Get ( LastError ) ); JSONString]
+    ;["location"; Get ( LastErrorLocation ); JSONNumber]
+)
