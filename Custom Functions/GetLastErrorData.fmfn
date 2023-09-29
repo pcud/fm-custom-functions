@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    LastErrorData ( )
+ *    GetLastErrorData ( )
  *
  *  DESCRIPTION
  *    Stores the GetLastError function results as a JSON
