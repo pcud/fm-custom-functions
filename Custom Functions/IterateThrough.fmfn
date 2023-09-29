@@ -42,7 +42,7 @@ If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires Fi
                 Case (
                     Left ( JSONFormatElements ( listOrArrayOrObject ); 1 ) = "?"; "list";
                     Evaluate ( "JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONArray" ); "array";
-                    Evaluate ( "JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONObject" ); "object";
+                    Evaluate ( "JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONObject"); "object";
                     ""
                 )
             );
