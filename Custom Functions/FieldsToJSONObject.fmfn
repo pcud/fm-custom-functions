@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    FieldsToJSONObject ( fieldNameList )
+ *    FieldsToJSONObject ( fieldNameList; includeTO )
  *
  *  DESCRIPTION
  *    Turns a list of field names into a JSON object where the key is the field name only and the value is that field's value
@@ -23,6 +23,7 @@ While (
   // initialVariable
   [
     ~fieldList = fieldNameList;
+    ~includeTO = includeTO;
     ~layoutTO = Get ( LayoutTableName );
     ~i = 0;
     ~json = "{}"
@@ -53,7 +54,7 @@ While (
       JSONString
     );
     ~json = JSONSetElement ( ~json
-        ;[~onlyThisFieldName; ~thisValue; ~jsonType]
+        ;[If ( ~includeTO; ~thisFQFN; ~onlyThisFieldName ); ~thisValue; ~jsonType]
     )
   ];
 

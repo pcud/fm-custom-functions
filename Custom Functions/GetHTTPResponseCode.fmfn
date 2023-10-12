@@ -1,18 +1,32 @@
 /*
  *  CUSTOM FUNCTION
- *    GetHTTPResponseCode ( responseHeaders )
+ *    GetHTTPResponseCode ( responseHeaders; includeArray )
  *
  *  DESCRIPTION
  *    Gets the last HHTP Response Code and description from the passed response headers
  *
  *  PARAMS
  *    responseHeaders: the response header(s) returned by an API call
+ *    includeArray: If true will return an array that contains all of the header information
  *
  *  RETURNS
- *    {
+ *    If ( includeArray = False )
+ *      {
  *        "code": number,
  *        "description": string
- *    }
+ *      }
+ *    If ( includeArray = True )
+ *      {
+ *        "code": number,
+ *        "description": string
+ *        "array" [
+ *          {
+ *            "code": number,
+ *            "description": string,
+              propertyName: value
+ *          }
+ *        ]
+ *      }
  *
  *  DEPENDENCIES
  *    --NONE--
@@ -21,39 +35,66 @@
  *    List of HTTP Reponse Codes: https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
  *
  *  CHANGELOG
- *    2021-07-17: Paul McCudden (paul@peak14.solutions): Created
+ *    2021-07-17: Paul McCudden: Created
  *    2023-06-15: Paul McCudden: Updated to output both code and description as JSON
  *    2023-08-31: Paul McCudden: Update to grab the full response description
+ *    2023-10-05: Paul McCudden: Major overhaul -
+ *        Updated to not loop if just not includeArray
+ *        Updated to return an array of all response codes and properties if desired
 */ 
 
-While (
+Let (
     [
-        ~stop = False;
-        ~lineCount = ValueCount ( responseHeaders );
-        ~i = 0;
-        ~responseCodeStart = "HTTP/"
+        // Set parameters here for easy debugging
+        ~responseHeaders = $header;
+        ~includeArray = False;
 
+        ~responseCodeStart = "HTTP/";
+
+        // Get the last line that contains ~responseCodeStart
+        ~lastResponseCodeLine = Trim ( GetValue ( ~responseHeaders; ValueCount ( Left ( ~responseHeaders; Position ( ~responseHeaders; ~responseCodeStart; Length ( ~responseHeaders ); -1 ) ) ) ) );
+
+        // Split into a list, safer to use Substitute over MiddleWords() because "/" is considered a seperator (do all responses have "/" in it?)
+        ~lastResponseCodeList = Substitute ( ~lastResponseCodeLine; " " ; ¶ );
+
+        ~lastResponseCode = GetValue ( ~lastResponseCodeList; 2 );
+        ~lastResponseDescription = Right ( ~lastResponseCodeLine ; Length ( ~lastResponseCodeLine ) - Position ( ~lastResponseCodeLine ; ~lastResponseCode ; 1 ; 1 ) - Length ( ~lastResponseCode ) );
+        ~responseJSON = JSONSetElement ( "{}"
+            ;["code"; ~lastResponseCode; JSONNumber]
+            ;["description"; ~lastResponseDescription; JSONString] 
+        );
+
+        // If they want to include the array, loop through each value
+        ~array = If ( ~includeArray;
+            While (
+                [
+                    ~lineCount = ValueCount ( ~responseHeaders );
+                    ~i = 0;
+                    ~array = "[]"
+                ];
+
+                ~i < ~lineCount;
+
+                [
+                    ~i = ~i + 1;
+                    ~thisLine = Trim ( GetValue ( ~responseHeaders; ~i ) );
+                    ~isResponseCode = Left ( ~thisLine; Length ( ~responseCodeStart ) = ~responseCodeStart );
+                    ~array = If ( ~isResponseCode;
+                        JSONSetElement ( ~array
+                            ;["[" & ~i - 1 & "].code"; ~thisLine; JSONString]
+                        );
+                        ~array
+                    )
+                ];
+
+                ~array
+            )
+        )
     ];
 
-    not ~stop;
-
-    [
-        // Countfrom the bottom line up since we only want the last code
-        ~thisLine = GetValue ( responseHeaders; ~lineCount - ~i );
-        ~i = ~i + 1;
-        ~isResponseCode = Left ( ~thisLine; Length ( ~responseCodeStart ) ) = ~responseCodeStart;
-
-		// Safer to use Substitute over MiddleWords() because "/" is considered a seperator (do all responses have "/" in it?)
-		~responseList = Substitute ( ~thisLine ; " " ; ¶ );
-        ~responseCode = If ( ~isResponseCode; GetValue ( ~responseList; 2 ) );
-        ~responseDescription = If ( ~isResponseCode; Right ( ~thisLine ; Length ( ~thisLine ) - Position ( ~thisLine ; ~responseCode ; 1 ; 1 ) - Length ( ~responseCode ) ) );
-        ~stop = ~isResponseCode
-
-    ];
-
-	JSONSetElement ( "{}"
-        ;["code"; ~responseCode; JSONNumber]
-        ;["description"; ~responseDescription; JSONString]
+    If ( ~includeArray;
+        JSONSetElement ( ~responseJSON; "array"; ~array; JSONArray );
+        ~responseJSON
     )
 
 )
