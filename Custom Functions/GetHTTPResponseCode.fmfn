@@ -29,7 +29,7 @@
  *      }
  *
  *  DEPENDENCIES
- *    --NONE--
+ *    JSONArrayAppendList: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONArrayAppendList.fmfn
  *
  *  NOTES
  *    List of HTTP Reponse Codes: https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
@@ -46,8 +46,8 @@
 Let (
     [
         // Set parameters here for easy debugging
-        ~responseHeaders = $header;
-        ~includeArray = False;
+        ~responseHeaders = responseHeaders;
+        ~includeArray = includeArray;
 
         ~responseCodeStart = "HTTP/";
 
@@ -70,6 +70,7 @@ Let (
                 [
                     ~lineCount = ValueCount ( ~responseHeaders );
                     ~i = 0;
+                    ~responseCount = 0;
                     ~array = "[]"
                 ];
 
@@ -78,12 +79,24 @@ Let (
                 [
                     ~i = ~i + 1;
                     ~thisLine = Trim ( GetValue ( ~responseHeaders; ~i ) );
-                    ~isResponseCode = Left ( ~thisLine; Length ( ~responseCodeStart ) = ~responseCodeStart );
+                    ~isResponseCode = Left ( ~thisLine; Length ( ~responseCodeStart ) )= ~responseCodeStart;
+                    ~responseCount = ~responseCount + If ( IsEmpty ( ~thisLine ); 1 );
+
+                    // Set up response code variables
+                    ~thisResponseCode = If ( ~isResponseCode; GetValue ( Substitute ( ~thisLine; " " ; ¶ ); 2 ) );
+                    ~thisResponseDescription = If ( ~isResponseCode ; Right ( ~thisLine ; Length ( ~thisLine ) - Position ( ~thisLine ; ~thisResponseCode ; 1 ; 1 ) - Length ( ~thisResponseCode ) ) );
+
+                    // Set up property and value
+                    ~thisProperty = Trim ( Left ( ~thisLine; Position ( ~thisLine; ":"; 1; 1 ) - 1 ) );
+                    ~thisValue = Trim ( Right ( ~thisLine; Length ( ~thisLine ) - Length ( ~thisProperty ) - 1 ) );
+
+                    // Set array
                     ~array = If ( ~isResponseCode;
                         JSONSetElement ( ~array
-                            ;["[" & ~i - 1 & "].code"; ~thisLine; JSONString]
+                            ;["[" & ~responseCount & "]code"; ~thisResponseCode; JSONString]
+                            ;["[" & ~responseCount & "]description"; ~thisResponseDescription; JSONString]
                         );
-                        ~array
+                        JSONArrayAppendList ( ~array ; "[" & ~responseCount & "]" & ~thisProperty ; ~thisValue ; JSONString )
                     )
                 ];
 
