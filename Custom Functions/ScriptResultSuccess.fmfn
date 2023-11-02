@@ -1,0 +1,26 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ScriptResultSuccess ( result )
+ *
+ *  DESCRIPTION
+ *    If used with scripting conventions will let you know if the script ran successfully or not
+ *
+ *  PARAMS
+ *    result: The script result. If blank will use Get ( ScriptResult )
+ *
+ *  RETURNS
+ *    Boolean
+ *
+ *  CHANGELOG
+ *    2023-11-02: Paul McCudden: Created
+*/ 
+
+Let (
+    [
+        ~result = If ( IsEmpty ( result ); Get ( ScriptResult ); result );
+        ~result = If ( Left ( JSONFormatElements ( ~result ); 1 ) = "?"; "{}"; ~result )
+    ];
+
+    GetAsBoolean ( JSONGetElement ( ~result; "success" ) )
+
+)
