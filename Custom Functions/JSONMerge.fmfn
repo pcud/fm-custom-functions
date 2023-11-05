@@ -1,0 +1,44 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONMerge ( json; keyOrIndexOrPath; jsonToMerge )
+ *
+ *  DESCRIPTION
+ *    Sets the values passed in the JSON element by element to avoid overrighting any other element in the JSON
+ *
+ *  PARAMS
+ *    json: The JSON to set the values to
+ *    keyOrIndexOrPath: The key, index, or path of the json to set
+ *    jsonToMerge: The json you wish to merge
+ *
+ *  RETURNS
+ *    JSON
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-11-05: Paul McCudden: Created
+*/
+
+While (
+    [
+        ~json = If ( Left ( JSONFormatElements ( json ); 1 ) = "?"; "{}"; json );
+        ~jsonElement = JSONGetElement ( ~json; keyOrIndexOrPath ); 
+        ~jsonToMerge = If ( Left ( JSONFormatElements ( jsonToMerge ); 1 ) = "?"; "{}"; jsonToMerge );
+        ~keys = JSONListKeys ( ~jsonToMerge; "" );
+        ~i = 0
+    ];
+
+    ~i < ValueCount ( ~keys );
+
+    [
+        ~i = ~i + 1;
+        ~thisKey = GetValue ( ~keys; ~i );
+        ~thisValue = JSONGetElement ( ~jsonToMerge; ~thisKey );
+        ~thisJSONType = JSONGetElementType ( ~jsonToMerge ; ~thisKey );
+        ~jsonElement = JSONSetElement ( ~jsonElement; ~thisKey; ~thisValue; ~thisJSONType )
+    ];
+
+    JSONSetElement ( ~json; keyOrIndexOrPath; ~jsonElement; JSONGetElementType ( ~jsonElement; "" ) )
+    
+)

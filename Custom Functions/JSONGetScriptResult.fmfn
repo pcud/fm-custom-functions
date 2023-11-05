@@ -1,0 +1,22 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONGetScriptResult ( json; keyOrIndexOrPath )
+ *
+ *  DESCRIPTION
+ *    Gets a specific element from a script result
+ *
+ *  PARAMS
+ *    json: The script result JSON. Leave blank to Get ( ScriptResult )
+ *    keyOrIndexOrPath: The key, index, or path of the script result to get
+ *
+ *  RETURNS
+ *    Anything
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-11-05: Paul McCudden: Created
+*/
+
+JSONGetElement ( If ( IsEmpty ( json ); Get ( ScriptResult ); json ); "return" & If ( not IsEmpty ( keyOrIndexOrPath ); "." & keyOrIndexOrPath ) )

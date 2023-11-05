@@ -1,13 +1,13 @@
 /*
  *  CUSTOM FUNCTION
- *    GetAccountUUID ( accountName )
+ *    GetAccountUUID ( account )
  *
  *  DESCRIPTION
  *    If you have an users table, use this instead of Get ( AccountName ) so you will get the proper casing of the account name.
  *    Get ( AccountName ) returns the casing as the user entered it when they logged in.
  *
  *  PARAMS
- *    accountName: The name of the account to grab. If blank will grab current account
+ *    account: The name of the account to grab. If blank will grab current account
  *
  *  RETURNS
  *    The account UUID as entered in the users table
@@ -25,7 +25,7 @@ SQLGetColumn1Where (
    Accounts::accountName;
    GetValue ( FilterValues (
       SQLGetColumn1Where ( Accounts::accountName ; "" ; "" ; "" );
-      If ( isEmpty ( accountName ); Get ( AccountName ); accountName )
+      If ( isEmpty ( account ); Get ( AccountName ); account )
    ); 1 );
    ""
 )
