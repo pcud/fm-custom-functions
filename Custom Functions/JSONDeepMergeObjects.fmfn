@@ -1,0 +1,112 @@
+/* -----------------------------------------------------------------------------------------------------------------
+
+  JSONDeepMergeObjects( ObjectA ; ObjectB )
+
+
+General Behavior:
+
+	• Non-empty parameter values which are not JSONObjects will return an error
+
+	• Otherwise, merges the properties of ObjectB into ObjectA, and returns result.
+
+
+Merge Rules:
+
+	• Empty-string parameter will default to an empty object
+
+	• Key from Object B does not exist in Object A --> Key and corresponding Value added to Object A
+
+	• Key from Object B exists in Object A and both values are a JSONObject --> Value objects will be merged
+
+	• Otherwise, value from Object B replaces value in Object A
+
+
+Limitations:
+
+	• Recursion limit set to 50000
+
+	• Does not handle keys which contain newline characters.
+
+
+
+Version: 20231115_1430
+
+----------------------------------------------------------------------------------------------------------------- */
+
+
+SetRecursion( 
+
+While([
+
+	~original_object = Case( IsEmpty( ObjectA ); "{}" ; ObjectA );
+	
+	~adding_object = Case( IsEmpty( ObjectB ); "{}" ; ObjectB );
+	
+	~input_type_original = JSONGetElementType( ~original_object ; "" );
+	
+	~input_type_adding = JSONGetElementType( ~adding_object ; "" );
+	
+	~input_is_valid = ( ~input_type_original = JSONObject ) and ( ~input_type_adding = JSONObject );
+
+	~object_to_update = ~original_object ;
+
+	~keys_to_process = Case( ~input_is_valid ; JSONListKeys( ~adding_object ; "" ))
+	
+];
+
+	not IsEmpty( ~keys_to_process );
+	
+[
+
+	~target_key = GetValue( ~keys_to_process ; 1 );
+	
+	~keys_to_process = Replace( ~keys_to_process ; 1 ; Length( ~target_key ) + 1 ; "" );
+	
+	~target_key_dot_safe = Case( PatternCount( ~target_key ; "." ); "['" & ~target_key & "']" ; ~target_key );
+	
+	
+
+	~value_from_adding_object = JSONGetElement( ~adding_object ; ~target_key_dot_safe );
+	
+	~node_type_from_adding_object = JSONGetElementType( ~adding_object ; ~target_key_dot_safe );
+	
+	~node_type_from_output_object = JSONGetElementType( ~object_to_update ; ~target_key_dot_safe );
+	
+	~both_values_are_objects = ( ~node_type_from_adding_object = JSONObject ) and ( ~node_type_from_output_object = JSONObject );
+	
+	
+	
+	~object_to_update = Case(
+	
+		~both_values_are_objects ; JSONSetElement(
+		
+			~object_to_update ;
+			
+			~target_key_dot_safe ;
+			
+			JSONDeepMergeObjects( JSONGetElement( ~object_to_update ; ~target_key_dot_safe ) ; ~value_from_adding_object );
+			
+			JSONObject
+		);
+		
+		JSONSetElement( ~object_to_update ; ~target_key_dot_safe ; ~value_from_adding_object ; ~node_type_from_adding_object )
+	)
+	
+];
+
+	Case(
+	
+		~input_is_valid ; ~object_to_update ;
+		
+		~input_type_original <> JSONObject and ~input_type_adding <> JSONObject ; "?ERROR: Invalid input supplied, both params." ;
+		
+		~input_type_original <> JSONObject ; "?ERROR: Invalid input supplied, first param." ;
+		
+		~input_type_adding <> JSONObject ; "?ERROR: Invalid input supplied, second param." ;
+		
+		"Unexpected validation condition."
+	)
+);
+
+	50000 // Recursion limit
+)

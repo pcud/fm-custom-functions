@@ -1,0 +1,42 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONMerge ( source; toMerge )
+ *
+ *  DESCRIPTION
+ *    Returns a merged JSON with respect to all nested properties. Elements from "toMerge" will overwrite elements from "source" if there are conflicts with typing
+ *
+ *  PARAMS
+ *    source: The JSON being merged with.
+ *    toMerge: The JSON doing the merging.
+ *
+ *  RETURNS
+ *    JSON
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-11-15: Paul McCudden: Created
+*/
+
+While (
+    [
+        ~a = source;
+        ~a = If ( Left ( JSONFormatElements ( ~a ); 1 ) = "?"; "{}"; ~a );
+        ~b = toMerge;
+        ~b = If ( Left ( JSONFormatElements ( ~b ); 1 ) = "?"; "{}"; ~b );
+        ~bLines = Substitute ( JSONFormatElements ( ~b ), Char ( 9 ); "" );
+        ~lineCount = ValueCount ( ~blines );
+        ~i = 0
+    ];
+
+    ~i < ~lineCount;
+
+    [
+        ~i = ~i + 1;
+        ~thisLine = If ( IsEmpty ( ~nextLine ); GetValue ( ~blines ; ~i ); ~nextLine );
+        ~nextLine = GetValue ( ~blines; ~i + 1 )
+    ];
+
+    ~thisLine
+)

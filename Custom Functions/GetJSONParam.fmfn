@@ -1,0 +1,29 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetJSONParam ( key )
+ *
+ *  DESCRIPTION
+ *    Gets a single parameter assuming the parameter is JSON
+ *
+ *  PARAMS
+ *    key: The key or index or path of the param to get
+ *
+ *  RETURNS
+ *    Anything
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2023-11-10: Paul McCudden: Created
+*/
+
+Let (
+  [
+    ~params = Get ( ScriptParameter );
+    ~params = If ( Left ( JSONFormatElements ( ~params ); 1 ) = "?"; "{}"; ~params )
+  ];
+
+  JSONGetElement ( ~params; key )
+
+)
