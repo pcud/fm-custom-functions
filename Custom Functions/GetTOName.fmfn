@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    GetTOName ( fieldRefOrFieldName )
+ *    GetFieldTOName ( fieldRefOrFieldName )
  *
  *  DESCRIPTION
  *    Strips out the field name from a field and returns just the table occurance name text

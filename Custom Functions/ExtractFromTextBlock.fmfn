@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    ExtractFromTextBlock ( fullText; startString; endString )
+ *    ExtractFromTextBlock ( fullText; startString; endString; includeStrings )
  *
  *  DESCRIPTION
  *    Used for when you want to get a block of text from a larger block of text where you know the start and end
@@ -8,7 +8,8 @@
  *  PARAMS
  *    fullText: The full block of text
  *    startString: The unique string that starts the block you want to get
- *    endString): The inque string the ends the block you want to get. If endString is empty, gets the rest of the text.
+ *    endString: The inque string the ends the block you want to get. If endString is empty, gets the rest of the text.
+ *    includeStrings: True to include the startString and endString in the return text
  *
  *  RETURNS
  *    Text
@@ -19,14 +20,20 @@
  *  CHANGELOG
  *    2022-03-30: Paul McCudden (paul@peak14.solutions): Created
  *    2023-08-28: Paul McCudden: Updated to pull all text if endString is empty
+ *    2023-11-22: Paul McCudden: Added includeStrings
 */
 
 Let (
     [
+        ~includeStrings = includeStrings;
         ~startPosition = Position ( fullText; startString; 1; 1 );
         ~endPosition = If ( IsEmpty ( endString ); Length ( fullText ) - ~startPosition; Position ( fullText; endString; ~startPosition; 1 ) )
     ];
 
-    Middle ( fullText; ~startPosition; ~endPosition - ~startPosition + Length ( endString ) )
+    Middle (
+        fullText;
+        ~startPosition + If ( not ~includeStrings; Length ( startString ) );
+        ~endPosition - ~startPosition + If ( ~includeStrings; ( Length ( endString ) ); Length ( startString ) * -1 )
+    )
 
 )
