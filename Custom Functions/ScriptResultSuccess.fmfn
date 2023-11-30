@@ -21,10 +21,12 @@
 Let (
     [
         ~result = If ( IsEmpty ( result ); Get ( ScriptResult ); result );
-        ~result = If ( Left ( JSONFormatElements ( ~result ); 1 ) = "?"; "{}"; ~result )
+        ~result = If ( Left ( JSONFormatElements ( ~result ); 1 ) = "?"; "{}"; ~result );
 
         // Pass up the common variables to the parent script so it can be used in logging
-        $error = 
+        $error = JSONGetElement ( ~result; "error" );
+        $errorData = JSONGetElement ( ~result; "errorData" );
+        $message = JSONGetElement ( ~result; "message" )
     ];
 
     GetAsBoolean ( JSONGetElement ( ~result; "success" ) )
