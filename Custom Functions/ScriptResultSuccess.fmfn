@@ -11,6 +11,9 @@
  *  RETURNS
  *    Boolean
  *
+ *  DEPENDENCIES
+ *    None
+ *
  *  CHANGELOG
  *    2023-11-02: Paul McCudden: Created
 */ 
@@ -19,6 +22,9 @@ Let (
     [
         ~result = If ( IsEmpty ( result ); Get ( ScriptResult ); result );
         ~result = If ( Left ( JSONFormatElements ( ~result ); 1 ) = "?"; "{}"; ~result )
+
+        // Pass up the common variables to the parent script so it can be used in logging
+        $error = 
     ];
 
     GetAsBoolean ( JSONGetElement ( ~result; "success" ) )
