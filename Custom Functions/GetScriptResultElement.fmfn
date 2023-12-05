@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    JSONGetScriptResult ( json; keyOrIndexOrPath )
+ *    GetScriptResultElement ( json; keyOrIndexOrPath )
  *
  *  DESCRIPTION
  *    Gets a specific element from a script result
@@ -19,4 +19,12 @@
  *    2023-11-05: Paul McCudden: Created
 */
 
-JSONGetElement ( If ( IsEmpty ( json ); Get ( ScriptResult ); json ); "return" & If ( not IsEmpty ( keyOrIndexOrPath ); "." & keyOrIndexOrPath ) )
+Let (
+    [
+        ~json = If ( IsEmpty ( json ); Get ( ScriptResult ); json );
+        ~json = If ( Left ( JSONFormatElements ( ~json ); 1 ) = "?"; "{}"; ~json )
+    ];
+
+    JSONGetElement ( ~json; "return" & If ( not IsEmpty ( keyOrIndexOrPath ); "." & keyOrIndexOrPath ) )
+
+)

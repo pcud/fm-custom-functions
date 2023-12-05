@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    ScriptResultSuccess ( result )
+ *    GetScriptResultSuccess ( result )
  *
  *  DESCRIPTION
  *    If used with scripting conventions will let you know if the script ran successfully or not
@@ -29,6 +29,7 @@ Let (
         $message = JSONGetElement ( ~result; "message" )
     ];
 
-    GetAsBoolean ( JSONGetElement ( ~result; "success" ) )
+    // Check to see if this value or a nested value is successful
+    GetAsBoolean ( JSONGetElement ( ~result; "return.success" ) or JSONGetElement ( ~result; "success" ) )
 
 )

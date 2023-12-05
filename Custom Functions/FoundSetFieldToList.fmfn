@@ -36,7 +36,7 @@ While (
 
     [
         ~i = ~i + 1;
-        ~list = If ( ~i > 1; "¶" ) & GetNthRecord ( GetField ( ~fieldName ); ~i )
+        ~list = List ( ~list ; GetNthRecord ( GetField ( ~fieldName ); ~i ) )
     ];
 
     ~list

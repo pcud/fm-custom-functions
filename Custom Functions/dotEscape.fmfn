@@ -1,1 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    DotEscape ( myText )
+ *
+ *  DESCRIPTION
+ *    Swaps "." in a text with another unique value that is unlikely to be seen. Ideal for use in JSON paths
+ *
+ *  PARAMS
+ *    myText: The text to substitute
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2020-09-09: Paul McCudden: Created
+*/
+
 Substitute ( myText; "."; "~|dot|~")
