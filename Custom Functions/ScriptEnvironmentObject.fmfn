@@ -4,6 +4,7 @@
  *
  *  DESCRIPTION
  *    Has the default JSONObject that should be the parameter for the enter script enviornment and exit script envrionemnt steps
+ *    Any data passed with additionalJSON
  *
  *  PARAMS
  *    additonalJSON: More json that you wish to include in the object
@@ -12,26 +13,36 @@
  *    Object
  *
  *  DEPENDENCIES
- *    None
+ *    JSONDeepMergeObjects: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONDeepMergeObjects.fmfn
+ *    JSONGetElementTypeExtended: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONGetElementTypeExtended.fmfn
  *
  *  CHANGELOG
  *    2022-12-05: Paul McCudden: Created
  *    2023-05-09: Paul McCudden: Added error data
+ *    2023-12-05: Paul McCudden: Prioritized JSON data being passed into additionalJSON
  *
 */
 
 Let (
     [
-        ~json = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
         $scriptLogID = If ( IsEmpty ( $scriptLogID ); "ScriptLog-" & Get ( UUID ); $scriptLogID )
+        ~jsonToAdd = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
+
+        // Assume that if there isn't a return key, everything should be a child of return
+        ~jsonToAdd = If (
+            IsEmpty ( FilterValues ( JSONListKeys ( ~jsonToAdd; "" ); "return" ) );
+            JSONSetElement ( "{}"; "return"; ~jsonToAdd; ~jsonType );
+            ~jsonToAdd
+        );
+        ~jsonExisting = JSONSetElement ( additionalJSON
+            ;["scriptLogID"; $scriptLogID; JSONString]
+            ;["return"; $return; JSONGetElementTypeExtended ( $return; "")]
+            ;["file"; Get ( FileName ); JSONString]
+            ;["script"; Get ( ScriptName ); JSONString]
+            ;["errorData"; $errorData; JSONArray]
+        )
     ];
 
-    JSONSetElement ( additionalJSON
-        ;["scriptLogID"; $scriptLogID; JSONString]
-        ;["return"; $return; JSONRaw]
-        ;["file"; Get ( FileName ); JSONString]
-        ;["script"; Get ( ScriptName ); JSONString]
-        ;["errorData"; $errorData; JSONArray]
-    )
+    JSONDeepMergeObjects ( ~jsonExisting; ~jsonToAdd )
 
 )

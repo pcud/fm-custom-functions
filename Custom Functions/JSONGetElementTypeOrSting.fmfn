@@ -1,0 +1,37 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSONGetElementTypeOrText ( json; keyOrIndexOrPath )
+ *
+ *  DESCRIPTION
+ *    Returns the JSONtype of the passed value. Different from JSONGetElementType since it can return JSONNumber, JSONText, JSONBoolean or JSONNull if this isn't a JSON
+ *
+ *  PARAMS
+ *    json: The JSON to add values to
+ *    keyOrIndexOrPath: The keyOrIndexOrPath if there is one
+ *
+ *  RETURNS
+ *    JSONType
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-12-05: Paul McCudden: Created
+*/
+
+Let (
+    [
+        ~type = JSONGetElementType ( json; keyOrIndexOrPath );
+        ~value = JSONGetElement ( json; keyOrIndexOrPath );
+        ~value = If ( Left ( ~value; 1 ) = "?"; json )
+    ];
+
+    Case (
+        Left ( ~type; 1 ) <> "?"; ~type;
+        IsEmpty ( ~value ); JSONNull;
+        ~value = True or ~value = False; JSONBoolean; // Could be a number or a boolean, FileMaker intrepets them the same, so it doesn't matter
+        Length ( ~value ) = Length ( GetAsNumber ( ~value ) ) and Length ( ~value ) < 19; JSONNumber; // Scientific notation starts at 19 characters
+        JSONString
+    )
+
+)
