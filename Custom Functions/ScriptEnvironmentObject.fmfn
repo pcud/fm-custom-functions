@@ -25,13 +25,13 @@
 
 Let (
     [
-        $scriptLogID = If ( IsEmpty ( $scriptLogID ); "ScriptLog-" & Get ( UUID ); $scriptLogID )
+        $scriptLogID = If ( IsEmpty ( $scriptLogID ); "ScriptLog-" & Get ( UUID ); $scriptLogID );
         ~jsonToAdd = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
 
         // Assume that if there isn't a return key, everything should be a child of return
         ~jsonToAdd = If (
             IsEmpty ( FilterValues ( JSONListKeys ( ~jsonToAdd; "" ); "return" ) );
-            JSONSetElement ( "{}"; "return"; ~jsonToAdd; ~jsonType );
+            JSONSetElement ( "{}"; "return"; ~jsonToAdd; JSONGetElementTypeExtended ( ~jsonToAdd; "") );
             ~jsonToAdd
         );
         ~jsonExisting = JSONSetElement ( additionalJSON
