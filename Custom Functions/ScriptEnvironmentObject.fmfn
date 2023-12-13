@@ -20,21 +20,23 @@
  *    2022-12-05: Paul McCudden: Created
  *    2023-05-09: Paul McCudden: Added error data
  *    2023-12-05: Paul McCudden: Prioritized JSON data being passed into additionalJSON
+ *    2023-12-07: Paul McCudden: Bug fixes
  *
 */
 
 Let (
     [
         $scriptLogID = If ( IsEmpty ( $scriptLogID ); "ScriptLog-" & Get ( UUID ); $scriptLogID );
+        $return = If ( $return = ""; "{}"; $return);
         ~jsonToAdd = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
 
         // Assume that if there isn't a return key, everything should be a child of return
-        ~jsonToAdd = If (
-            IsEmpty ( FilterValues ( JSONListKeys ( ~jsonToAdd; "" ); "return" ) );
-            JSONSetElement ( "{}"; "return"; ~jsonToAdd; JSONGetElementTypeExtended ( ~jsonToAdd; "") );
+        ~jsonToAdd = Case (
+            IsEmpty ( FilterValues ( JSONListKeys ( ~jsonToAdd; "" ); "return" ) ) and ~jsonToAdd <> "{}";
+                JSONSetElement ( "{}"; "return"; ~jsonToAdd; JSONGetElementTypeExtended ( ~jsonToAdd; "") );
             ~jsonToAdd
         );
-        ~jsonExisting = JSONSetElement ( additionalJSON
+        ~jsonExisting = JSONSetElement ( "{}"
             ;["scriptLogID"; $scriptLogID; JSONString]
             ;["return"; $return; JSONGetElementTypeExtended ( $return; "")]
             ;["file"; Get ( FileName ); JSONString]

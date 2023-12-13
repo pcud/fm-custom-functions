@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    JSONGetElementTypeOrText ( json; keyOrIndexOrPath )
+ *    JSONGetElementTypeExtended ( json; keyOrIndexOrPath )
  *
  *  DESCRIPTION
  *    Returns the JSONtype of the passed value. Different from JSONGetElementType since it can return JSONNumber, JSONText, JSONBoolean or JSONNull if this isn't a JSON
