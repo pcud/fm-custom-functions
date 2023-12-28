@@ -22,18 +22,21 @@
 
 Let (
     [
-        ~json = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON )
+        ~json = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
 
         // error and message might be nested in $return, check for that and set it to work with the other custom functions
+        // Prioritize what's in return for backwards compatibility
         ~returnIsObject = JSONGetElementType ( $return; "" ) = JSONObject;
+        ~error = If ( ~returnIsObject; JSONGetElement ( $return; "error" ) );
+        ~message = If ( ~returnIsObject; JSONGetElement ( $return; "message" ) );
         ~error = Case (
+            ~returnIsObject and not IsEmpty ( ~error ); ~error;
             not IsEmpty ( $error ); $error;
-            ~returnIsObject; JSONGetElement ( $return; "error" )
         );
         ~message = Case (
+            ~returnIsObject and not IsEmpty ( ~message ); ~message;
             not IsEmpty ( $message ); $message;
-            ~returnIsObject; JSONGetElement ( $return; "message" )
-        );
+        )
     ];
 
     JSONSetElement ( additionalJSON
