@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    JSONArrayAppendList ( json ; keyOrIndexOrPath ; appendList ; jsonType )
+ *    JSONArrayAppend ( json ; keyOrIndexOrPath ; listOrArrayToAppend ; type )
  *
  *  DESCRIPTION
  *    Appends a list of values onto a JSON Array. Maintains existing null values
@@ -8,41 +8,48 @@
  *  PARAMS
  *    json: The JSON to append the list to
  *    keyOrIndexOrPath: The keyOrIndexOrPath where the list is in the JSON
- *    appendList: The list to append to the list current at keyOrIndexOrPath
- *    jsonType: The type of JSON, same as in JSONSetElement.
+ *    listOrArrayToAppend: The list or array to append to the list current at keyOrIndexOrPath.
+ *       -If listOrArrayToAppend is an array and type is JSONArray, will append the array as a single element
+ *       -If listOrArrayToAppend is an array and type is not JSONArray, will append each item in the array as seperate elements
+ *    type: The type of JSON, same as in JSONSetElement.
  *
  *  RETURNS
  *    The JSON with the newly appended list. If there's a JSON error, returns "?"
  *
  *  DEPENDANCIES
- *    JSONGetElementType: https://www.briandunning.com/cf/2287 (removed @ from start of CF name)
+ *    JSONGetElementType: https://www.briandunning.com/cf/2287 (removed @ from start of CF name) or FM version 19.5.1+
  *
  *  CHANGELOG
- *    2019-10-21: Paul McCudden (paul@peak14.solutions): Created
- *    2021-01-07: Paul McCudden (paul@peak14.solutions): Fixed issue where if appendList was empty, would cause FM to crash
+ *    2019-10-21: Paul McCudden: Created
+ *    2021-01-07: Paul McCudden: Fixed issue where if appendList was empty, would cause FM to crash
+ *    2023-12-28: Paul McCudden: Updated to be able to append arrays as well as lists
 */
 
 While (
   [
-    //initialVariable
+    // initialVariable
     ~json = If ( IsEmpty ( json ) or IsEmpty ( JSONGetElement ( json; keyOrIndexOrPath ) ); JSONSetElement ( json; keyOrIndexOrPath; "[]"; JSONArray ); json );
     ~isArray = JSONGetElementType ( ~json ; keyOrIndexOrPath ) = JSONArray;
     ~arrayLength = ValueCount ( JSONListKeys ( ~json ; keyOrIndexOrPath ) );
-    ~count = If ( IsEmpty ( appendList ) ; 1 ; ValueCount ( appendList ) ); // Set count to at least 1 so at least 1 value will be set
+    ~appendEachElement = JSONGetElementType ( listOrArrayToAppend ; "" ) = JSONArray and type <> JSONArray;
+    ~count = ValueCount ( If ( ~appendEachElement; JSONListKeys ( listOrArrayToAppend; "" ); listOrArrayToAppend ) );
     ~i = 0;
     ~addValue = ""
   ];
 
-  //condition
-  ~i < ~count and ~isArray;
+  // condition
+  ~i < ~count and ~isArray and ~count > 0;
 
   [
-    //logic
+    // logic
     ~i = ~i + 1;
-    ~addValue = GetValue ( appendList ; ~i );
-    ~json = JSONSetElement ( ~json ; keyOrIndexOrPath & "[" & ~i + ~arrayLength - 1 & "]"; ~addValue ; jsonType )
+    ~addValue = If ( ~appendEachElement;
+      JSONGetElement ( listOrArrayToAppend; "[" & ~i - 1 & "]" );
+      GetValue ( listOrArrayToAppend ; ~i )
+    );
+    ~json = JSONSetElement ( ~json ; keyOrIndexOrPath & "[" & ~i + ~arrayLength - 1 & "]"; ~addValue ; type )
   ];
 
+  // result
   If ( ~isArray ; ~json ; "? * Cannot append to a non-array jsonType")
-
 )
