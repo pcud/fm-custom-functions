@@ -12,23 +12,37 @@
  *    Object
  *
  *  DEPENDENCIES
- *    None
+ *    JSONGetElementTypeExtended: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONGetElementTypeExtended.fmfn
  *
  *  CHANGELOG
  *    2022-12-05: Paul McCudden: Created
+ *    2023-12-28: Paul McCudden: Updated to have "error" and "message" and use JSONGetElementTypeExtended for better JSON typing for "return"
  *
 */
 
 Let (
     [
         ~json = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON )
+
+        // error and message might be nested in $return, check for that and set it to work with the other custom functions
+        ~returnIsObject = JSONGetElementType ( $return; "" ) = JSONObject;
+        ~error = Case (
+            not IsEmpty ( $error ); $error;
+            ~returnIsObject; JSONGetElement ( $return; "error" )
+        );
+        ~message = Case (
+            not IsEmpty ( $message ); $message;
+            ~returnIsObject; JSONGetElement ( $return; "message" )
+        );
     ];
 
     JSONSetElement ( additionalJSON
-        ;["return"; $return; JSONRaw]
+        ;["return"; $return; JSONGetElementTypeExtended ( $return; "")]
         ;["file"; Get ( FileName ); JSONString]
         ;["script"; Get ( ScriptName ); JSONString]
         ;["errorData"; ErrorGetMinimalInfo; JSONArray]
+        ;["error"; ~error; JSONString] // JSONString instead of JSONumber in case it's a non-standard error
+        ;["message"; ~message; JSONString]
     )
 
 )
