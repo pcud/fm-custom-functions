@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isFrontPanel ( panelName )
+ *
+ *  DESCRIPTION
+ *    Tells you whether a panel is currently the front panel or not
+ *
+ *  PARAMS
+ *    --NONE--
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2023-01-04: Paul McCudden: Created
+*/
+
+GetLayoutObjectAttribute ( panelName ; "isFrontPanel" )
