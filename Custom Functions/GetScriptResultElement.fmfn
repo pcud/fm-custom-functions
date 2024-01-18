@@ -22,9 +22,15 @@
 Let (
     [
         ~json = If ( IsEmpty ( json ); Get ( ScriptResult ); json );
-        ~json = If ( Left ( JSONFormatElements ( ~json ); 1 ) = "?"; "{}"; ~json )
+        ~json = If ( Left ( JSONFormatElements ( ~json ); 1 ) = "?"; "{}"; ~json );
+
+        // Be able to handle if there's a return key for backwards compatibility
+        ~return = If (
+            not IsEmpty ( FilterValues ( JSONListKeys ( ~json; "" ); "return" ) ) and ~json <> "{}";
+            "return"
+        )
     ];
 
-    JSONGetElement ( ~json; "return" & If ( not IsEmpty ( keyOrIndexOrPath ); "." & keyOrIndexOrPath ) )
+    JSONGetElement ( ~json; ~return & If ( not IsEmpty ( keyOrIndexOrPath ); "." & keyOrIndexOrPath ) )
 
 )

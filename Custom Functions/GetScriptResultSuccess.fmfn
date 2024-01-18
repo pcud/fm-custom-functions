@@ -12,7 +12,7 @@
  *    Boolean
  *
  *  DEPENDENCIES
- *    JSONArrayAppendList
+ *    JSONArrayAppend: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONArrayAppend.fmfn
  *
  *  CHANGELOG
  *    2023-11-02: Paul McCudden: Created
@@ -26,7 +26,7 @@ Let (
 
         // Pass up the common variables to the parent script so it can be used in logging
         $error = JSONGetElement ( ~result; "error" );
-        $errorData = JSONArrayAppendList ( $errorData; ""; JSONGetElement ( ~result; "errorData" ); JSONObject );
+        $errorData = JSONArrayAppend ( $errorData; ""; JSONGetElement ( ~result; "errorData" ); JSONObject );
         $message = JSONGetElement ( ~result; "message" )
     ];
 

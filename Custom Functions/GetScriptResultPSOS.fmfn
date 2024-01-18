@@ -1,0 +1,50 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetScriptResultPSOS ( result; additionalJSON )
+ *
+ *  DESCRIPTION
+ *    Used when running a script PSOS to pass all the results properly
+ *
+ *  PARAMS
+ *    additionalJSON: An additional JSON object to set 
+ *
+ *  RETURNS
+ *    A JSON object
+ *
+ *  DEPENDENCIES
+ *    JSONDeepMergeObjects: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONDeepMergeObjects.fmfn
+ *    GetScriptResultElement: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/GetScriptResultElement.fmfn
+ *    JSONArrayAppend: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONArrayAppend.fmfn
+ *
+ *  CHANGELOG
+ *    2024-01-17: Paul McCudden: Created
+*/
+
+Let (
+    [
+        ~result = If ( IsEmpty ( result ); Get ( ScriptResult ); result );
+        ~result = If ( Left ( JSONFormatElements ( Get ( ScriptResult ) ); 1 ) = "?"; "{}"; Get ( ScriptResult ) );
+        ~jsonToAdd = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
+
+        // Assume that if there isn't a return key, everything should be a child of return
+        ~jsonToAdd = Case (
+            IsEmpty ( FilterValues ( JSONListKeys ( ~jsonToAdd; "" ); "return" ) ) and ~jsonToAdd <> "{}";
+                JSONSetElement ( "{}"; "return"; ~jsonToAdd; JSONGetElementTypeExtended ( ~jsonToAdd; "") );
+            ~jsonToAdd
+        );
+
+        // Pass up the common variables to the parent script so it can be used in logging
+        $error = JSONGetElement ( ~result; "error" );
+        $errorData = JSONArrayAppend ( $errorData; ""; JSONGetElement ( ~result; "errorData" ); JSONObject );
+        $message = JSONGetElement ( ~result; "message" )
+    ];
+
+    JSONDeepMergeObjects ( 
+        JSONSetElement ( GetScriptResultElement ( ""; "" )
+            ;["psos"; True; JSONBoolean]
+            ;["waited"; not IsEmpty ( Get ( ScriptResult ) ); JSONBoolean]
+        );
+        ~jsonToAdd
+    )
+
+)
