@@ -33,8 +33,6 @@ Let (
 
     // Only use substitute method if can't use While() method since it's riskier with unexpected characters
     If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 18;
-
-        // If no nested JSON variables, we don't need to loop
         Let (
             [
                 ~unique = Get ( UUID );
@@ -67,7 +65,6 @@ Let (
             ) & "¶];\"Used Substitute Method\")" )
         );
 
-        // We have nested JSON variables, need to loop
         While (
             [
                 ~paramList = JSONListKeys ( ~params; "" );
