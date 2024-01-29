@@ -19,6 +19,7 @@
  *  CHANGELOG
  *    2022-??-??: Max_P: Created
  *    2023-06-02: Paul McCudden: Added comments and added view as permissions
+ *    2024-01-28: Paul McCudden: Added programs and countries
 */
 
 Let (
@@ -33,17 +34,21 @@ Let (
 	];
 
 	JSONSetElement( "{}"
-		; ["MENU.LEARNING_PROGRESSION"; ¢all ; JSONBoolean]
-        ; ["EDIT.LEARNING_PROGRESSION"; ¢isAdmin or ¢isAppleUser ; JSONBoolean]
-		; ["MENU.COHORTS"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
-		; ["ADD.COHORTS"; ¢isAdmin ; JSONBoolean]
-		; ["MENU.EVENTS"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
-		; ["MENU.LOGS";  ¢isAdmin; JSONBoolean]
-		; ["MENU.ADMIN"; ¢isAdmin ; JSONBoolean]
+		;["MENU.LEARNING_PROGRESSION"; ¢all ; JSONBoolean]
+        ;["EDIT.LEARNING_PROGRESSION"; ¢isAdmin or ¢isAppleUser ; JSONBoolean]
+		;["MENU.COHORTS"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
+		;["ADD.COHORTS"; ¢isAdmin ; JSONBoolean]
+		;["MENU.COUNTRIES"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
+		;["ADD.COUNTRIES"; ¢isAdmin; JSONBoolean]
 
-		; ["EXPORT"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
-		; ["VIEW_AS.LOGGED_IN_AS"; ¢isSuperAdminLoggedIn; JSONBoolean]
-		; ["VIEW_AS.VIEWING_AS"; ¢isSuperAdminViewingAs; JSONBoolean]
+		;["MENU.PROGRAMS"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
+		;["MENU.EVENTS"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
+		;["MENU.LOGS";  ¢isAdmin; JSONBoolean]
+		;["MENU.ADMIN"; ¢isAdmin ; JSONBoolean]
+
+		;["EXPORT"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
+		;["VIEW_AS.LOGGED_IN_AS"; ¢isSuperAdminLoggedIn; JSONBoolean]
+		;["VIEW_AS.VIEWING_AS"; ¢isSuperAdminViewingAs; JSONBoolean]
 	)
 
 )

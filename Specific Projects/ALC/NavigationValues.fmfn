@@ -20,6 +20,7 @@
  *    2022-07-07: Paul McCudden: Created
  *    2023-06-02: Paul McCudden: Added compatibility with hasAccessTo*() CF
  *    2023-06-30: Paul McCudden: Removed event import from navigation
+ *    2023-01-28: Paul McCudden: Updated Cohort => Country
 */
 
 Let (
@@ -45,18 +46,18 @@ Let (
                     ~value = "hide"; not hasAccessTo ( "MENU.LEARNING_PROGRESSION" )
                 );
                 ~order = 2; Case (
-                    ~value = "label"; "cohorts";
+                    ~value = "label"; "countries";
                     ~value = "script"; JSONSetElement ( ~json
-                        ; ["NAV_KEY"; "cohorts"; JSONString]
+                        ; ["NAV_KEY"; "countries"; JSONString]
                     );
                     ~value = "hide"; not hasAccessTo ( "MENU.COHORTS" )
                 );
                 ~order = 3; Case (
-                    ~value = "label"; "events";
+                    ~value = "label"; "programs";
                     ~value = "script"; JSONSetElement ( ~json
-                        ; ["NAV_KEY"; "events"; JSONString]
+                        ; ["NAV_KEY"; "programs"; JSONString]
                     );
-                    ~value = "hide"; not hasAccessTo ( "MENU.EVENTS" )
+                    ~value = "hide"; not hasAccessTo ( "MENU.PROGRAMS" )
                 );
                 ~order = 4; Case (
                     ~value = "label"; "admin";
@@ -103,38 +104,46 @@ Let (
                     );
                     ~value = "hide"; False
                 );
-                ~order = 2; Case (
+                // removed from list
+                ~order = -1; Case (
                     ~value = "label"; "countries";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "countries"; JSONString]
                     );
                     ~value = "hide"; False
                 );
-                ~order = 3; Case (
+                ~order = 2; Case (
                     ~value = "label"; "users";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "users"; JSONString]
                     );
                     ~value = "hide"; False
                 );
-                ~order = 4; Case (
+                ~order = 3; Case (
                     ~value = "label"; "units";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "units"; JSONString]
                     );
                     ~value = "hide"; False
                 );
-                ~order = 5; Case (
+                ~order = 4; Case (
                     ~value = "label"; "event types";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "event types"; JSONString]
                     );
                     ~value = "hide"; False
                 );
-                ~order = 6; Case (
+                ~order = 5; Case (
                     ~value = "label"; "email¶templates";
                     ~value = "script"; JSONSetElement ( ~json
                         ; ["NAV_KEY"; "emails"; JSONString]
+                    );
+                    ~value = "hide"; False
+                );
+                ~order = 6; Case (
+                    ~value = "label"; "feedback¶questions";
+                    ~value = "script"; JSONSetElement ( ~json
+                        ; ["NAV_KEY"; "feedback questions"; JSONString]
                     );
                     ~value = "hide"; False
                 );
