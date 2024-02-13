@@ -40,7 +40,7 @@ Let (
     ];
 
     JSONDeepMergeObjects ( 
-        JSONSetElement ( GetScriptResultElement ( ""; "" )
+        JSONSetElement ( ~result
             ;["psos"; True; JSONBoolean]
             ;["waited"; not IsEmpty ( Get ( ScriptResult ) ); JSONBoolean]
         );
