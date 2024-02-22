@@ -17,8 +17,9 @@
  *    GetCurrentUTCTimestamp: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/GetCurrentUTCTimestamp.fmfn
  *
  *  CHANGELOG
- *    2023-07-06: Paul McCudden (paul@peak14.solutions): Created
+ *    2023-07-06: Paul McCudden: Created
  *    2023-08-29: Paul McCudden: Added get as timestamp to force typing
+ *    2024-02-22: Paul McCudden: Updated to auto detect if this is just a time or if it's just a date and format properly and update issue where days could calculate incorrect if UTC was next day
  *
 */
 
@@ -29,26 +30,32 @@ Let (
 			LeftWords ( Get ( HostApplicationVersion ); 1 ) = "Server"; Get ( CurrentHostTimestamp ); // Get host timestamp if hosted
 			Get ( CurrentTimestamp )
 		);
+
 		~timestamp = GetAsTimestamp ( theTimestamp );
+		~isOnlyDate = GetAsDate ( ~timestamp ) = ~timestamp;
+		~isOnlyTime = GetAsNumber ( GetAsTime ( ~timestamp ) ) = GetAsNumber ( GetAsTimestamp ( ~timestamp ) );
 		~timestamp = Case (
 			IsEmpty ( ~timestamp ) or ~timestamp = "?"; "";
 			isUTC; ConvertUTCtoLocalTimestamp ( ~timestamp );
 			~timestamp
 		);
-		~days = Int ( ~now / 86400 ) - Int ( ~timestamp / 86400 );
+		~utcDayOffset = If ( isUTC; GetAsDate ( GetCurrentUTCTimestamp ) - Get ( CurrentDate ) );
+		~days = Int ( ~now / 86400 ) - Int ( ~timestamp / 86400 ) - ~utcDayOffset;
 		~dayName = DayName ( ~timestamp );
-		~dateFormatted = MonthName ( ~timestamp ) & " " & Day ( ~timestamp ) & If ( Year ( ~timestamp ) <> Year ( ~now ); ", " & Year ( ~timestamp ) );
+		~dateFormatted = Case (
+			~days < -1 and ~days > -8; "This upcoming " & ~dayName;
+			~days = -1; "Tomorrow";
+			~days = 0; "Today";
+			~days = 1; "Yesterday";
+			~days > 1 and ~days < 7 ; "This past " & ~dayName;
+			MonthName ( ~timestamp ) & " " & Day ( ~timestamp ) & If ( Year ( ~timestamp ) <> Year ( ~now ); ", " & Year ( ~timestamp ) )
+		);
 		~timeFormatted = If ( Hour ( ~timestamp ) > 12 ; Hour ( ~timestamp ) - 12 ; Hour ( ~timestamp ) ) & ":" & Right ( "00" & Minute ( ~timestamp ); 2 ) & " " & Choose ( Int ( Hour ( ~timestamp ) / 12 ); "AM"; "PM" )
 		
 	];
 
-	Case (
-		IsEmpty ( ~timestamp ); "";
-		~days < -1 and ~days > -8; "This upcomming " & ~dayName & " at " & ~timeFormatted;
-		~days = -1; "Tomorrow at " & ~timeFormatted;
-		~days = 0; "Today at " & ~timeFormatted;
-		~days = 1; "Yesterday at " & ~timeFormatted;
-		~days > 1 and ~days < 7 ; "This past " & ~dayName & " at " & ~timeFormatted;
-		~dateFormatted & " at " & ~timeFormatted
-	)
+	If ( not ~isOnlyTime; ~dateFormatted ) & 
+	If ( not ( ~isOnlyDate or ~isOnlyTime ); " at " ) & 
+	If ( not ~isOnlyDate; ~timeFormatted )
+
 )
