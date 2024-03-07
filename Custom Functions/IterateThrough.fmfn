@@ -22,6 +22,7 @@
  *    2022-07-07: Paul McCudden: Updated to work with arrays and objects
  *    2023-08-11: Paul McCudden: $ not needed in variable name declaration
  *    2023-09-29: Paul McCudden: Added backward compatibility for v16+
+ *    2024-03-06: Paul McCudden: Added in ~listOrArrayOrObjectEscaped to allow for evaluating of JSONGetElementType work better
 */
 
 If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires FileMaker version 16+";
@@ -29,7 +30,8 @@ If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires Fi
         [
             thisVariableName = If ( IsEmpty ( thisVariableName ); "$thisValue"; If ( Left ( thisVariableName; 1 ) <> "$"; "$" ) & thisVariableName );
             iterationVariableName = If ( IsEmpty ( iterationVariableName ); "$i"; If ( Left ( iterationVariableName; 1 ) <> "$"; "$" ) & iterationVariableName );
-            
+
+            ~listOrArrayOrObjectEscaped = Quote ( listOrArrayOrObject );
             ~listType = If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 19.5; 
                 // Don't have access to JSONGetElementType - there are better ways to check JSONType, but don't want to use dependancies
                 Case (
@@ -41,8 +43,8 @@ If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires Fi
                 // Do have access to JSONGetElementType - use evaluate to hide <Function Missing> in v19.4-
                 Case (
                     Left ( JSONFormatElements ( listOrArrayOrObject ); 1 ) = "?"; "list";
-                    Evaluate ( "JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONArray" ); "array";
-                    Evaluate ( "JSONGetElementType ( listOrArrayOrObject ; "" ) = JSONObject"); "object";
+                    Evaluate ( "JSONGetElementType ( " & ~listOrArrayOrObjectEscaped & " ; \"\" ) = JSONArray" ); "array";
+                    Evaluate ( "JSONGetElementType ( " & ~listOrArrayOrObjectEscaped & " ; \"\" ) = JSONObject"); "object";
                     ""
                 )
             );
@@ -54,8 +56,7 @@ If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires Fi
                 ~listType = "array"; GetValue ( JSONListValues ( listOrArrayOrObject; "" ); ~newIteration );
                 ~listType = "object"; GetValue ( JSONListKeys ( listOrArrayOrObject; "" ); ~newIteration )
             ) );
-
-        ~letStatement = "Let([" & thisVariableName & "=\"" & Substitute ( ~newVariableValue; "\""; "\\\"" ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
+            ~letStatement = "Let([" & thisVariableName & "=\"" & Substitute ( ~newVariableValue; "\""; "\\\"" ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
         ];
 
         Evaluate ( ~letStatement )
