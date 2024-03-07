@@ -42,6 +42,7 @@ Let (
 		;["ADD.COUNTRIES"; ¢isAdmin; JSONBoolean]
 
 		;["MENU.PROGRAMS"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
+		;["EDIT.PROGRAMS.FEEDBACK"; ¢isAdmin; JSONBoolean]
 		;["MENU.EVENTS"; ¢isAdmin or ¢isAppleUser; JSONBoolean]
 		;["MENU.LOGS";  ¢isAdmin; JSONBoolean]
 		;["MENU.ADMIN"; ¢isAdmin ; JSONBoolean]
