@@ -53,7 +53,7 @@ If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires Fi
             ~newIteration = If ( ~exitLoop; ""; ~newIteration );
             ~newVariableValue = If ( ~exitLoop; ""; Case (
                 ~listType = "list"; GetValue ( listOrArrayOrObject; ~newIteration );
-                ~listType = "array"; GetValue ( JSONListValues ( listOrArrayOrObject; "" ); ~newIteration );
+                ~listType = "array"; JSONGetElement ( listOrArrayOrObject; "[" & ~newIteration - 1 & "]" );
                 ~listType = "object"; GetValue ( JSONListKeys ( listOrArrayOrObject; "" ); ~newIteration )
             ) );
             ~letStatement = "Let([" & thisVariableName & "=\"" & Substitute ( ~newVariableValue; "\""; "\\\"" ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
