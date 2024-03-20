@@ -1,0 +1,21 @@
+/*
+ *  DESCRIPTION
+ *    Grabs the correct values for the program feedback
+*/
+
+Let (
+    [
+        ~data = GetWindowAttribute ( "FEEDBACK." & GetWindowAttribute ( "FEEDBACK.POINTER[" & VIRTUAL_TABLE__FEEDBACK::ID_SERIAL - 1 & "]PATH" ) & "TOTALS.PRE.DISPLAY" );
+    ];
+
+    If ( ValueCount ( ~data ) = 1; ~data;
+        While (
+            [
+                ~i = 0
+            ];
+
+            ~i < ValueCount ( ~data )
+        )
+    )
+
+)
