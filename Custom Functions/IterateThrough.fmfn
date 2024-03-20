@@ -60,8 +60,8 @@ If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires Fi
             ~letStatement = "Let([" & thisVariableName & "=\"" &
                 Substitute ( ~newVariableValue
                     ;["\\"; "\\\\"]
-                    ;[Char(8220); "\\\""]; // Opening double quote: “
-                    ;[Char(8221); "\\\""]; // Closeing double quote: ”
+                    ;[Char(8220); "\\\""] // Opening double quote: “
+                    ;[Char(8221); "\\\""] // Closeing double quote: ”
                 ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
         ];
 
