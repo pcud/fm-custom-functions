@@ -7,8 +7,8 @@
  *
  *  PARAMS
  *    listOrArrayOrObject: The variable that contains the list or array or object to iterate through
- *    iterationVariableName (optional): The name of the variable to use to count through the list. If nothing passed, will use $i. Clears after last iteration
  *    thisVariableName (optional): The name of the variable to set this current iteration variable to. If nothing passed, will use $thisValue
+ *    iterationVariableName (optional): The name of the variable to use to count through the list. If nothing passed, will use $i. Clears after last iteration
  *
  *  RETURNS
  *    True or False
@@ -23,6 +23,7 @@
  *    2023-08-11: Paul McCudden: $ not needed in variable name declaration
  *    2023-09-29: Paul McCudden: Added backward compatibility for v16+
  *    2024-03-06: Paul McCudden: Added in ~listOrArrayOrObjectEscaped to allow for evaluating of JSONGetElementType work better
+ *    2024-03-20: Paul McCudden & Kully: Fixed bug where a json contained \"
 */
 
 If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires FileMaker version 16+";
@@ -56,7 +57,12 @@ If ( GetAsNumber ( Get ( ApplicationVersion ) ) < 16; "This function requires Fi
                 ~listType = "array"; JSONGetElement ( listOrArrayOrObject; "[" & ~newIteration - 1 & "]" );
                 ~listType = "object"; GetValue ( JSONListKeys ( listOrArrayOrObject; "" ); ~newIteration )
             ) );
-            ~letStatement = "Let([" & thisVariableName & "=\"" & Substitute ( ~newVariableValue; "\""; "\\\"" ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
+            ~letStatement = "Let([" & thisVariableName & "=\"" &
+                Substitute ( ~newVariableValue
+                    ;["\\"; "\\\\"]
+                    ;[Char(8220); "\\\""]; // Opening double quote: “
+                    ;[Char(8221); "\\\""]; // Closeing double quote: ”
+                ) & "\";" & iterationVariableName & "=\"" & ~newIteration & "\"];" & ~exitLoop & ")"
         ];
 
         Evaluate ( ~letStatement )

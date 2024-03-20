@@ -48,8 +48,8 @@ Let (
                 // Format each line to have the proper syntax
                 [Char(9) & "\""; Char(9) & "$"];
                 ["\" :"; " ="];
-                ["\“"; "\\\""];
-                ["\”"; "\\\""];
+                [Char(8220); "\\\""]; // Opening double quote: “
+                [Char(8221); "\\\""]; // Clsoing double quote: ”
 
                 // Eliminate any empty lines
                 ["¶¶"; ¶ & ~unique & ¶];
