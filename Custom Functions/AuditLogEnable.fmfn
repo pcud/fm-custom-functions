@@ -1,0 +1,28 @@
+/*
+ *  CUSTOM FUNCTION
+ *    AuditLogEnable
+ *
+ *  DESCRIPTION
+ *    Enables audit logging
+ *
+ *  PARAMS
+ *    --None--
+ *
+ *  RETURNS
+ *    JSON
+ *
+ *  DEPENDENCIES
+ *    FileMaker 20.0.1+
+ *
+ *  CHANGELOG
+ *    2024-03-21: Paul McCudden: Created
+ *
+*/
+
+Let (
+    [
+        $$auditLogDisabled = ""
+    ];
+
+    True
+)
