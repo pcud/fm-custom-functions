@@ -17,11 +17,14 @@
  *  CHANGELOG
  *    2023-04-25: Alec Gregory (https://blog.beezwax.net/lets-make-an-audit-log-with-claris-filemaker/): Created
  *    2023-08-30: Paul McCudden: Adjust into CF and updated for to add more information
+ *    2024-03-27: Paul McCudden: Added in the ability to pass a string as the idField and added disabling
  */
+
+If ( $$auditLogDisabled; "{}";
 
 Let (
 	[
-        // Settings
+        // ================= Settings =============
 
         // Any field name that matches one of the below won't be logged
         ~fieldNameIgnore = List (
@@ -29,9 +32,21 @@ Let (
             ""
         );
 
+		// =============== End Settings =============
+
+
+		~calcTimeStart = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 );
+		// Convert the ID field into a name in case it was passed as a reference
+		~idFieldName = Case (
+			not EvaluationError ( GetFieldName ( idField ) ) ;
+				GetFieldName ( idField ) ;
+			not EvaluationError ( GetField ( idField ) ) or EvaluationError ( Evaluate ( idField ) ) = 103 ;
+				idField
+		);
+
 		// Get base table name and convert it to a unique number
 		// for use as $fieldInfo repetition number
-		~baseTableName = GetBaseTableName ( idField );
+		~baseTableName = GetBaseTableName ( GetField ( ~idFieldName ) );
 		~baseTableId =
 			Let (
 				[
@@ -126,27 +141,27 @@ Let (
 									~finalObjects =
 										List (
 											~finalObjects;
-											If ( LeftWords ( ~fieldType; 1 ) ≠ "UnstoredCalc";
+											If ( LeftWords ( ~fieldType; 1 ) <> "UnstoredCalc";
 												List (
-												Quote ( ~fieldName ) & ":" & ~fieldObject;
-			 									If ( ~repetitions > 1;
-												While (
-												[
-												~objects = "";
-												~i = 2
-												];
-												~i ≤ ~repetitions;
-												[
-												~objects =
-												List (
-												~objects;
-												Quote ( ~fieldName & "[" & ~i & "]" ) & ":{}"
-												);
-												~i = ~i + 1
-												];
-												~objects
-												)
-												)
+													Quote ( ~fieldName ) & ":" & ~fieldObject;
+													If ( ~repetitions > 1;
+														While (
+															[
+																~objects = "";
+																~i = 2
+															];
+																~i ≤ ~repetitions;
+															[
+																~objects =
+																	List (
+																		~objects;
+																		Quote ( ~fieldName & "[" & ~i & "]" ) & ":{}"
+																	);
+																~i = ~i + 1
+															];
+																~objects
+														)
+													)
 												)
 											)
 										);
@@ -180,7 +195,7 @@ Let (
 		[
 			~i = 1;
 			~field = "";
-			~table = GetValue ( Substitute ( GetFieldName ( idField ); "::"; ¶ ); 1 );
+			~table = GetValue ( Substitute ( ~idFieldName; "::"; ¶ ); 1 );
 			~fieldType = "";
 			~dataObjects = ""
 		];
@@ -262,7 +277,7 @@ Let (
 					"{}";
 					[
 						"recordPrimaryKey";
-						idField;
+						GetField ( ~idFieldName );
 						JSONString
 					];
 					[
@@ -336,9 +351,15 @@ Let (
 						"userName";
 						Get ( UserName );
 						JSONString
+					];
+					[
+						"parameterCalcTime";
+						GetAsTime ( GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ) - ~calcTimeStart );
+						JSONString
 					]
                 ); JSONObject
             ]
 		)
 	)
+)
 )
