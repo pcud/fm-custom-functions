@@ -1,20 +1,29 @@
 /*
- *  DESCRIPTION
+ *  DESCRIPTION 
  *    Grabs the correct values for the program feedback
 */
 
 Let (
     [
-        ~data = GetWindowAttribute ( "FEEDBACK." & GetWindowAttribute ( "FEEDBACK.POINTER[" & VIRTUAL_TABLE__FEEDBACK::ID_SERIAL - 1 & "]PATH" ) & "TOTALS.PRE.DISPLAY" );
+        ~data = GetWindowAttribute ( "FEEDBACK." & GetWindowAttribute ( "FEEDBACK.POINTER[" & VIRTUAL_TABLE__FEEDBACK::ID_SERIAL + 3 & "]PATH" ) & "TOTALS.PRE.DISPLAY" )
     ];
 
     If ( ValueCount ( ~data ) = 1; ~data;
         While (
             [
+                ~dataNew = "";
                 ~i = 0
             ];
 
-            ~i < ValueCount ( ~data )
+            ~i < ValueCount ( ~data );
+
+            [
+                ~i = ~i + 1;
+                ~thisData = Substitute ( GetValue ( ~data; ~i ); " "; ¶ ); // Use substitute instead of LeftWords() because "%" is considered a seperator
+                ~dataNew = List ( ~dataNew; TextStyleRemove ( GetValue ( ~thisData; 1 ); bold ) & " " & GetValue ( ~thisData; 2 ))
+            ];
+
+            ~dataNew
         )
     )
 
