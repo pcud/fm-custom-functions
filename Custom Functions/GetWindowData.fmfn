@@ -1,0 +1,21 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetWindowData ( element )
+ *
+ *  DESCRIPTION
+ *    Gets the result for this window data stored in $$sessionData
+ *
+ *  PARAMS
+ *    element: The json path to get
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2024-03-27: Paul McCudden: Created
+*/
+
+JSONGetElement ( $$sessionData; "windowData." & GetValue ( Get ( WindowName ); 2 ) & "." & element )
