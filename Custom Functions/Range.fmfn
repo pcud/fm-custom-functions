@@ -17,10 +17,14 @@
  *    --None--
  *
  *  CHANGELOG
- *    2022-09-12: Paul McCudden (paul@peak14.solutions): Created
+ *    2022-09-12: Paul McCudden: Created
+ *    2024-04-02: Paul McCudden: Adapted methods from Kevin Frank to speed it up if step is 1
+ *
+ *  CREDIT
+ *    Kevin Frank: https://filemakerhacks.com/2024/03/31/fastrange-custom-function/
 */
 
-While (
+Let (
     [
         ~start = GetAsNumber ( start );
         ~stop = GetAsNumber ( stop );
@@ -30,40 +34,77 @@ While (
             IsEmpty ( ~start ); 0;
             ~start
         );
+        ~stop = Case (
+            IsEmpty ( ~stop ); 0;
+            ~stop
+        );
         ~step = Case (
             not IsEmpty ( ~step ); ~step;
             ~start < ~stop; 1;
             ~start > ~stop; -1
-        );
-        ~list = "";
-        ~currentNumber = ~start;
-
-        ~noLoop = Case (
-            ~step = 0; True;
-            ~start = ~stop; True;
-            ~start < ~stop and ~step < 0; True;
-            ~start > ~stop and ~step > 0; True;
-            False
         )
     ];
 
     Case (
-        ~noLoop; False;
-        ~start < ~stop; ~currentNumber <= ~stop;
-        ~start > ~stop; ~currentNumber >= ~stop;
-    );
-
-    [
-        ~list = List ( ~list; ~currentNumber );
-        ~currentNumber = ~currentNumber + ~step
-    ];
-
-    Case (
+        // Error cases
         ~step = 0; Evaluate ( "Factorial ( -1 )" ); // Simulate an out of range error - will never reach stop
         ~start < ~stop and ~step < 0; Evaluate ( "Factorial ( -1 )" ); // Simulate an out of range error - will never reach stop
         ~start > ~stop and ~step > 0; Evaluate ( "Factorial ( -1 )" ); // Simulate an out of range error - will never reach stop
+        
+        // Nothing only single step
         ~start = ~stop; ~start;
-        ~list
-    )
 
+        // Can use the faster method of creating a range from Kevin Frank
+        ~step = 1; Let (
+            [
+                // The positive list contains the "0"
+                ~listPositive = If ( ~stop >= 0;
+                    MiddleWords (
+                        JSONListKeys ( JSONSetElement ( "[]"; ~stop; ""; JSONNull ); "" );
+                        Max ( ~start + 1; 1 );
+                        ~stop + 1
+                    )
+                );
+                ~listNegative = If ( ~start < 0;
+                    "-" & Substitute (
+                        LeftWords ( // Use leftwords to get rid of 0 and the ¶ created with SortValues()
+                            SortValues (
+                                MiddleWords (
+                                    JSONListKeys ( JSONSetElement ( "[]"; Abs ( ~start ); ""; JSONNull ); "" );
+                                    If ( ~stop >= 0; 1; Abs ( ~stop ) + 1 );
+                                    Abs ( ~start ) + 1
+                                );
+                                -2
+                            );
+                            Abs ( ~start )
+                        );
+                        ¶;
+                        "¶-"
+                    )
+                )
+            ];
+
+            List ( ~listNegative; ~listPositive)
+        );
+
+        // Use slower looping method
+        While (
+            [
+                ~list = "";
+                ~currentNumber = ~start
+            ];
+
+            Case (
+                ~start < ~stop; ~currentNumber <= ~stop;
+                ~start > ~stop; ~currentNumber >= ~stop;
+            );
+
+            [
+                ~list = List ( ~list; ~currentNumber );
+                ~currentNumber = ~currentNumber + ~step
+            ];
+
+            ~list
+        )
+    )
 )
