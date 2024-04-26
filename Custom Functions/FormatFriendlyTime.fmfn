@@ -15,7 +15,8 @@
  *    —None—
  *
  *  CHANGELOG
- *    2023-07-26: Paul McCudden (paul@peak14.solutions): Created
+ *    2023-07-26: Paul McCudden: Created
+ *    2024-04-26: Paul McCudden: If time is 0, output 0s
  *
 */
 
@@ -26,9 +27,11 @@ Let (
         ~sec = Round ( Seconds ( theTime ); 0 )
 	];
 
-	Trim (
-		If ( ~hours > 0; ~hours & "h " ) &
-		If ( ~min > 0; Right ( "0" & ~min; 2 ) & "m " ) &
-        If ( ~sec > 0; Right ( "0" & ~sec; 2 ) & "s " )
+	If ( ~hours + ~min + ~sec = 0; "0s";
+		Trim (
+			If ( ~hours > 0; ~hours & "h " ) &
+			If ( ~min > 0; Right ( "0" & ~min; 2 ) & "m " ) &
+			If ( ~sec > 0; Right ( "0" & ~sec; 2 ) & "s " )
+		)
 	)
 )
