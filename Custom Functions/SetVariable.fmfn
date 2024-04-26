@@ -17,7 +17,8 @@
  *    --NONE--
  *
  *  CHANGELOG
- *    2020-03-04: Paul McCudden (paul@peak14.solutions): Created
+ *    2020-03-04: Paul McCudden: Created
+ *    2023-??-??: Paul McCudden: Updated to be able to declare variables inside let statments
 */
 
 Let (
