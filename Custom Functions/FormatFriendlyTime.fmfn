@@ -16,7 +16,7 @@
  *
  *  CHANGELOG
  *    2023-07-26: Paul McCudden: Created
- *    2024-04-26: Paul McCudden: If time is 0, output 0s
+ *    2024-05-30: Paul McCudden: Updated to handle seconds better
  *
 */
 
@@ -24,14 +24,18 @@ Let (
 	[
 		~hours = Hour ( theTime );
         ~min = Minute ( theTime );
-        ~sec = Round ( Seconds ( theTime ); 0 )
+        ~sec = If ( ~hours = 0 and ~min = 0;
+			Seconds ( theTime );
+			Round ( Seconds ( theTime ); 0 )
+		)
 	];
 
-	If ( ~hours + ~min + ~sec = 0; "0s";
-		Trim (
-			If ( ~hours > 0; ~hours & "h " ) &
-			If ( ~min > 0; Right ( "0" & ~min; 2 ) & "m " ) &
-			If ( ~sec > 0; Right ( "0" & ~sec; 2 ) & "s " )
+	Trim (
+		If ( ~hours > 0; ~hours & "h " ) &
+		If ( ~min > 0; Right ( "0" & ~min; 2 ) & "m " ) &
+        If ( ~hours = 0 and ~min = 0;
+			If ( Int ( ~sec ) = 0; "0" ) & ~sec & "s";
+			If ( ~sec > 0; Right ( "0" & ~sec; 2 ) & "s" )
 		)
 	)
 )
