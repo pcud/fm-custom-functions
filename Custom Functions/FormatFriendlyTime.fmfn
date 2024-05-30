@@ -16,6 +16,7 @@
  *
  *  CHANGELOG
  *    2023-07-26: Paul McCudden: Created
+ *    2024-04-26: Paul McCudden: If time is 0, output 0s
  *    2024-05-30: Paul McCudden: Updated to handle seconds better
  *
 */
