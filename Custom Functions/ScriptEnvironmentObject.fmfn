@@ -21,6 +21,7 @@
  *    2023-05-09: Paul McCudden: Added error data
  *    2023-12-05: Paul McCudden: Prioritized JSON data being passed into additionalJSON
  *    2023-12-07: Paul McCudden: Bug fixes
+ *    2024-06-11: Paul McCudden: Added in parameter and took out return nesting since this is the script enviornment object
  *
 */
 
@@ -30,14 +31,9 @@ Let (
         $return = If ( $return = ""; "{}"; $return);
         ~jsonToAdd = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
 
-        // Assume that if there isn't a return key, everything should be a child of return
-        ~jsonToAdd = Case (
-            IsEmpty ( FilterValues ( JSONListKeys ( ~jsonToAdd; "" ); "return" ) ) and ~jsonToAdd <> "{}";
-                JSONSetElement ( "{}"; "return"; ~jsonToAdd; JSONGetElementTypeExtended ( ~jsonToAdd; "") );
-            ~jsonToAdd
-        );
         ~jsonExisting = JSONSetElement ( "{}"
             ;["scriptLogID"; $scriptLogID; JSONString]
+            ;["parameter"; Get ( ScriptParameter ); JSONGetElementTypeExtended ( Get ( ScriptParameter ); "")]
             ;["return"; $return; JSONGetElementTypeExtended ( $return; "")]
             ;["file"; Get ( FileName ); JSONString]
             ;["script"; Get ( ScriptName ); JSONString]

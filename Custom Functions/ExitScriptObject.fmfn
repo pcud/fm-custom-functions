@@ -19,12 +19,20 @@
  *    2022-12-05: Paul McCudden: Created
  *    2023-12-28: Paul McCudden: Updated to have "error" and "message" and use JSONGetElementTypeExtended for better JSON typing for "return"
  *    2024-03-26: Paul McCudden: Updated to work with using GetScriptResultPSOS
+ *    2024-06-11: Paul McCudden: Added in additionalJSON nesting into the return variable if "return" isn't passed
  *
 */
 
 Let (
     [
-        ~json = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
+        ~jsonToAdd = If ( Left ( JSONFormatElements ( additionalJSON ); 1 ) = "?"; "{}"; additionalJSON );
+        
+        // Assume that if there isn't a return key, everything should be a child of return
+        ~jsonToAdd = Case (
+            IsEmpty ( FilterValues ( JSONListKeys ( ~jsonToAdd; "" ); "return" ) ) and ~jsonToAdd <> "{}";
+                JSONSetElement ( "{}"; "return"; ~jsonToAdd; JSONGetElementTypeExtended ( ~jsonToAdd; "") );
+            ~jsonToAdd
+        );
 
         // error and message might be nested in $return, check for that and set it to work with the other custom functions
         // Prioritize what's in return for backwards compatibility
@@ -41,6 +49,7 @@ Let (
         )
     ];
 
+    // If the child script is a script with the same name, just exit with the information in $return
     If ( JSONGetElement ( $return; "script" ) = Get ( ScriptName );
         $return;
         JSONDeepMergeObjects ( 
@@ -52,7 +61,7 @@ Let (
                 ;["error"; ~error; JSONString] // JSONString instead of JSONumber in case it's a non-standard error
                 ;["message"; ~message; JSONString]
             );
-            ~json
+            ~jsonToAdd
         )
     )
 
