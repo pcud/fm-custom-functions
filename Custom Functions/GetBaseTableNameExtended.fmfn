@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    GetBaseTableName ( fieldOrTO )
+ *    GetBaseTableNameExtended ( fieldOrTO )
  *
  *  DESCRIPTION
  *    Lists the base table name for the passed field or table occurrence
