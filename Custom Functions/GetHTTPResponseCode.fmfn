@@ -29,7 +29,7 @@
  *      }
  *
  *  DEPENDENCIES
- *    JSONArrayAppendList: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONArrayAppendList.fmfn
+ *    JSONArrayAppend: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONArrayAppend.fmfn
  *
  *  NOTES
  *    List of HTTP Reponse Codes: https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
@@ -41,6 +41,7 @@
  *    2023-10-05: Paul McCudden: Major overhaul -
  *        Updated to not loop if just not includeArray
  *        Updated to return an array of all response codes and properties if desired
+ *    2024-07-22: Paul McCudden: Updated to have the new wording for JSONArrayAppend
 */ 
 
 Let (
@@ -96,7 +97,7 @@ Let (
                             ;["[" & ~responseCount & "]code"; ~thisResponseCode; JSONString]
                             ;["[" & ~responseCount & "]description"; ~thisResponseDescription; JSONString]
                         );
-                        JSONArrayAppendList ( ~array ; "[" & ~responseCount & "]" & ~thisProperty ; ~thisValue ; JSONString )
+                        JSONArrayAppend ( ~array ; "[" & ~responseCount & "]" & ~thisProperty ; ~thisValue ; JSONString )
                     )
                 ];
 
