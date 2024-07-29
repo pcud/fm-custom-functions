@@ -55,8 +55,10 @@ While (
             "    HH: The hours on a 24-hour clock¶"&
             "    hh: The hours on a 12-hour clock¶"&
             "Other Time Codes:¶"&
-            "    ii: The minutes¶"&
-            "    ss: The seconds¶"&
+            "    i: The minutes as 1 or 2 digits¶"&
+            "    ii: The minutes as 2 digits¶"&
+            "    s: The seconds as 1 or 2 digits¶"&
+            "    ss: The seconds as 2 digits¶"&
             "    .000: The milliseconds as a fraction (to the same number of digits) - incomplete¶"&
             "    ap: For displaying hours based on a 12-hour clock and showing am or pm¶"&
             "    AP: For displaying hours based on a 12-hour clock and showing AM or PM¶"&
@@ -160,9 +162,11 @@ While (
             Exact ( ~processing; "hh" ); Hour ( ~time ) - If ( Hour ( ~time ) > 12; 12 );
 
             // Minutes
+            ~processing = "i"; GetAsNumber ( Minute ( ~time ) );
             ~processing = "ii"; Right ( "0" & Minute ( ~time ); 2 );
 
             // Seconds
+            ~processing = "s"; GetAsNumber ( Seconds ( ~time ) );
             ~processing = "ss"; Right ( "0" & Seconds ( ~time ); 2 );
 
             // Milliseconds - Need to complete
