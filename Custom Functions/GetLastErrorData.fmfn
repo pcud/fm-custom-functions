@@ -1,12 +1,12 @@
 /*
  *  CUSTOM FUNCTION
- *    GetLastErrorData ( )
+ *    GetLastErrorData ( note )
  *
  *  DESCRIPTION
  *    Stores the GetLastError function results as a JSON
  *
  *  PARAMS
- *    --None--
+ *    description: A developer description of the error that happened
  *
  *  RETURNS
  *    A JSONObject
@@ -15,12 +15,23 @@
  *    ErrorDescription: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/ErrorDescription.fmfn
  *
  *  CHANGELOG
- *    2023-09-28: Paul McCudden (paul@peak14.solutions): Created
+ *    2023-09-28: Paul McCudden: Created
+ *    2024-08-28: Paul McCudden: Split up location information
 */
 
-JSONSetElement ( "{}"
-    ;["error"; Get ( LastError ); JSONNumber]
-    ;["detail"; Get ( LastErrorDetail ); JSONString]
-    ;["description"; ErrorDescription ( Get ( LastError ) ); JSONString]
-    ;["location"; Get ( LastErrorLocation ); JSONNumber]
+Let (
+	[
+		~location = Get ( LastErrorLocation )
+	];
+
+    JSONSetElement ( "{}"
+        ;["error"; Get ( LastError ); JSONNumber]
+        ;["detail"; Get ( LastErrorDetail ); JSONString]
+        ;["description"; ErrorDescription ( Get ( LastError ) ); JSONString]
+        ;["note"; note; JSONString]
+        ;["script"; GetValue ( ~location; 1 ); JSONString]
+        ;["step"; GetValue ( ~location; 2 ); JSONString]
+        ;["line"; GetValue ( ~location; 3 ); JSONNumber]
+    )
+
 )
