@@ -17,6 +17,7 @@
  *
  *  CHANGELOG
  *    2023-12-05: Paul McCudden: Created
+ *    2024-08-26: Paul McCudden: Fixed bug where it would incorrectly read a boolean value when started with a number
 */
 
 Let (
@@ -29,7 +30,7 @@ Let (
     Case (
         Left ( ~type; 1 ) <> "?"; ~type;
         IsEmpty ( ~value ); JSONNull;
-        ~value = True or ~value = False; JSONBoolean; // Could be a number or a boolean, FileMaker intrepets them the same, so it doesn't matter
+        Exact ( ~value; True ) or Exact ( ~value; False ); JSONBoolean; // Could be a number or a boolean, FileMaker intrepets them the same, so it doesn't matter
         Length ( ~value ) = Length ( GetAsNumber ( ~value ) ) and Length ( ~value ) < 19; JSONNumber; // Scientific notation starts at 19 characters
         JSONString
     )
