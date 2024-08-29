@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    GetOnlyFieldName ( fieldRefOrFieldName )
+ *    GetFieldNameOnly ( fieldRefOrFieldName )
  *
  *  DESCRIPTION
  *    Strips out the table name from a field and returns just the field name text
