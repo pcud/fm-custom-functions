@@ -16,21 +16,29 @@
  *    --NONE--
  *
  *  CHANGELOG
- *    2022-02-25: Paul McCudden (paul@peak14.solutions): Created
+ *    2022-02-25: Paul McCudden: Created
+ *    2024-09-11: Paul McCudden: Updated to include date if one is passed
  *
 */
 
 Let (
   [
-    ~time = GetAsNumber ( GetAsTime ( theTime ) );
+    ~date = GetAsDate ( theTime );
+    ~time = GetAsTime ( theTime );
+    ~timeAsNumber = GetAsNumber ( GetAsTime ( theTime ) );
     ~nearest = GetAsNumber ( toTheNearest );
-    ~min = Mod ( GetAsTime ( theTime ); 3600 )
+    ~min = Mod ( ~timeAsNumber; 3600 );
+    ~rounded = GetAsTime ( Case (
+      ~timeAsNumber = "?"; "0";
+      ~nearest = 0; "0";
+      ~time - ~min + Round ( ~min / 60 / ~nearest; 0 ) * 60 * ~nearest
+    ) )
   ];
 
-  GetAsTime ( Case (
-    ~time = "?"; "0";
-    ~nearest = 0; "0";
-    theTime - ~min + Round ( ~min / 60 / toTheNearest; 0 ) * 60 * toTheNearest
-  ) )
+  Case (
+    ~time = "?"; Evaluate ( "Factorial ( -1 )" ); // If there is no time, simulate an error
+    ~date = "?"; ~rounded;
+    Timestamp ( ~date; ~rounded )
+  )
   
 )
