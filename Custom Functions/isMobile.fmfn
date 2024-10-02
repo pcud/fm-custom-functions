@@ -3,7 +3,7 @@
  *    isMobile ()
  *
  *  DESCRIPTION
- *    Use when you want to know if the user is on a mobile device or not
+ *    Use when you want to know if the user is on a mobile device or not. Has to use screen size if using web direct
  *    Claris Documentation on Get ( Device ): https://help.claris.com/en/pro-help/content/get-device.html?cshid=HID_Calc_GET_Device
  *      -Get ( Device ) = 3: iPad
  *      -Get ( Device ) = 4: iPhone
@@ -19,7 +19,8 @@
  *    --NONE--
  *
  *  CHANGELOG
- *    2020-02-26: Paul McCudden (paul@peak14.solutions): Created
+ *    2020-02-26: Paul McCudden: Created
+ *    2024-10-02: Paul McCudden: Added in web direct check for window size
 */
 
 
@@ -29,5 +30,5 @@ Let (
         ~device = Get ( Device )
     ];
 
-    ~device > 2 and ~device < 6
+    ~device > 2 and ~device < 6 or ( Get ( SystemPlatform ) = 4 and ( Get ( WindowHeight ) < 400 or Get ( WindowWidth ) < 700 ) )
 )
