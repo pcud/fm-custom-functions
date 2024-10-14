@@ -17,6 +17,7 @@
  *  CHANGELOG
  *    2023-09-28: Paul McCudden: Created
  *    2024-08-28: Paul McCudden: Split up location information
+ *    2024-10-14: Paul McCudden: Only sets information if an error happened
 */
 
 Let (
@@ -24,14 +25,16 @@ Let (
 		~location = Get ( LastErrorLocation )
 	];
 
-    JSONSetElement ( "{}"
-        ;["error"; Get ( LastError ); JSONNumber]
-        ;["detail"; Get ( LastErrorDetail ); JSONString]
-        ;["description"; ErrorDescription ( Get ( LastError ) ); JSONString]
-        ;["note"; note; JSONString]
-        ;["script"; GetValue ( ~location; 1 ); JSONString]
-        ;["step"; GetValue ( ~location; 2 ); JSONString]
-        ;["line"; GetValue ( ~location; 3 ); JSONNumber]
+    If ( Get ( LastError ) <> 0;
+        JSONSetElement ( "{}"
+            ;["error"; Get ( LastError ); JSONNumber]
+            ;["detail"; Get ( LastErrorDetail ); JSONString]
+            ;["description"; ErrorDescription ( Get ( LastError ) ); JSONString]
+            ;["note"; note; JSONString]
+            ;["script"; GetValue ( ~location; 1 ); JSONString]
+            ;["step"; GetValue ( ~location; 2 ); JSONString]
+            ;["line"; GetValue ( ~location; 3 ); JSONNumber]
+        )
     )
 
 )

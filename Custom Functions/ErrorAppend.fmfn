@@ -17,7 +17,8 @@
  *    ErrorDescription
  *
  *  CHANGELOG
- *    2022-12-02: Paul McCudden (paul@peak14.solutions): Combined from the previous error custom functions that can be found at the below reference
+ *    2022-12-02: Paul McCudden: Combined from the previous error custom functions that can be found at the below reference
+ *    2024-10-14: Paul McCudden: Added error location
  *
  * REFERENCES:
  *		http://filemakerstandards.org/x/AoA-/
@@ -110,6 +111,7 @@ While (
       // "InstalledFMPlugins" ;
       "InstalledFMPluginsAsJSON" ;
       "LastError" ;
+      "LastErrorLocation" ;
       "LastExternalErrorDetail" ;
       "LastMessageChoice" ;
       "LayoutAccess" ;

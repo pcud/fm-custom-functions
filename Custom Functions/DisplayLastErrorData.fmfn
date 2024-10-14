@@ -1,0 +1,37 @@
+/*
+ *  CUSTOM FUNCTION
+ *    DisplayLastErrorData ( errorData )
+ *
+ *  DESCRIPTION
+ *    A user friendly message from GetLastErrorData
+ *
+ *  PARAMS
+ *    description: A developer description of the error that happened
+ *
+ *  RETURNS
+ *    A JSONObject
+ *
+ *  DEPENDENCIES
+ *    GetLastErrorData: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/GetLastErrorData.fmfn
+ *
+ *  CHANGELOG
+ *    2024-10-14: Paul McCudden: Created
+*/
+
+Let (
+	[
+		~data = If ( Left ( JSONFormatElements ( errorData ); 1) <> "?"; errorData )
+	];
+
+    If ( not IsEmpty ( ~data );
+        JSONGetElement ( ~data; "note" ) & " " & JSONGetElement ( ~data; "description") & " (Error " & JSONGetElement ( ~data; "error" ) & ")."
+        &¶&¶&
+        List (
+            If ( not IsEmpty ( JSONGetElement ( ~data; "script") ); "Script: " & JSONGetElement ( ~data; "script" ) );
+            If ( not IsEmpty ( JSONGetElement ( ~data; "line") ); "Line: " & JSONGetElement ( ~data; "line" ) );
+            If ( not IsEmpty ( JSONGetElement ( ~data; "step") ); "Step: " & JSONGetElement ( ~data; "step" ) );
+            If ( not IsEmpty ( JSONGetElement ( ~data; "detail") ); "Detail: " & JSONGetElement ( ~data; "detail" ) );
+        )
+    )
+
+)
