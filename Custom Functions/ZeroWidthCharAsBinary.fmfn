@@ -1,0 +1,118 @@
+/*==============================================================
+
+	カスタム関数:	ZeroWidthCharAsBinary ( 整数値 ; ソート順 )
+	CustomFunction:	ZeroWidthCharAsBinary ( integerNumber ; sortDirection )
+
+	数値を 2 進数に変換し 0 ,1 の文字の替わりに ゼロ幅文字 を利用することで
+	2 進数で30 桁 = 10億7374万1823 までの数をゼロ幅文字を使ってソートできます。
+	By converting a number to binary and using zero-width characters instead of 0,1.
+	You can sort numbers up to 30 binary digits = 1073741823 using zero-width characters.
+
+
+	⚠ 索引もしくはソート言語は UNICODE にしてください。
+	⚠ Using the UNICODE setting for indexing or sorting.
+
+
+	第二引数に "降順" , "DESC" , のいずれかの値が入っている場合は、値一覧で降順ソートされるような値が生成されます。
+	If the second argument contains a value of "Descending", "降順", the value is generated to sort in descending order by the value list.
+
+create: chamo 2014-08-12
+modified: chamo 2015-06-16 Change function name（by bison）
+modified: chamo 2015-06-19 Changed from 2 binary 100 digits to 2 binary 30 digits
+modified: chamo 2017-04-16 Added second argument so that it can be used in descending order
+modified: chamo 2020-06-04 Change to While function (FileMaker 18 or later)
+=============================================================*/
+
+While (
+	[
+		// 0,1 の代替文字を使った 2 進数で
+		// In binary with an alternate character of 0, 1
+		%baseN = 2 ;
+
+		// 何桁で揃えるか
+		// How many digits to align
+		%digits = 30 ;
+
+		%isASC = not ( Left ( Lower ( sortDirection ) ; 3 ) = "des" or PatternCount ( sortDirection ; "降" ) ) ;
+
+		// DESC 指定の場合は 0,1 の扱いを逆にする
+		// If descending order is specified, reverse handling of 0 and 1
+		%0 = Case ( %isASC ; Char ( 8203 ) ; Char ( 65279 ) ) ; // Char(8203) ZERO WIDTH SPACE
+		%1 = Case ( %isASC ; Char ( 65279 ) ; Char ( 8203 ) ) ; // Char(65279) ZERO WIDTH NO-BREAK SPACE (=BOM)
+
+		%number = GetAsNumber ( integerNumber ) ;
+		%binary = ""
+	] ;
+
+		%number > 0 ;
+
+	[
+		%remainder =
+			Middle (
+				%0 & %1 ;
+				Mod ( %number ; %baseN ) + 1 ;
+				1
+			) ;
+		%number = Div ( %number ; %baseN ) ;
+		%binary = %remainder & %binary
+	] ;
+
+	Case (
+		// 数値が整数値でない場合は空白を返す
+		// If the number is not an integer, return blank.
+		%number < 0 or ( Int ( %number ) ≠ %number ) ;
+			"" ;
+
+		// 0埋めで桁揃え
+		// Pad numbers with zeros to make them the same length.
+			Right (
+				Substitute ( 10^%digits - 1 ; [ 9 ; %0 ] ) & %binary ;
+				%digits
+			)
+	)
+)
+
+/*==============================================================
+
+	Custom function using recursion up to FM17
+
+  ==============================================================
+
+Let (
+	[
+	％baseN = 2 ; // In binary with an alternate character of 0, 1
+	%digits = 30 ; // How many digits to align
+
+	%isASC = not ( Left ( Lower ( sortDirection ) ; 3 ) = "des" or PatternCount ( sortDirection ; "降" ) ) ;
+
+	// If descending order is specified, reverse handling of 0 and 1
+	%0 = Case ( %isASC ; Char ( 8203 ) ; Char ( 65279 ) ) ;	// Char(8203)  ZERO WIDTH SPACE
+	%1 = Case ( %isASC ; Char ( 65279 ) ; Char ( 8203 ) ) ;	// Char(65279) ZERO WIDTH NO-BREAK SPACE（=BOM）
+
+	%number	 = GetAsNumber ( integerNumber ) ;
+	%quotient	 = Int ( %number / ％baseN ) ;
+
+	$%remainder =
+		Middle (
+			%0 & %1 ;
+			Mod ( %number ; ％baseN ) + 1 ;
+			1
+		) & $%remainder ;
+
+	%binary =
+		Case (
+			%number < 0 or ( Int ( %number ) ≠ %number ) ; // If the number is not an integer, return null and exit
+				"" ;
+			%quotient = 0 ;
+				$%remainder & Let ( [ $%remainder = "" ] ; "" ) ; // Clear local variable
+			// Recursion
+				ZeroWidthCharAsBinary ( %quotient ; sortDirection )
+		)
+	] ;
+	// Pad numbers with zeros to make them the same length.
+	Right (
+		Substitute ( 10^%digits - 1 ; [ 9 ; %0 ] ) & %binary ;
+		%digits
+	)
+)
+=============================================================*/
