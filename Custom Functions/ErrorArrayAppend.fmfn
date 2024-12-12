@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    ErrorAppend ( errorType; errorCode ; errorInfo )
+ *    ErrorArrayAppend ( errorType; errorCode ; errorInfo )
  *
  *  DESCRIPTION
  *    Appends an error to the current error information
@@ -19,6 +19,7 @@
  *  CHANGELOG
  *    2022-12-02: Paul McCudden: Combined from the previous error custom functions that can be found at the below reference
  *    2024-10-14: Paul McCudden: Added error location
+ *    2024-12-12: Paul McCudden: Updated name to distinguish between other error methods
  *
  * REFERENCES:
  *		http://filemakerstandards.org/x/AoA-/
