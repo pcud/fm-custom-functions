@@ -27,7 +27,6 @@ Let (
     JSONSetElement ( "{}"
         ;["error"; Get ( LastError ); JSONNumber]
         ;["detail"; Get ( LastErrorDetail ); JSONString]
-        ;["description"; ErrorDescription ( Get ( LastError ) ); JSONString]
         ;["note"; note; JSONString]
         ;["script"; GetValue ( ~location; 1 ); JSONString]
         ;["step"; GetValue ( ~location; 2 ); JSONString]
