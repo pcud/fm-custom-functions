@@ -27,6 +27,7 @@ Let (
         ~errorData = JSONSetElement ( "{}"; ""; errorData; JSONObject );
         ~error = JSONGetElement ( ~errorData; "error" );
         ~detail = JSONGetElement ( ~errorData; "detail" );
+        ~description = JSONGetElement ( ~errorData; "description" );
         ~note = Trim ( JSONGetElement ( ~errorData; "note" ) );
         ~script = JSONGetElement ( ~errorData; "script" );
         ~step = JSONGetElement ( ~errorData; "step" );
@@ -38,8 +39,9 @@ Let (
             ~note & If ( Right ( ~note; 1 ) <> "."; ".") & " Additional error data:¶  -" &
                 Substitute (
                     List (
-                        "Number: " & ~error;
-                        "Description: " & ~detail;
+                        "Error number: " & ~error;
+                        "Error detail: " & ~detail;
+                        "Error description: " & ~description;
                         "Script name: " & ~script;
                         "Script step: " & ~step;
                         "Script line: " & ~line
@@ -48,7 +50,7 @@ Let (
                 );
         detailLevel = 1;
             If ( Right ( ~note; 1 ) = "."; Trim ( Left ( ~note; Length ( ~note ) - 1 ) ); ~note ) &
-            " (" & ~detail & " - error " & ~error & ").";
+            " (" & ~description & " - error " & ~error & ").";
         ~note
     )
 
