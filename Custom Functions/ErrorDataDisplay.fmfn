@@ -1,0 +1,55 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorDataDisplay ( errorData ; detailLevel )
+ *
+ *  DESCRIPTION
+ *    Takes the error data provided by the dependancy and formats it into a human readable message.
+ *
+ *  PARAMS
+ *    errorData: A JSON of data about the error. The same JSON that the dependancy provides.
+ *    detailLevel: How much detail to display:
+ *      -null/blank: Only the note (minimal)
+ *      -1: Include the error detail and number
+ *      -2: Include all error data
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    GetLastErrorData: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/GetLastErrorData.fmfn
+ *
+ *  CHANGELOG
+ *    2024-12-12: Paul McCudden: Created
+*/
+
+Let (
+    [
+        ~errorData = JSONSetElement ( "{}"; ""; errorData; JSONObject );
+        ~error = JSONGetElement ( ~errorData; "error" );
+        ~detail = JSONGetElement ( ~errorData; "detail" );
+        ~note = Trim ( JSONGetElement ( ~errorData; "note" ) );
+        ~script = JSONGetElement ( ~errorData; "script" );
+        ~step = JSONGetElement ( ~errorData; "step" );
+        ~line = JSONGetElement ( ~errorData; "line" )
+    ];
+
+    Case (
+        detailLevel = 2;
+            ~note & If ( Right ( ~note; 1 ) <> "."; ".") & " Additional error data:¶  -" &
+                Substitute (
+                    List (
+                        "Number: " & ~error;
+                        "Description: " & ~detail;
+                        "Script name: " & ~script;
+                        "Script step: " & ~step;
+                        "Script line: " & ~line
+                    );
+                    "¶"; "¶  -"
+                );
+        detailLevel = 1;
+            If ( Right ( ~note; 1 ) = "."; Trim ( Left ( ~note; Length ( ~note ) - 1 ) ); ~note ) &
+            " (" & ~detail & " - error " & ~error & ").";
+        ~note
+    )
+
+)
