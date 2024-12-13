@@ -50,7 +50,7 @@ Let (
                 );
         detailLevel = 1;
             If ( Right ( ~note; 1 ) = "."; Trim ( Left ( ~note; Length ( ~note ) - 1 ) ); ~note ) &
-            " (" & ~description & " - error " & ~error & ").";
+            " (Error " & ~error & ": " & ~description & ").";
         ~note
     )
 
