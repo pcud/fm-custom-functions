@@ -15,7 +15,7 @@
  *    --NONE--
  *
  *  CHANGELOG
- *    2021-12-23: Paul McCudden (paul@peak14.solutions): Created
+ *    2021-12-23: Paul McCudden: Created
 */
 
 Get ( SystemPlatform ) = 4

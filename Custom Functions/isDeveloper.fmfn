@@ -15,7 +15,7 @@
  *    --NONE--
  *
  *  CHANGELOG
- *    2020-02-26: Paul McCudden (paul@peak14.solutions): Created
+ *    2020-02-26: Paul McCudden: Created
 */
 
 Get ( AccountPrivilegeSetName ) = "[Full Access]"
