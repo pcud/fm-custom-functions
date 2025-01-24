@@ -17,7 +17,16 @@
  *  CHANGELOG
  *    2020-07-01: Steve Winter: Created (https://msdev.nz/generating-jwts-in-native-filemaker/)
  *    2022-04-22: Paul McCudden: Turned into a custom function and added the ability to pass a timestamp
+ *    2025-01-24: Paul McCudden: Updated the ability to actually pass in a timestamp...
  *
 */
 
-Round ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ; 0 ) - GetAsNumber ( Timestamp ( Date ( 1 ; 1 ; 1970 ) ; Time ( 0 ; 0 ; 0 ) ) )
+Let ( 
+    [
+        // Unix is the number of seconds since 1/1/1970
+        ~unixEpoch = GetAsNumber ( Timestamp ( Date ( 1 ; 1 ; 1970 ) ; Time ( 0 ; 0 ; 0 ) ) );
+        ~timeInSeconds = GetAsNumber ( If ( IsEmpty ( FileMakerTimestamp ); Get ( CurrentTimestamp ); FileMakerTimestamp ) )
+    ];
+
+    ~timeInSeconds - ~unixEpoch
+)
