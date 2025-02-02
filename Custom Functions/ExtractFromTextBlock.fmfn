@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    ExtractFromTextBlock ( fullText; startString; endString; occurance; includeStrings )
+ *    ExtractFromTextBlock ( fullText; startString; endString; occurrence; includeStrings )
  *
  *  DESCRIPTION
  *    Used for when you want to get a block of text from a larger block of text where you know the start and end
@@ -9,7 +9,7 @@
  *    fullText: The full block of text
  *    startString: The unique string that starts the block you want to get
  *    endString: The inque string the ends the block you want to get. If endString is empty, gets the rest of the text.
- *    occurance: The occurance number of this to grab, default is 1
+ *    occurrence: The occurrence number of this to grab, default is 1
  *    includeStrings: True to include the startString and endString in the return text
  *
  *  RETURNS
@@ -23,14 +23,14 @@
  *    2023-08-28: Paul McCudden: Updated to pull all text if endString is empty
  *    2023-11-22: Paul McCudden: Added includeStrings
  *    2024-05-02: Paul McCudden: Added in case where IsEmpty ( startString )
- *    2025-01-28: Paul McCudden: Added occurance and set to return empty string if no startString found.
+ *    2025-01-28: Paul McCudden: Added occurrence and set to return empty string if no startString found.
 */
 
 Let (
     [
         ~includeStrings = includeStrings;
-        ~occurance = If ( GetAsNumber ( occurance ) < 1; 1; GetAsNumber ( occurance ) );
-        ~startPosition = If ( IsEmpty ( startString ); 1; Position ( fullText; startString; 1; ~occurance ) );
+        ~occurrence = If ( GetAsNumber ( occurrence ) < 1; 1; GetAsNumber ( occurrence ) );
+        ~startPosition = If ( IsEmpty ( startString ); 1; Position ( fullText; startString; 1; ~occurrence ) );
         ~endPosition = If ( IsEmpty ( endString ); Length ( fullText ) - ~startPosition; Position ( fullText; endString; ~startPosition + Length ( startString ); 1 ) )
     ];
 

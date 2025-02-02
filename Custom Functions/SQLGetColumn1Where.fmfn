@@ -19,8 +19,8 @@
  *    SQLGetTable: (https://www.briandunning.com/cf/2547)
  *
  *  CHANGELOG
- *    2019-10-16: Paul McCudden (paul@peak14.solutions): Created
- *    2021-11-03: Paul McCudden (paul@peak14.solutions): Added the ability to pass a list into whereValue
+ *    2019-10-16: Paul McCudden: Created
+ *    2021-11-03: Paul McCudden: Added the ability to pass a list into whereValue
 */
 
 While (
