@@ -5,7 +5,7 @@
  *  DESCRIPTION
  *    Does a simple SQL Statement with two where queries
  *  !!~~IMPORTANT~~!!
- *    This function assums you enter valid fields for each variable. Will not work if you don't enter a value for each field
+ *    This function assumes you enter valid fields for each variable. Will not work if you don't enter a value for each field
  *
  *  PARAMS
  *    returnField: The field you want to return the value of
@@ -18,7 +18,7 @@
  *    A list of values
  *
  *  CHANGELOG
- *    2019-10-16: Paul McCudden (paul@peak14.solutions): Created
+ *    2019-10-16: Paul McCudden: Created
 */
 
 
