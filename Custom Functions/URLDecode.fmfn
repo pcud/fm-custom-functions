@@ -17,12 +17,15 @@
  *
  *  CHANGELOG
  *    2025-01-21: Paul McCudden: Created
+ *    2025-02-04: Paul McCudden: Added %0a as a newline character
  *
 */
 
 Substitute (
     text           
     ;[ "%25" ; "%" ]
+    ;[ "%0a" ; "¶" ]
+    ;[ "%0A" ; "¶" ]
     ;[ "%0D" ; "¶" ]
     ;[ "%0d" ; "¶" ]
     ;[ "%20" ; " " ]
