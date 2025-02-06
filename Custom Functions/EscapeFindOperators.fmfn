@@ -1,0 +1,35 @@
+ /*
+ *  CUSTOM FUNCTION
+ *    EscapeFindOperators ( text )
+ *
+ *  DESCRIPTION
+ *	  Returns the passed text but with all the special find chatacters escaped. Intended to be used to wrap find qeries with
+ *
+ *  PARAMS
+ *    text: The text to escape
+ *
+ *  RETURNS
+ *    String
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  DOCUMENTATION
+ *    https://help.claris.com/en/pro-help/content/finding-text.html
+ *
+ *  CHANGELOG
+ *    2025-02-06: Paul McCudden: Created
+ *
+*/
+
+Substitute ( text
+    ;["\\"; "\\\\"] // Escape chatacter
+    ;["#"; "\\#"] // Digits in a text field (any one digit)
+    ;["*"; "\\*"] // Words with zero or more unknown or variable text characters in a row (zero or more characters)
+    ;["@"; "\\@"] // Operators or other non-alphanumeric characters, such as punctuation or spaces
+    ;["!"; "\\!"] // Duplicates
+    ;["="; "\\="] // Equal to
+    ;["<"; "\\<"] // Less than
+    ;[">"; "\\>"] // Greater than
+    ;["\""; "\\\""] // Quote character
+)
