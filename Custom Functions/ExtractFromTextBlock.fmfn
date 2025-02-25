@@ -24,6 +24,7 @@
  *    2023-11-22: Paul McCudden: Added includeStrings
  *    2024-05-02: Paul McCudden: Added in case where IsEmpty ( startString )
  *    2025-01-28: Paul McCudden: Added occurrence and set to return empty string if no startString found.
+ *    2025-02-25: Paul McCudden: Fixed bug where was returning wrong value when dealing with end of strings
 */
 
 Let (
@@ -31,7 +32,7 @@ Let (
         ~includeStrings = includeStrings;
         ~occurrence = If ( GetAsNumber ( occurrence ) < 1; 1; GetAsNumber ( occurrence ) );
         ~startPosition = If ( IsEmpty ( startString ); 1; Position ( fullText; startString; 1; ~occurrence ) );
-        ~endPosition = If ( IsEmpty ( endString ); Length ( fullText ) - ~startPosition; Position ( fullText; endString; ~startPosition + Length ( startString ); 1 ) )
+        ~endPosition = If ( IsEmpty ( endString ); Length ( fullText ) - ~startPosition + 1; Position ( fullText; endString; ~startPosition + Length ( startString ); 1 ) )
     ];
 
     If (
@@ -39,9 +40,8 @@ Let (
         Middle (
             fullText;
             ~startPosition + If ( not ~includeStrings; Length ( startString ) );
-            ~endPosition - ~startPosition + If ( ~includeStrings; ( Length ( endString ) ); Length ( startString ) * -1 )
+            ~endPosition + If ( ~includeStrings; ( Length ( endString ) ); Length ( startString ) * -1 ) + 1
         )
-    )
-    
+    )    
 
 )
