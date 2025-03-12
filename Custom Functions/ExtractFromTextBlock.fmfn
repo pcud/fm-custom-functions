@@ -32,16 +32,21 @@ Let (
         ~includeStrings = includeStrings;
         ~occurrence = If ( GetAsNumber ( occurrence ) < 1; 1; GetAsNumber ( occurrence ) );
         ~startPosition = If ( IsEmpty ( startString ); 1; Position ( fullText; startString; 1; ~occurrence ) );
-        ~endPosition = If ( IsEmpty ( endString ); Length ( fullText ) - ~startPosition + 1; Position ( fullText; endString; ~startPosition + Length ( startString ); 1 ) )
+        ~endPosition = If ( IsEmpty ( endString ); Length ( fullText ) + 1; Position ( fullText; endString; ~startPosition + Length ( startString ); 1 ) );
+
+		// Adjust the start and end positions to add or remove the match strings
+		~startPosition = If ( ~includeStrings; ~startPosition; ~startPosition + Length ( startString ) );
+		~endPosition = If ( ~includeStrings; ~endPosition + Length ( endString ); ~endPosition )
     ];
+
 
     If (
         ~startPosition = 0; "";
         Middle (
             fullText;
-            ~startPosition + If ( not ~includeStrings; Length ( startString ) );
-            ~endPosition + If ( ~includeStrings; ( Length ( endString ) ); Length ( startString ) * -1 ) + 1
+            ~startPosition;
+            ~endPosition - ~startPosition
         )
-    )    
+    )
 
 )
