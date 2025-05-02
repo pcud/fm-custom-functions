@@ -15,7 +15,7 @@
  *    GetLastErrorData: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/GetLastErrorData.fmfn
  *
  *  CHANGELOG
- *    2024-10-14: Paul McCudden: Created
+ *    Check https://github.com/pcud/fm-custom-functions/{{this_function_name}}
 */
 
 Let (
@@ -24,8 +24,7 @@ Let (
 	];
 
     If ( not IsEmpty ( ~data );
-        JSONGetElement ( ~data; "note" ) & " " & JSONGetElement ( ~data; "description") & " (Error " & JSONGetElement ( ~data; "error" ) & ")."
-        &¶&¶&
+        JSONGetElement ( ~data; "note" ) & "¶¶Error " & JSONGetElement ( ~data; "error" ) & ": " & JSONGetElement ( ~data; "description") & ".¶" &
         List (
             If ( not IsEmpty ( JSONGetElement ( ~data; "script") ); "Script: " & JSONGetElement ( ~data; "script" ) );
             If ( not IsEmpty ( JSONGetElement ( ~data; "line") ); "Line: " & JSONGetElement ( ~data; "line" ) );
