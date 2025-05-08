@@ -192,14 +192,14 @@ While (
             ~processing = "s"; GetAsNumber ( Seconds ( ~time ) );
             ~processing = "ss"; Right ( "0" & Seconds ( ~time ); 2 );
 
-            // Milliseconds - Need to complete
+            // Milliseconds
             Left ( ~processing; 1 ) = "." and Length ( ~processing ) > 1 ; Let (
                 [
                     ~seconds = Seconds ( ~time );
                     ~rounded = Round ( ~seconds - Floor ( ~seconds ); Length ( ~processing ) - 1 )
                 ];
                 
-                // 
+                // Make sure the precision is the same by appending any needed 0s on the end from ~processing
                 ~rounded & Right ( ~processing; Length ( ~processing ) - Length ( ~rounded ) )
 
             );
