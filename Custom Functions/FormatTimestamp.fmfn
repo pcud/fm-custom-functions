@@ -21,6 +21,7 @@
  *  CHANGELOG
  *    2021-09-17: Paul McCudden: Created - Time section incomplete
  *    2022-05-26: Paul McCudden: Mostly finished time section - Millisecond section incomplete
+ *    2025-05-08: Paul McCudden: Completed Millisecond section
 */
 
 While (
@@ -98,6 +99,28 @@ While (
             ~processing
         );
 
+        // If they are doing decimals, grab the precision 
+        ~processing = If ( ~processing = ".";
+            While (
+                [
+                    ~processCheck = ~processing;
+                    ~processing2 = ~processing;
+                    ~next = Right ( Left ( ~toProcess; 2 ); 1 )
+                ];
+
+                ~next = "0" and Length ( ~processing2 ) < Length ( ~toProcess );
+
+                [
+                    ~processing2 = ~processing2 & ~next;
+                    ~next = Right ( Left ( ~toProcess; Length ( ~processing2 ) + 1 ); 1 )
+                ];
+
+                ~processing2
+            
+            );
+            ~processing
+        );
+
         // If there are multiple of the same character in a row, grab all of that character - only do this section if processing is a single character still
         ~processing = If ( Length ( ~processing ) = 1;
             While (
@@ -170,7 +193,16 @@ While (
             ~processing = "ss"; Right ( "0" & Seconds ( ~time ); 2 );
 
             // Milliseconds - Need to complete
-            ~processing = ".000"; "?";
+            Left ( ~processing; 1 ) = "." and Length ( ~processing ) > 1 ; Let (
+                [
+                    ~seconds = Seconds ( ~time );
+                    ~rounded = Round ( ~seconds - Floor ( ~seconds ); Length ( ~processing ) - 1 )
+                ];
+                
+                // 
+                ~rounded & Right ( ~processing; Length ( ~processing ) - Length ( ~rounded ) )
+
+            );
 
             // Meridiem Indicator (AM/PM)
             Exact ( ~processing; "AP" ); If ( Hour ( ~time ) > 12; "PM"; "AM" );
