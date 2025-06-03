@@ -1,0 +1,40 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FixedPrecision ( number; precision )
+ *
+ *  DESCRIPTION
+ *    Returns the passed number with a fixed number of 0s
+ *
+ *  PARAMS
+ *    number: The number to modify
+ *    precision: How many decimals to include
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2025-06-03: Paul McCudden: Created
+*/
+
+While (
+	[
+		~number = GetAsNumber ( number );
+		~precision = GetAsNumber ( precision );
+		~rounded = Round ( ~number; ~precision );
+		~zeros = "0000000000" // 10 0s
+	];
+
+    // By concatenating multiples of 10 0s, we can generate large amounts of 0s 10 times faster than just a single one
+    // Most of the time this loop will not be used
+	Length ( ~zeros ) < ~precision;
+
+	[
+		~zeros = ~zeros & ~zeros & ~zeros & ~zeros & ~zeros
+	];
+
+	Int ( ~rounded ) & Left ( ~rounded - Int ( ~rounded ) + GetAsNumber ( "0." & Left ( ~zeros; ~precision ) & "1" ); ~precision + 1 )
+
+)
