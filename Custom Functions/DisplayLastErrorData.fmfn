@@ -1,36 +1,58 @@
 /*
  *  CUSTOM FUNCTION
- *    DisplayLastErrorData ( errorData )
+ *    ErrorDataDisplay ( errorData ; detailLevel )
  *
  *  DESCRIPTION
- *    A user friendly message from GetLastErrorData
+ *    Takes the error data provided by the dependancy and formats it into a human readable message.
  *
  *  PARAMS
- *    description: A developer description of the error that happened
+ *    errorData: A JSON of data about the error. The same JSON that the dependancy provides.
+ *    detailLevel: How much detail to display:
+ *      -null/blank: Only the note (minimal)
+ *      -1: Include the error detail and number
+ *      -2: Include all error data
  *
  *  RETURNS
- *    A JSONObject
+ *    Text
  *
  *  DEPENDENCIES
  *    GetLastErrorData: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/GetLastErrorData.fmfn
  *
  *  CHANGELOG
- *    Check https://github.com/pcud/fm-custom-functions/{{this_function_name}}
+ *    2024-12-12: Paul McCudden: Created
+ *    2025-06-11: Paul McCudden: Updated to not specicify error 5 info since that's used to artificially generate errors
 */
 
 Let (
-	[
-		~data = If ( Left ( JSONFormatElements ( errorData ); 1) <> "?"; errorData )
-	];
+    [
+        ~errorData = JSONSetElement ( "{}"; ""; errorData; JSONObject );
+        ~error = JSONGetElement ( ~errorData; "error" );
+        ~detail = JSONGetElement ( ~errorData; "detail" );
+        ~description = JSONGetElement ( ~errorData; "description" );
+        ~note = Trim ( JSONGetElement ( ~errorData; "note" ) );
+        ~script = JSONGetElement ( ~errorData; "script" );
+        ~step = JSONGetElement ( ~errorData; "step" );
+        ~line = JSONGetElement ( ~errorData; "line" )
+    ];
 
-    If ( not IsEmpty ( ~data );
-        JSONGetElement ( ~data; "note" ) & "¶¶Error " & JSONGetElement ( ~data; "error" ) & ": " & JSONGetElement ( ~data; "description") & ".¶" &
-        List (
-            If ( not IsEmpty ( JSONGetElement ( ~data; "script") ); "Script: " & JSONGetElement ( ~data; "script" ) );
-            If ( not IsEmpty ( JSONGetElement ( ~data; "line") ); "Line: " & JSONGetElement ( ~data; "line" ) );
-            If ( not IsEmpty ( JSONGetElement ( ~data; "step") ); "Step: " & JSONGetElement ( ~data; "step" ) );
-            If ( not IsEmpty ( JSONGetElement ( ~data; "detail") ); "Detail: " & JSONGetElement ( ~data; "detail" ) );
-        )
+    Case (
+        detailLevel = 2;
+            ~note & If ( Right ( ~note; 1 ) <> "."; ".") & " Additional error data:¶  -" &
+                Substitute (
+                    List (
+                        If ( ~error <> 5; "Error number: " & ~error );
+                        If ( not IsEmpty ( ~detail ); "Error detail: " & ~detail );
+                        If ( ~error <> 5; "Error description: " & ~description );
+                        "Script name: " & ~script;
+                        If ( ~error <> 5; "Script step: " & ~step );
+                        "Script line: " & ~line
+                    );
+                    "¶"; "¶  -"
+                );
+        detailLevel = 1;
+            If ( Right ( ~note; 1 ) = "."; Trim ( Left ( ~note; Length ( ~note ) - 1 ) ); ~note ) &
+            If ( ~error <> 5; " (Error " & ~error & ": " & ~description & ")." );
+        ~note
     )
 
 )
