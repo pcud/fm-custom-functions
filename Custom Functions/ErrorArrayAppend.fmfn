@@ -112,8 +112,9 @@ While (
       // "InstalledFMPlugins" ;
       "InstalledFMPluginsAsJSON" ;
       "LastError" ;
+      "LastErrorDetail" ;
       "LastErrorLocation" ;
-      "LastExternalErrorDetail" ;
+      "LastExternalErrorDetail" ; // Deprecated in v19 - maybe
       "LastMessageChoice" ;
       "LayoutAccess" ;
       // "LayoutCount" ;
