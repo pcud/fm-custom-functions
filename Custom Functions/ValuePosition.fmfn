@@ -1,6 +1,6 @@
 /*
  *  CUSTOM FUNCTION
- *    ValuePosition ( theList; theValue )
+ *    ValuePosition ( theList; theValue; occurrence )
  *
  *  DESCRIPTION
  *    Returns the position of theValue in theList
@@ -8,6 +8,7 @@
  *  PARAMS
  *    theList: the list the contains the values you want to know the position of
  *    theValue: the value you want to know the position of
+ *.   occurrence: which instance of the text string you want to find
  *
  *  RETURNS
  *    Number
@@ -17,18 +18,71 @@
  *
  *  CHANGELOG
  *    2011-06-25: Kevin Frank (filemaker hacks): Created (https://filemakerhacks.com/2011/06/12/valueposition-the-function-filemaker-forgot/)
+ *    2025-06-26: Paul McCudden: Updated to handle occurrence and started wildcard matching
+ *
+ *  NOTE
+ *    To add more wildcards to this CF, there are several places that will need to be updated for wildcard checks. It was done this way (instead of using a single list of wildcard characters) to increase processing time. Especially when dealing with no wild card matches.
  *
 */
 
-Let(
+Let (
     [
-        pLp = ¶ & theList & ¶ ;
-        pVp = ¶ & theValue & ¶ ;
-        thePos = Position ( pLp ; pVp ; 1 ; 1 ) ;
-        theSegment = Left ( pLp ; thePos ) ;
-        theValPos = PatternCount ( theSegment ; ¶ )
+        ~list = theList;
+        ~value = theValue;
+        ~occurrence = If ( IsEmpty ( occurrence); 1; GetAsNumber ( occurrence ) )
     ];
 
-    theValPos
+    Case (
+        // Invalid param checks
+        isEmpty ( ~list ) or IsEmpty ( ~value ); "";
+        ~occurrence = 0; 0;
+
+        PatternCount ( ~value; "*" ) + PatternCount ( ~value; "?" ) = 0;
+            // Do easy method without wildcards
+            If ( PatternCount ( ¶ & ~list & ¶; ¶ & ~value & ¶ ) > 0;
+                PatternCount ( Left (¶ & ~list; Position ( ¶ & ~list & ¶; ¶ & ~value & ¶; 1; ~occurrence ) ); ¶ ); // Value exists, search for it
+                "" // Value Doesn't exist, return blank
+            );
+
+        "Wild card search functionality not complete yet"  
+        /*
+        // Wildcards found, do more complex search
+        While (
+            [
+                ~escapeCharater = "\\";
+                ~toProcess = ~Value;
+                ~processing = Left ( ~toProcess; 1 );
+                ~possibleValueJSON = ""
+            ];
+
+            not IsEmpty ( ~toProcess );
+
+            [
+                // Grab the entire section to process - until we hit a wildcard
+                ~processing = While (
+                    [
+                        ~processing = Left ( ~toProcess; 1 );
+                        ~next = Right ( Left ( ~toProcess; Length ( ~processing ) + 1 ); 1 )
+                    ];
+
+                    ~next <> "*" and ~next <> "?" and ~next <> "";
+
+                    [
+                        ~processing = ~processing & ~next;
+                        ~next = Right ( Left ( ~toProcess; Length ( ~processing ) + 1 ); 1 )
+                    ];
+
+                    ~processing
+                
+                );
+
+                // We have the full processing section. Cut it out of what's left to process
+                ~toProcess = Right ( ~toProcess; Length ( ~toProcess )  - Length ( ~processing ) )
+            ];
+
+            ~processing
+        )
+        */
+    )
 
 )
