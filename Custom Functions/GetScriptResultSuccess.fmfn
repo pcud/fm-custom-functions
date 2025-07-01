@@ -17,6 +17,7 @@
  *  CHANGELOG
  *    2023-11-02: Paul McCudden: Created
  *    2023-12-28: Updated to append the new $errorData to the current $errorData
+ *.   2025-07-01: Paul McCudden: Took out appending $errorData to the current $errorData
 */ 
 
 Let (
@@ -26,7 +27,9 @@ Let (
 
         // Pass up the common variables to the parent script so it can be used in logging
         $error = JSONGetElement ( ~result; "error" );
-        $errorData = JSONArrayAppend ( $errorData; ""; JSONGetElement ( ~result; "errorData" ); JSONObject );
+
+        // Don't pass up error data since the sub script should log it
+        // $errorData = JSONArrayAppend ( $errorData; ""; JSONGetElement ( ~result; "errorData" ); JSONObject );
         $message = JSONGetElement ( ~result; "message" )
     ];
 

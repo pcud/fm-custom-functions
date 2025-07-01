@@ -129,7 +129,7 @@ While (
       "NetworkType" ;
       "OpenDataFileInfo" ;
       // "PageCount" ;
-      //"PageNumber" ;
+      // "PageNumber" ;
       "PersistentID" ;
       // "PreferencesPath" ;
       // "PrinterName" ;
@@ -156,7 +156,7 @@ While (
       "SystemIPAddress" ;
       "SystemLanguage" ;
       // "SystemLocaleElements" ;
-      //"SystemNICAddress" ;
+      // "SystemNICAddress" ;
       "SystemPlatform" ;
       "SystemVersion" ;
       // "TemporaryPath" ;
@@ -203,13 +203,14 @@ While (
 
   Let (
     [
+      ~errorLocation = Get ( LastErrorLocation )
       ~thisErrorData = JSONSetElement ( "{}"
-        ;[ "errorType" ; errorType ; JSONString]
-        ;[ "errorCode" ; errorCode ; JSONNumber]
-        ;[ "errorDescription" ; ~errorDescription ; JSONString]
-        ;[ "errorInfo" ; errorInfo ; JSONString]
-        ;[ "systemState"; ~stateJSON; JSONObject]
-      );
+          ;[ "errorType" ; errorType ; JSONString]
+          ;[ "errorCode" ; errorCode ; JSONNumber]
+          ;[ "errorDescription" ; ~errorDescription ; JSONString]
+          ;[ "errorInfo" ; errorInfo ; JSONString]
+          ;[ "systemState"; ~stateJSON; JSONObject]
+        );
       $errorData = JSONSetElement ( $errorData; "[" & ~index & "]"; ~thisErrorData; JSONObject )
     ];
 
