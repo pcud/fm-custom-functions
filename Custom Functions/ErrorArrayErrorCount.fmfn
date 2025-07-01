@@ -1,6 +1,6 @@
  /*
  *  CUSTOM FUNCTION
- *    ErrorArrayCount ( errorArray )
+ *    ErrorArrayErrorCount ( errorArray )
  *
  *  DESCRIPTION
  *	  Returns the number of errors stored in errorArray
