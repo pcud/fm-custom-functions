@@ -16,6 +16,7 @@
  *
  *  CHANGELOG
  *    2020-02-26: Paul McCudden: Created
+ *    2025-07-24: Updated to be true when running on FM cloud
 */
 
-LeftWords ( Get (ApplicationVersion) ; 1 ) = "Server"
+LeftWords ( Get (ApplicationVersion) ; 1 ) = "Server" or LeftWords ( Get (ApplicationVersion) ; 1 ) = "Cloud"

@@ -16,6 +16,7 @@
  *
  *  CHANGELOG
  *    2020-02-26: Paul McCudden (paul@peak14.solutions): Created
+ *    2025-07-24: Updated to be true when hosted on FM cloud
 */
 
-LeftWords ( Get ( HostApplicationVersion ); 1 ) = "Server"
+LeftWords ( Get ( HostApplicationVersion ); 1 ) = "Server" or LeftWords ( Get ( HostApplicationVersion ); 1 ) = "Cloud"
