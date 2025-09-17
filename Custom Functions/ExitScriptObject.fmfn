@@ -60,6 +60,7 @@ Let (
                 ;["errorData"; ErrorGetMinimalInfo; JSONArray]
                 ;["error"; ~error; JSONString] // JSONString instead of JSONumber in case it's a non-standard error
                 ;["message"; ~message; JSONString]
+                ;["scriptLogID"; $scriptLogID; JSONString]
             );
             ~jsonToAdd
         )

@@ -24,7 +24,7 @@ While (
         ~length = Length ( ~camelCase );
         ~i = 0;
         ~broken = "";
-        ~alpha = "abcdefghijklmnopqrstuvwxyz";
+        ~alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         ~allAlpha = ~length = Length ( Filter ( ~camelCase ; ~alpha ) )
     ];
 
@@ -44,7 +44,7 @@ While (
 
     Case (
         ~allAlpha; TrimAll ( Proper (
-            Substitute ( camelCase;
+            Substitute ( ~camelCase;
                 ["A"; " A"]; 
                 ["B"; " B"];
                 ["C"; " C"];

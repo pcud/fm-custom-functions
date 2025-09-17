@@ -203,7 +203,7 @@ While (
 
   Let (
     [
-      ~errorLocation = Get ( LastErrorLocation )
+      ~errorLocation = Get ( LastErrorLocation );
       ~thisErrorData = JSONSetElement ( "{}"
           ;[ "errorType" ; errorType ; JSONString]
           ;[ "errorCode" ; errorCode ; JSONNumber]
