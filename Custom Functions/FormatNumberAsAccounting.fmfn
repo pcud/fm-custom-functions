@@ -1,0 +1,35 @@
+/*
+ *  CUSTOM FUNCTION
+ *    FormatNumberAsAccounting ( number; currency; precision )
+ *
+ *  DESCRIPTION
+ *    Formats a number as a typical accounting forat
+ *
+ *  PARAMS
+ *    number: The number to convert into currency
+ *    currency: The currency symbol to use
+ *    precision: How many decimal places to go to. Default is 2
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    FormatNumberAsCurrency
+ *
+ *  CHANGELOG
+ *    2025-10-11: Paul McCudden: Created
+*/
+
+Let (
+	[
+		~amount = GetAsNumber ( number );
+		~formatted = FormatNumberAsCurrency ( ~amount; currency ; precision )
+	];
+
+	Case (
+        ~amount > 0; ~formatted;
+        ~amount = 0; "-";
+		TextColor ( "(" & Right ( ~formatted; Length ( ~formatted ) - 1 ) & ")" ; RGB ( 255; 0; 0 ) )
+	)
+
+)

@@ -15,7 +15,8 @@
  *    --None--
  *
  *  CHANGELOG
- *    2021-10-25: Paul McCudden (paul@peak14.solutions): Created
+ *    2021-10-25: Paul McCudden: Created
+ *.   2025-09-17: Updated to work properly in standard cases
 */
 
 While (

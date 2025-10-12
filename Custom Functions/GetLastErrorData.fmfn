@@ -13,6 +13,7 @@
  *
  *  DEPENDENCIES
  *    ErrorDescription: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/ErrorDescription.fmfn
+ *    JSONGetElementTypeExtended: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONGetElementTypeExtended.fmfn
  *
  *  CHANGELOG
  *    2023-09-28: Paul McCudden: Created
@@ -26,7 +27,10 @@ Let (
 
     JSONSetElement ( "{}"
         ;["error"; Get ( LastError ); JSONNumber]
-        ;["detail"; Get ( LastErrorDetail ); JSONString]
+
+        // Due to developered set Revert transaction LastErrorDetail text, check to see what type this is to set
+        ;["detail"; Get ( LastErrorDetail ); JSONGetElementTypeExtended ( Get ( LastErrorDetail ); "" ) ]
+
         ;["description"; ErrorDescription ( Get ( LastError ) ); JSONString]
         ;["note"; note; JSONString]
         ;["script"; GetValue ( ~location; 1 ); JSONString]

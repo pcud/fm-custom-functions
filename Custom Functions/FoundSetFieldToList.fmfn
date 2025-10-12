@@ -6,7 +6,7 @@
  *    Returns a list of values in the current found set for the passed field
  *
  *  PARAMS
- *    fieldName: A single field name to populate the list with
+ *    fieldRefOrFieldName: A single field name to populate the list with
  *
  *  RETURNS
  *    List

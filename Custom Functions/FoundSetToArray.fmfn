@@ -1,28 +1,27 @@
 /*
  *  CUSTOM FUNCTION
- *    FoundSetToArray ( fieldNameList )
+ *    FoundSetToArray ( fieldNameList; returnFQFN )
  *
  *  DESCRIPTION
  *    Returns an array of objects who's key is the fully qualified field name and value is the field value
  *
  *  PARAMS
  *    fieldNameList: A list of field names to save to the array. If no passed, will grab all fields on the current layout that are a part of the layout table
+ *    returnFQFN: If true will return the fully qualified field name as each key.
  *
  *  RETURNS
  *    Array
  *
  *  DEPENDENCIES
- *    --None--
+ *    JSONGetElementTypeExtended
  *
  *  CHANGELOG
  *    2023-05-25: Paul McCudden: Created
+ *.   2025_10_03: Paul McCudden: This doesn't work because the passed fields in the parameter
 */
 
 While (
     [
-        // Settings
-        ~useBaseTable = True; // Set to True to use the base table for all field names or false
-
         ~foundCount = Get ( FoundCount );
         ~i = 0;
         ~array = "[]"
@@ -52,7 +51,8 @@ While (
                         ~thisField
                 );
                 ~thisValue = GetNthRecord ( GetField ( ~thisFieldName ) ; ~j );
-                ~object = JSONSetElement ( ~object; ~thisFieldName; ~thisValue; JSONRaw )
+                ~thisJSONType = JSONGetElementTypeExtended ( ""; ~thisValue );
+                ~object = JSONSetElement ( ~object; ~thisFieldName; ~thisValue; ~thisJSONType )
             ];
 
             ~object
