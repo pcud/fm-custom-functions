@@ -18,12 +18,15 @@
  *
  *  CHANGELOG
  *    2025-10-11: Paul McCudden: Created
+ *    2025-12-22: Paul McCudden: Added defaults for currency and precision
 */
 
 Let (
 	[
 		~amount = GetAsNumber ( number );
-		~formatted = FormatNumberAsCurrency ( ~amount; currency ; precision )
+		~currency = If ( IsEmpty ( currency ); "$"; currency);
+		~precision = If ( IsEmpty ( precision ); 2; precision );
+		~formatted = FormatNumberAsCurrency ( ~amount; ~currency ; ~precision )
 	];
 
 	Case (
