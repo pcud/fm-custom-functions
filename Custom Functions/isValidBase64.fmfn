@@ -1,0 +1,39 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isValidBase64 ( string )
+ *
+ *  DESCRIPTION
+ *    Returns true is the passed string is in a valid base64 encoded format
+ *
+ *  PARAMS
+ *    string: The string to validate
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    SuperTrim: https://www.briandunning.com/cf/904
+ *
+ *  CHANGELOG
+ *    2026-01-28: Paul McCudden: Created
+*/
+
+Let (
+    [
+        // Different encodings may include line breaks at different positions and whitespaces at the end; strip them out
+        ~string = SuperTrim ( Substitute ( string; ¶; "" ) );
+
+        // Check padding: 0-2 "=" at end only
+        ~potentialPaddingCount = Length ( Filter ( ~string; "=" ) );
+        ~isPaddingAtEndOfString = Right ( ~string; ~potentialPaddingCount ) = Left ( "=="; ~potentialPaddingCount );
+        ~paddingCount = If ( ~isPaddingAtEndOfString; ~potentialPaddingCount; -1 ); // Set ~paddingCount to -1 if padding is invalid for easy checking
+
+        // Only that there's only padding at end of string and valid characters
+        ~validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        ~hasOnlyValidChars = Length ( Filter ( ~string; ~validChars ) ) + ~paddingCount = Length ( ~string )
+    ];
+
+    // Valid base64 
+    ~paddingCount >= 0 and ~paddingCount <= 2 and ~hasOnlyValidChars
+
+)

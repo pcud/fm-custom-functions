@@ -1,0 +1,191 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ErrorLoggingDebugInfo
+ *
+ *  DESCRIPTION
+ *    Outputs information that should be in the debugging info for an error
+ *
+ *  PARAMS
+ *    --None--
+ *
+ *  RETURNS
+ *    A JSON array which contains information about this new error
+ *
+ *  DEPENDENCIES
+ *    ErrorDescription
+ *
+ *  CHANGELOG
+ *    2026-01-19: Paul M: Created
+*/
+
+While ( 
+  [
+    ~i = 0 ;
+    ~stateJson = "" ;
+    ~stateList = List (
+
+      //<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+      // Comment or uncomment what you'd like to recieve here.
+      //<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+      // -- High priority values moved to top for easy viewing --
+      "AccountName" ;
+      "CurrentHostTimestamp" ;
+      "CurrentTimestamp" ;
+      "Device" ;
+      "FileName" ;
+      "ScriptName" ;
+      "ScriptParameter" ;
+      "ScriptResult" ;
+
+      // -- Lower priority items --
+      "AccountExtendedPrivileges" ;
+      "AccountGroupName" ;
+      "AccountPrivilegeSetName" ;
+      "AccountType" ;
+      "ActiveFieldContents" ;
+      "ActiveFieldName" ;
+      "ActiveFieldTableName" ;
+      "ActiveLayoutObjectName" ;
+      "ActiveModifierKeys" ; 
+      // "ActiveRepetitionNumber" ;
+      // "ActiveSelectionSize" ;
+      // "ActiveSelectionStart" ;
+      "AllowAbortState" ;
+      // "AllowFormattingBarState" ;
+      "ApplicationArchitecture" ;
+      "ApplicationLanguage" ;
+      "ApplicationVersion" ;
+      // "CalculationRepetitionNumber" ;
+      // "ConnectionAttributes" ;
+      "ConnectionState" ;
+      // "CurrentDate" ;
+      "CurrentExtendedPrivileges" ;
+      "CurrentPrivilegeSetName" ;
+      // "CurrentTime" ;
+      // "CurrentTimeUTCMilliseconds"
+      "CustomMenuSetName" ;
+      // "DesktopPath" ;
+      "Device" ;
+      // "DocumentsPath" ;
+      // "DocumentsPathListing" ;
+      // "EncryptionState" ;
+      "ErrorCaptureState" ;
+      //"FileMakerPath" ;
+      "FilePath" ;
+      "FileSize" ;
+      "FoundCount" ;
+      // "HighContrastState" ;
+      "HostApplicationVersion" ;
+      "HostIPAddress" ;
+      "HostName" ;
+      // "InstalledFMPlugins" ;
+      "InstalledFMPluginsAsJSON" ;
+      "LastError" ;
+      "LastErrorDetail" ;
+      "LastErrorLocation" ;
+      "LastExternalErrorDetail" ; // Deprecated in v19 - maybe
+      "LastMessageChoice" ;
+      "LayoutAccess" ;
+      // "LayoutCount" ;
+      "LayoutName" ;
+      // "LayoutNumber" ;
+      "LayoutTableName" ;
+      "LayoutViewState" ;
+      "MenubarState" ;
+      "ModifiedFields" ;
+      "MultiUserState" ;
+      "NetworkProtocol" ;
+      "NetworkType" ;
+      "OpenDataFileInfo" ;
+      // "PageCount" ;
+      // "PageNumber" ;
+      "PersistentID" ;
+      // "PreferencesPath" ;
+      // "PrinterName" ;
+      // "QuickFindText" ;
+      "RecordAccess" ;
+      "RecordID" ;
+      // "RecordModificationCount" ;
+      // "RecordNumber" ;
+      "RecordOpenCount" ;
+      "RecordOpenState" ;
+      // "RegionMonitorEvents" ;
+      // "RequestCount" ;
+      // "RequestOmitState" ;
+      // "ScreenDepth" ;
+      "ScreenHeight" ;
+      // "ScreenScaleFactor" ;
+      "ScreenWidth" ;
+      // "ScriptAnimationState" ;
+      "SessionIdentifier" ;
+      "SortState" ;
+      "StatusAreaState" ;
+      // "SystemAppearance" ;
+      "SystemDrive" ;
+      "SystemIPAddress" ;
+      "SystemLanguage" ;
+      // "SystemLocaleElements" ;
+      // "SystemNICAddress" ;
+      "SystemPlatform" ;
+      "SystemVersion" ;
+      // "TemporaryPath" ;
+      // "TextRulerVisible" ;
+      "TotalRecordCount" ;
+      // "TriggerGestureInfo" ;
+      // "TriggerKeystroke" ;
+      // "TriggerCurrentPanel" ;
+      "TriggerModifierKeys" ;
+      // "TriggerGestureInfo" ;
+      // "TriggerTargetPanel" ;
+      "UserCount" ;
+      "UserName" ;
+      // "UseSystemFormatsState" ;
+      // "UUID" ;
+      // "UUIDNumber" ;
+      // "WindowContentHeight" ;
+      // "WindowContentWidth" ;
+      // "WindowDesktopHeight" ;
+      // "WindowDesktopWidth" ;
+      "WindowHeight" ;
+      "WindowLeft" ;
+      "WindowMode" ;
+      "WindowName" ;
+      // "WindowOrientation" ;
+      "WindowStyle" ;
+      "WindowTop" ;
+      "WindowVisible" ;
+      "WindowWidth" ;
+      "WindowZoomLevel"
+    ) 
+  ] ; 
+
+   ~i < ValueCount ( ~stateList ) ;
+
+   [
+    ~i = ~i + 1 ;
+    ~thisItem = GetValue ( ~stateList ; ~i ) ;
+    ~thisData = Evaluate ( "Get ( " & ~thisItem & " )" );
+    ~stateJSON = JSONSetElement ( ~stateJSON ;
+      [~thisItem ; ~thisData ; JSONRaw]
+    )
+  ];
+
+  Let (
+    [
+      ~errorLocation = Get ( LastErrorLocation )
+    ];
+
+    JSONSetElement ( "{}"
+        ;["error"; Get ( LastError ); JSONNumber]
+        ;["description" ; GetErrorDescription ( Get ( LastError ) ) ; JSONString]
+        ;["script"; GetValue ( ~location; 1 ); JSONString]
+        ;["step"; GetValue ( ~location; 2 ); JSONString]
+        ;["line"; GetValue ( ~location; 3 ); JSONNumber]
+        ;["info" ; $$additionalErrorInfo ; JSONString]
+        ;["systemState"; ~stateJSON; JSONObject]
+    )
+
+  )
+  
+)

@@ -1,0 +1,23 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isBase64EncodedImage ( string )
+ *
+ *  DESCRIPTION
+ *    Checkes the passed format types against a Base64 encoded image, excluding pdf files
+ *
+ *  PARAMS
+ *    string: The base64 encoded string
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2026-01-28: Paul McCudden: Created
+*/
+
+// Any valid image type should encode as jpg successfully and return a width attribute
+// Tested and works with: jpg, png, heic, exr, tiff, jp2
+GetContainerAttribute ( Base64Decode ( string; "temp.jpg" ); "width" ) <> "?"

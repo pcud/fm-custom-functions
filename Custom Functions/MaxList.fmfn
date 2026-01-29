@@ -1,0 +1,39 @@
+/*
+ *  CUSTOM FUNCTION
+ *    MaxList ( theList )
+ *
+ *  DESCRIPTION
+ *    Returns the maximum value from a list of numbers
+ *
+ *  PARAMS
+ *    theList: the list the contains the values you want to find the min of
+ *
+ *  RETURNS
+ *    Number
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2026-01-28: Paul McCudden: Created
+ *
+ *  CREDITS
+ *    Credit goes to Debi Fuchs of Aptworks Consulting, debi@aptworks.com for the strategy of getting rid of null list values
+*/
+
+Let(
+    [
+        ~unique = Get(UUID);
+        ~newList = Substitute( ~unique & theList & ~unique;
+            [ "¶¶"; ¶ & ~unique & ¶ ];
+            [ "¶¶"; ¶ & ~unique & ¶ ];
+            [ ~unique & ¶; "" ];
+            [ ¶ & ~unique; "" ];
+            [ ~unique; "" ];
+            [ ¶ ; ";" ]
+        )
+    ];
+
+    If ( IsEmpty ( ~newList ) ; "" ; Evaluate ( "Max (" & ~newList & ")" ) )
+    
+)
