@@ -1,0 +1,60 @@
+/*
+ *  CUSTOM FUNCTION
+ *    JSON.Truncate ( JSON ; arrayMax )
+ *
+ *  DESCRIPTION
+ *    Truncates a JSON object or array to a specified number of elements, replacing excess elements with an ellipsis ("...") and MD5 hashes of images
+ *
+ *  PARAMS
+ *    JSON: The JSON object or array to truncate
+ *    arrayMax: The maximum number of elements to include before truncation (default is 2)
+ *
+ *  RETURNS
+ *    JSON object or array
+ *
+ *  DEPENDENCIES
+ *    isBase64EncodedImage
+ *
+ *  CHANGELOG
+ *    20??-??-??: Julien Lafleur: Created
+ *    2026-01-29: Paul McCudden: Updated images to be stored as MD5 hashes
+*/
+
+While ( 
+	[
+	~JSON = JSON ;
+	~aMAX = If ( GetAsNumber ( arrayMax ) = 0 ; 2 ; GetAsNumber ( arrayMax ) ) ;
+	~ISJSON  = isJSON ( ~JSON ) ;
+	~ISARRAY = JSONGetElementType ( ~json ; "" ) = 4 ;
+	~JSONKEYS = JSONListKeys ( ~JSON ; "" ) ;
+	~KEYCount = ValueCount ( ~JSONKEYS ) ;
+	~KEYCount = If ( ~ISARRAY ; Min ( ~aMax + 1 ; ~KEYCount ) ; ~KEYCount )  * ~ISJSON ;
+	~newJSON = If ( ~ISARRAY ; "[]" ; "" ) ;
+	~i = 0
+	] ;
+
+	~i < ~KEYCount ;
+
+	[
+	~i =  ~i + 1 ;
+	~thisKEY = GetValue ( ~JSONKEYS ; ~i ) ;
+	~thisLMNT = JSONGetElement ( ~JSON ; ~thisKEY ) ;
+	~thisTYPE = JSONGetElementType ( ~JSON ; ~thisKEY ) ; //1-String ; 2-Number ; 3-Object ; 4-Array ; 5-Boolean
+	~theseKEYS = ValueCount ( JSONListKeys ( ~thisLMNT ; "" ) ) ;
+
+	~newLMNT = Case (
+		~ISARRAY and ( ~i = ( ~aMax + 1 ) ) ; "..." ;
+		~ISARRAY and ( ~i <= ~aMax ) ;  ( ~thisLMNT )  ;
+		~thisTYPE = 1 ; If ( isImage ( ~thisLMNT ) ; "Image MD5: " & GetContainerAttribute ( Base64Decode ( ~thisLMNT ; "temp.jpg" ) ; "MD5" ) ; Left ( ~thisLMNT ; 1000 ) ) ;
+		~thisTYPE = 2 or ~thisTYPE = 5 ; ~thisLMNT ;
+		~thisTYPE = 3 and ~theseKEYS > 0 ; JSON.truncate ( ~thisLMNT ; 4 )  ;
+		~thisTYPE = 4 and ~theseKEYS > 0 ; JSON.truncate ( ~thisLMNT ; 4 )  ;
+		~thisLMNT
+		) ;
+
+	~newJSON = JSONSetElement ( ~newJSON ; ~thisKEY ; ~newLMNT ; ~thisTYPE )
+	
+	] ;
+
+	If ( not ( ~isjson ) ; ~JSON ; JSONFormatElements ( ~newJSON ) )
+ )

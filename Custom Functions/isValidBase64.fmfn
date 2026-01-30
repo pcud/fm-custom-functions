@@ -21,12 +21,10 @@
 Let (
     [
         // Different encodings may include line breaks at different positions and whitespaces at the end; strip them out
-        ~string = SuperTrim ( Substitute ( string; ¶; "" ) );
+        ~string = Supertrim ( Substitute ( string; ¶; "" ) );
 
         // Check padding: 0-2 "=" at end only
-        ~potentialPaddingCount = Length ( Filter ( ~string; "=" ) );
-        ~isPaddingAtEndOfString = Right ( ~string; ~potentialPaddingCount ) = Left ( "=="; ~potentialPaddingCount );
-        ~paddingCount = If ( ~isPaddingAtEndOfString; ~potentialPaddingCount; -1 ); // Set ~paddingCount to -1 if padding is invalid for easy checking
+        ~paddingCount = Length ( Filter ( Right ( ~string; 2 ); "=" ) );
 
         // Only that there's only padding at end of string and valid characters
         ~validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
