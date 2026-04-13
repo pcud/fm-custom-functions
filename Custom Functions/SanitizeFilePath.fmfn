@@ -1,0 +1,80 @@
+/*
+ *  CUSTOM FUNCTION
+ *    SanitizeFilePath ( path )
+ *
+ *  DESCRIPTION
+ *    Sanitizes only the FILENAME portion of a file path, preserving
+ *    the directory path and file extension. Strips characters that
+ *    are unsafe or invalid for filenames: colons, backslashes,
+ *    Unicode symbols, punctuation marks, and whitespace characters.
+ *    Periods in the file extension are preserved.
+ *
+ *  PARAMS
+ *    path: The full file path string to sanitize
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2026-03-19: Paul McCudden: Created
+ *    2026-03-19: Paul McCudden: Fixed to only sanitize filename,
+ *                preserving directory path and file extension
+ *
+*/
+
+Let (
+    [
+        // Separate directory, filename, and extension
+        ~lastSlash     = Position ( path ; "/" ; Length ( path ) ; -1 ) ;
+        ~dir           = Left ( path ; ~lastSlash ) ;
+        ~fullName      = Middle ( path ; ~lastSlash + 1 ; Length ( path ) ) ;
+
+        // Separate extension from filename
+        ~lastDot       = Position ( ~fullName ; "." ; Length ( ~fullName ) ; -1 ) ;
+        ~hasExt        = ~lastDot > 0 ;
+        ~name          = If ( ~hasExt ; Left ( ~fullName ; ~lastDot - 1 ) ; ~fullName ) ;
+        ~ext           = If ( ~hasExt ; Middle ( ~fullName ; ~lastDot ; Length ( ~fullName ) ) ; "" ) ;
+
+        // Define whitespace characters
+        ~tab           = Char ( 9 ) ;
+        ~lf            = Char ( 10 ) ;
+        ~cr            = Char ( 13 ) ;
+
+        // Sanitize only the filename (not directory or extension)
+        ~sanitized     = Substitute ( ~name ;
+                            [":" ; ""] ;
+                            ["\\" ; ""] ;
+                            ["¢" ; ""] ;
+                            ["™" ; ""] ;
+                            ["$" ; ""] ;
+                            ["®" ; ""] ;
+                            ["." ; ""] ;
+                            ["," ; ""] ;
+                            ["[" ; ""] ;
+                            ["]" ; ""] ;
+                            ["{" ; ""] ;
+                            ["}" ; ""] ;
+                            ["(" ; ""] ;
+                            [")" ; ""] ;
+                            ["!" ; ""] ;
+                            [";" ; ""] ;
+                            ["\"" ; ""] ;
+                            ["'" ; ""] ;
+                            ["*" ; ""] ;
+                            ["?" ; ""] ;
+                            ["<" ; ""] ;
+                            [">" ; ""] ;
+                            ["|" ; ""] ;
+                            [" " ; ""] ;
+                            [~tab ; ""] ;
+                            [~lf ; ""] ;
+                            [~cr ; ""]
+                         )
+    ] ;
+
+    // Reassemble: directory + sanitized filename + extension
+    ~dir & ~sanitized & ~ext
+)

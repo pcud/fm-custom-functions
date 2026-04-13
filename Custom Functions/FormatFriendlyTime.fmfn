@@ -18,6 +18,7 @@
  *    2023-07-26: Paul McCudden: Created
  *    2024-04-26: Paul McCudden: If time is 0, output 0s
  *    2024-05-30: Paul McCudden: Updated to handle seconds better
+ *    2026-04-13: Paul McCudden: Updated to handle milliseconds and microseconds
  *
 */
 
@@ -25,18 +26,19 @@ Let (
 	[
 		~hours = Hour ( theTime );
         ~min = Minute ( theTime );
-        ~sec = If ( ~hours = 0 and ~min = 0;
-			Seconds ( theTime );
-			Round ( Seconds ( theTime ); 0 )
-		)
+        ~sec = Int ( Seconds ( theTime ) );
+        ~ms = Int ( Mod ( theTime * 1000; 1000 ) );
+        ~us = Int ( Mod ( theTime * 1000000; 1000 ) )
 	];
 
 	Trim (
 		If ( ~hours > 0; ~hours & "h " ) &
 		If ( ~min > 0; Right ( "0" & ~min; 2 ) & "m " ) &
         If ( ~hours = 0 and ~min = 0;
-			If ( Int ( ~sec ) = 0; "0" ) & ~sec & "s";
-			If ( ~sec > 0; Right ( "0" & ~sec; 2 ) & "s" )
-		)
+			Max ( 0; ~sec ) & "s";
+			Right ( "0" & ~sec; 2 ) & "s"
+		) &
+		If ( ~ms > 0; " " & Right ( "00" & ~ms; 3 ) & "ms" ) &
+		If ( ~us > 0; " " & Right ( "00" & ~us; 3 ) & "µs" )
 	)
 )

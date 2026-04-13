@@ -16,6 +16,7 @@
  *
  *  CHANGELOG
  *    2018-04-19: Paul McCudden (paul@peak14.solutions): Created
+ *    2026-04-09: Paul McCudden: Updated LayoutIDs and LayoutNames uses "" as parameter to prevent issues with duplicate file names
 */
 
 Let ( 
@@ -23,8 +24,8 @@ Let (
       ~layout = If ( IsEmpty ( layout ); Get ( LayoutName ); layout );
 
       //Lists of all layouts
-      ~ids = LayoutIDs ( Get ( FileName ) ) ; 
-      ~names = LayoutNames ( Get ( FileName ) ) ;
+      ~ids = LayoutIDs ( "" ) ; 
+      ~names = LayoutNames ( "" ) ;
       
       //New Variable 
       ~newLayout =
