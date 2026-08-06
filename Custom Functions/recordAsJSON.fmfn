@@ -1,0 +1,89 @@
+/*
+ *  CUSTOM FUNCTION
+ *    recordAsJSON ( reference; fieldListToSkip )
+ *
+ *  DESCRIPTION
+ *    Returns a JSON representation of the current record with the field names as keys and the field values as values. 
+ *
+ *  PARAMS
+ *    reference: Any reference to a field in the table. If this is used as part of the table definition, self is the preffered method
+ *    fieldListToSkip: A list of field names to exclude from the JSON representation
+ *
+ *  RETURNS
+ *    JSONObject
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    202?-??-??: ?: Created
+ *    2026-3-12: Krishna: updated to remove stored calcs from the json
+ *    2026-6-01: Paul: Refactored
+ *
+*/
+
+While (
+    // intitial variable
+    [
+        reference = templateTable::recordAsJson;
+        fieldListToSkip = List (
+            GetFieldName ( templateTable::zz_meta_createdBy );
+            GetFieldName ( templateTable::zz_meta_createdTimestampUtc )
+        );
+        ~fqfn = Case (
+            not EvaluationError ( GetFieldName ( reference ) ) ;
+                GetFieldName ( reference ) ;
+            not EvaluationError ( GetField ( reference ) ) or EvaluationError ( Evaluate ( reference ) ) = 103;
+                reference
+        );
+        ~fieldName = GetValue ( Substitute ( ~fqfn ; "::" ; ¶ ) ; 2 );
+        ~tableName = GetValue ( Substitute ( ~fqfn ; "::" ; ¶ ) ; 1 );
+        ~sqlStatement = "SELECT FieldName FROM FileMaker_Fields WHERE TableName = ?";
+        ~fieldListFull = "";//ExecuteSQL ( ~sqlStatement;""; ""; ~tableName);
+
+        // Ensure that fieldListToSkip is a list of field names without the preceeding table name
+        ~fieldListToSkip = fieldListToSkip;
+        /*~fieldListToSkip = If (
+            PatternCount ( ~fieldListToSkip; "::" ) = 0; ~fieldListToSkip;
+            While (
+                [
+                    ~j = 0;
+                    ~thisFieldToSkip = "";
+                    ~fieldListToSkipNew = ""
+                ];
+
+                ~j < ValueCount ( ~fieldListToSkip );
+
+                [
+                    ~j = ~j + 1;
+                    ~thisFieldToSkip = GetValue ( ~fieldListToSkip ; ~j );
+                    ~fieldListToSkipNew = List (
+                        ~fieldListToSkipNew;
+                        If (
+                            PatternCount ( ~thisFieldToSkip; "::" ) = 0;
+                            ~thisFieldToSkip;
+                            GetValue ( Substitute ( ~thisFieldToSkip ; "::" ; ¶ ) ; 2 ) )
+                    )
+                ];
+
+                ~fieldListToSkipNew
+            )
+        );*/
+        ~fieldList = RemoveValues ( ~fieldListFull; ~fieldListToSkip );
+        ~i = 0;
+        ~json = "{}"
+    ];
+
+    // condition 
+   ~i < ValueCount ( ~fieldList );
+
+    //logic
+    [
+        ~i = ~i + 1;
+        ~thisField = GetValue ( ~fieldList ; ~i )
+    ] ;
+
+    //result 
+    ~fieldListToSkip
+
+)

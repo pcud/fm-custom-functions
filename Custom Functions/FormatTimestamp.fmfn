@@ -60,7 +60,7 @@ While (
             "    ii: The minutes as 2 digits¶"&
             "    s: The seconds as 1 or 2 digits¶"&
             "    ss: The seconds as 2 digits¶"&
-            "    .000: The milliseconds as a fraction (to the same number of digits) - incomplete¶"&
+            "    .000: The milliseconds as a fraction"&
             "    ap: For displaying hours based on a 12-hour clock and showing am or pm¶"&
             "    AP: For displaying hours based on a 12-hour clock and showing AM or PM¶"&
             "    Ap: For displaying hours based on a 12-hour clock and showing Am or Pm¶"&

@@ -1,0 +1,76 @@
+/*
+ *  CUSTOM FUNCTION
+ *    SanitizeURL ( url ; isFullUrl )
+ *
+ *  DESCRIPTION
+ *    Sanitizes a URL or a single URL component
+ *
+ *  PARAMS
+ *    url: The URL or component to sanitize
+ *    isFullUrl: True if url is a complete URL. False if url is a single URL component
+ *      -True:  "https://ex.com/f?a=1" stays intact
+ *      -False: "Bob & Sons" > "Bob%20%26%20Sons"
+ *              Do NOT pass multiple components. "a=1&b=2" has its
+ *              delimiters encoded ( "a%3D1%26b%3D2" ) and breaks
+ *
+ *  RETURNS
+ *    Text
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2026-07-29: Paul McCudden: Created
+*/
+
+Let (
+    [
+        ~isFull = GetAsBoolean ( isFullUrl ) ;
+
+        // Strip chars illegal in any URL context
+        ~clean = Trim ( Substitute ( url
+            ; [Char ( 0 )  ; ""]   // null
+            ; [Char ( 9 )  ; ""]   // tab
+            ; [Char ( 10 ) ; ""]   // line feed
+            ; [Char ( 13 ) ; ""]   // carriage return
+        ) ) ;
+
+        // Whitelist: RFC 3986 legal set + Latin-1 supplement
+        ~allowed =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            & "abcdefghijklmnopqrstuvwxyz"
+            & "0123456789"
+            & "-._~"          // unreserved
+            & ":/?#[]@"       // gen-delims
+            & "!$&'()*+,;="   // sub-delims
+            & "%"             // percent-encoding
+            & "¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ·¸¹º»¼½¾¿"
+            & "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß"
+            & "àáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"
+    ] ;
+
+    If ( ~isFull ;
+
+        // Encode only the illegal chars; reserved ones are delimiters
+        // and must stay raw, so GetAsURLEncoded() can't be used here
+        Filter (
+            Substitute ( ~clean
+                ; ["\\" ; "/"]           // backslash to forward slash - normal browser behavior
+                ; [Char ( 160 ) ; " "]   // non-breaking space to space
+                ; [" "  ; "%20"]         // space
+                ; ["\"" ; "%22"]         // double quote
+                ; ["<"  ; "%3C"]         // less than
+                ; [">"  ; "%3E"]         // greater than
+                ; ["{"  ; "%7B"]         // left brace
+                ; ["}"  ; "%7D"]         // right brace
+                ; ["|"  ; "%7C"]         // vertical bar
+                ; ["^"  ; "%5E"]         // caret
+                ; ["`"  ; "%60"]         // backtick
+            )
+            ; ~allowed
+        ) ;
+
+        // Can use GetAsURLEncoded()
+        GetAsURLEncoded ( ~clean ) 
+    )
+)

@@ -32,7 +32,7 @@ Let (
         ;["detail"; Get ( LastErrorDetail ); JSONGetElementTypeExtended ( Get ( LastErrorDetail ); "" ) ]
 
         ;["description"; ErrorDescription ( Get ( LastError ) ); JSONString]
-        ;["note"; note; JSONString]
+        ;["note"; note; JSONGetElementTypeExtended ( note; "" ) ]
         ;["script"; GetValue ( ~location; 1 ); JSONString]
         ;["step"; GetValue ( ~location; 2 ); JSONString]
         ;["line"; GetValue ( ~location; 3 ); JSONNumber]
