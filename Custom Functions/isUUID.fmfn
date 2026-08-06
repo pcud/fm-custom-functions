@@ -1,0 +1,57 @@
+/*
+ *  CUSTOM FUNCTION
+ *    isUUID ( value )
+ *
+ *  DESCRIPTION
+ *    Returns true if the passed value has the shape of a string produced by the native Get ( UUID ) function:
+ *      36 characters of uppercase hex grouped 8-4-4-4-12.
+ *    An optional custom prefix ending in "-" is allowed in front of the UUID, e.g. "ACME-E47E7AE0-5CF0-FF45-B3AD-C12B3E765CD5".
+ *    The UUID is read from the right hand end of the value, so the prefix may itself contain hyphens.
+ *    Casing is enforced. Get ( UUID ) returns uppercase while most other platforms emit lowercase, so casing is the
+ *      strongest available signal that a value was generated natively rather than imported.
+ *    No version digit is checked. Claris documents Get ( UUID ) values that are not version 4, and Windows clients
+ *      have been reported to return a mix of v1 and v4, so requiring a "4" in the version position would reject
+ *      genuine native values.
+ *
+ *  PARAMS
+ *    value: The value to test
+ *
+ *  RETURNS
+ *    True or False
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2026-08-03: Paul McCudden: Created
+*/
+
+Let (
+    [
+        ~length = Length ( value );
+
+        // The UUID is the last 36 characters, anything in front of it is the custom prefix
+        ~uuid = Right ( value; 36 );
+        ~prefix = Left ( value; Max ( ~length - 36; 0 ) );
+
+        ~longEnough = ~length >= 36;
+
+        // No prefix at all, or at least one character followed by "-"
+        ~prefixOK = Case (
+            IsEmpty ( ~prefix ); True;
+            Length ( ~prefix ) >= 2 and Right ( ~prefix; 1 ) = "-"
+        );
+
+        // 8-4-4-4-12 grouping
+        ~hyphensOK = Middle ( ~uuid; 9 ; 1 ) = "-"
+            and Middle ( ~uuid; 14 ; 1 ) = "-"
+            and Middle ( ~uuid; 19 ; 1 ) = "-"
+            and Middle ( ~uuid; 24 ; 1 ) = "-";
+
+        // The remaining 32 characters are all uppercase hex; Filter is case sensitive
+        ~hexOK = Length ( Filter ( ~uuid; "0123456789ABCDEF" ) ) = 32
+    ];
+
+    ~longEnough and ~prefixOK and ~hyphensOK and ~hexOK
+
+)

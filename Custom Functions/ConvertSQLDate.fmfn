@@ -15,21 +15,24 @@
  *    --NONE--
  *
  *  CHANGELOG
- *    2021-07-14: Paul McCudden (paul@peak14.solutions): Created
+ *    2021-07-14: Paul McCudden: Created
+ *    2026-07-02: Paul McCudden: Updated to handle time and use middle functions for efficiency reasons
 */
 
 Let(
   [
-    ~dateList = Substitute ( GetValue ( Substitute ( SQLDate; " "; ¶ ); 1 ); "-"; ¶ )
+	SQLDate = GetValue ( CullNulls ( SQL.Get1ColumnWhere ( REFERENCE::lastUpdatedDate; ""; "" ) ); 1 );
+    ~year  = Middle ( SQLDate;  1; 4 );
+    ~month = Middle ( SQLDate;  6; 2 );
+    ~day   = Middle ( SQLDate;  9; 2 );
+    ~time = Middle ( SQLDate; 12; 999 );
+    ~time = If ( IsEmpty ( ~time ); 0; ~time )
   ];
 
+
   Timestamp (
-    Date (
-      GetValue ( ~dateList; 2 );
-      GetValue ( ~dateList; 3 );
-      GetValue ( ~dateList; 1 )
-    );
-    GetValue ( Substitute ( SQLDate; " "; ¶ ); 2 )
+    Date ( ~month; ~day; ~year );
+    ~time
   )
 
 )

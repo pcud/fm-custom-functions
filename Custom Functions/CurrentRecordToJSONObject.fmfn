@@ -1,0 +1,64 @@
+/*
+ *  CUSTOM FUNCTION
+ *    CurrentRecordToJSONObject ( includeTO )
+ *
+ *  DESCRIPTION
+ *    Converts the current record into a JSON object by querying FileMaker_Fields
+ *    for all fields on the current layout's table and then packaging each field
+ *    value into a JSONObject.
+ *
+ *  PARAMS
+ *    includeTO: If true, field keys are returned as fully qualified field names
+ *               (Table::Field). If false or blank, only the field name is used.
+ *
+ *  RETURNS
+ *    JSONObject
+ *
+ *  DEPENDENCIES
+ *    --NONE--
+ *
+ *  CHANGELOG
+ *    2026-07-31: Created
+ */
+
+Let (
+  [
+    ~layoutTO = Get ( LayoutTableName );
+    ~fieldNames = ExecuteSQL (
+      "SELECT FieldName" &
+      "¶FROM FileMaker_Fields" &
+      "¶WHERE TableName = ?"
+      ; "" ; "" ; ~layoutTO
+    );
+    ~json = "{}";
+    ~i = 0
+  ];
+
+  While (
+    ~i < ValueCount ( ~fieldNames );
+    [
+      ~i = ~i + 1;
+      ~thisFieldName = GetValue ( ~fieldNames ; ~i );
+      ~thisFQFN = ~layoutTO & "::" & ~thisFieldName;
+      ~fieldType = FieldType ( "" ; ~thisFQFN );
+      ~isExcludedField = MiddleWords ( ~fieldType ; 1; 1 ) = "Summary" or
+                        MiddleWords ( ~fieldType ; 1; 1 ) = "Global" or
+                        Right ( LeftWords ( ~fieldType ; 1 ) ; 4 ) = "Calc";
+      ~thisValue = GetField ( ~thisFQFN );
+      ~jsonType = Case (
+        MiddleWords ( ~fieldType ; 2; 1 ) = "Number"; JSONNumber;
+        Left ( JSONFormatElements ( ~thisValue ); 1 ) <> "?"; JSONGetElementType ( ~thisValue ; "" );
+        JSONString
+      );
+      ~json = If ( ~isExcludedField;
+        ~json;
+        JSONSetElement (
+          ~json
+          ; [ If ( ~includeTO ; ~thisFQFN ; ~thisFieldName ); ~thisValue; ~jsonType ]
+        )
+      )
+    ]
+  );
+
+  ~json
+)
