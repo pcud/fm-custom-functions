@@ -3,7 +3,16 @@
  *    CamelBreaker ( camelCase )
  *
  *  DESCRIPTION
- *    Breaks camel case into readable words
+ *    Breaks camelCase / PascalCase into readable words by inserting spaces
+ *    at word boundaries, then title-cases each word (firstName → First Name).
+ *
+ *    Boundaries:
+ *      1. lower → Upper  (firstName → first Name)
+ *      2. Upper → UpperLower  (XMLParser → XML Parser)
+ *
+ *    Exception: a single leading lowercase letter before Upper is kept
+ *    attached (iPhone, eBay) and is not title-cased. This also leaves
+ *    aValue unsplit — that ambiguity cannot be resolved without a dictionary.
  *
  *  PARAMS
  *    camelCase: Any text string in the camel case format
@@ -16,65 +25,90 @@
  *
  *  CHANGELOG
  *    2021-10-25: Paul McCudden: Created
- *.   2025-09-17: Updated to work properly in standard cases
+ *    2025-09-17: Updated to work properly in standard cases
+ *    2026-08-07: Rewrite — char scan with acronym + iPhone heuristics
 */
 
-While (
+Let (
     [
-        ~camelCase = camelCase;
-        ~length = Length ( ~camelCase );
-        ~i = 0;
-        ~broken = "";
-        ~alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        ~allAlpha = ~length = Length ( Filter ( ~camelCase ; ~alpha ) )
-    ];
+        ~broken = While (
+            [
+                ~text = camelCase ;
+                ~len = Length ( ~text ) ;
+                ~i = 1 ;
+                ~out = "" ;
+                ~lowerRun = 0 ;
+                ~prevIsUpper = False ;
+                ~prevIsLower = False
+            ] ;
 
-    ~i < ~length and not ~allAlpha;
+            ~i ≤ ~len ;
 
-    [
-        ~i = ~i + 1;
-        ~thisChar = Middle ( ~camelCase; ~i; 1 );
-        ~lastChar = If ( ~i = 1; ""; Middle ( ~camelCase; ~i - 1; 1 ) );
-        ~addSpace = Exact ( ~thisChar; Upper ( ~thisChar ) ) and
-            Exact ( ~lastChar; Lower ( ~lastChar ) ) and 
-            not IsEmpty ( Filter ( ~alpha ; ~lastChar )  ) and
-            not IsEmpty ( Filter ( ~alpha ; ~thisChar )  )
-        ;
-        ~broken = ~broken & If ( ~addSpace and ~i > 1; " " ) & ~thisChar
-    ];
+            [
+                ~ch = Middle ( ~text ; ~i ; 1 ) ;
+                ~next = If ( ~i = ~len ; "" ; Middle ( ~text ; ~i + 1 ; 1 ) ) ;
 
-    Case (
-        ~allAlpha; TrimAll ( Proper (
-            Substitute ( ~camelCase;
-                ["A"; " A"]; 
-                ["B"; " B"];
-                ["C"; " C"];
-                ["D"; " D"];
-                ["E"; " E"];
-                ["F"; " F"];
-                ["G"; " G"];
-                ["H"; " H"];
-                ["I"; " I"];
-                ["J"; " J"];
-                ["K"; " K"];
-                ["L"; " L"];
-                ["M"; " M"];
-                ["N"; " N"];
-                ["O"; " O"];
-                ["P"; " P"];
-                ["Q"; " Q"];
-                ["R"; " R"];
-                ["S"; " S"];
-                ["T"; " T"];
-                ["U"; " U"];
-                ["V"; " V"];
-                ["W"; " W"];
-                ["X"; " X"];
-                ["Y"; " Y"];
-                ["Z"; " Z"]  
-            ) );
-            1; 0
-        );
-        ~broken
+                ~isUpper =
+                    Exact ( ~ch ; Upper ( ~ch ) ) and
+                    not Exact ( ~ch ; Lower ( ~ch ) ) ;
+                ~isLower =
+                    Exact ( ~ch ; Lower ( ~ch ) ) and
+                    not Exact ( ~ch ; Upper ( ~ch ) ) ;
+                ~nextIsLower =
+                    Exact ( ~next ; Lower ( ~next ) ) and
+                    not Exact ( ~next ; Upper ( ~next ) ) ;
+
+                // lower→Upper, but skip when only one lowercase precedes (iPhone)
+                ~camelBreak = ~isUpper and ~prevIsLower and ~lowerRun > 1 ;
+
+                // Upper→UpperLower acronym boundary (XMLParser → XML Parser)
+                ~acronymBreak = ~isUpper and ~prevIsUpper and ~nextIsLower ;
+
+                ~out = ~out & If ( ~camelBreak or ~acronymBreak ; " " ) & ~ch ;
+
+                ~lowerRun = If ( ~isLower ; ~lowerRun + 1 ; 0 ) ;
+                ~prevIsUpper = ~isUpper ;
+                ~prevIsLower = ~isLower ;
+                ~i = ~i + 1
+            ] ;
+
+            ~out
+        )
+    ] ;
+
+    // Title-case each word, but leave brand-style words (iPhone, eBay) alone
+    While (
+        [
+            ~words = Substitute ( ~broken ; " " ; ¶ ) ;
+            ~n = ValueCount ( ~words ) ;
+            ~w = 1 ;
+            ~result = ""
+        ] ;
+
+        ~w ≤ ~n ;
+
+        [
+            ~word = GetValue ( ~words ; ~w ) ;
+            ~c1 = Left ( ~word ; 1 ) ;
+            ~c2 = Middle ( ~word ; 2 ; 1 ) ;
+            ~c1Lower =
+                Exact ( ~c1 ; Lower ( ~c1 ) ) and
+                not Exact ( ~c1 ; Upper ( ~c1 ) ) ;
+            ~c2Upper =
+                Exact ( ~c2 ; Upper ( ~c2 ) ) and
+                not Exact ( ~c2 ; Lower ( ~c2 ) ) ;
+            ~isBrand = Length ( ~word ) ≥ 2 and ~c1Lower and ~c2Upper ;
+
+            ~titled = Case (
+                ~isBrand ; ~word ;
+                ~c1Lower ; Upper ( ~c1 ) & Middle ( ~word ; 2 ; Length ( ~word ) - 1 ) ;
+                ~word
+            ) ;
+
+            ~result = ~result & If ( ~w > 1 ; " " ) & ~titled ;
+            ~w = ~w + 1
+        ] ;
+
+        ~result
     )
 )
