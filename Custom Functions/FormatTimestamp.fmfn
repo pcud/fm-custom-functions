@@ -22,6 +22,7 @@
  *    2021-09-17: Paul McCudden: Created - Time section incomplete
  *    2022-05-26: Paul McCudden: Mostly finished time section - Millisecond section incomplete
  *    2025-05-08: Paul McCudden: Completed Millisecond section
+ *    2026-08-26: Paul McCudden: Fixed issue where seconds was wrong if there were milliseconds in the timestamp
 */
 
 While (
@@ -188,9 +189,9 @@ While (
             ~processing = "i"; GetAsNumber ( Minute ( ~time ) );
             ~processing = "ii"; Right ( "0" & Minute ( ~time ); 2 );
 
-            // Seconds
-            ~processing = "s"; GetAsNumber ( Seconds ( ~time ) );
-            ~processing = "ss"; Right ( "0" & Seconds ( ~time ); 2 );
+            // Seconds: potential issue - if miliseconds aren't included, should it round() instead of floor()? Should minutes and hours do that too?
+            ~processing = "s"; GetAsNumber ( Floor ( Seconds ( ~time ) ) );
+            ~processing = "ss"; Right ( "0" & Floor ( Seconds ( ~time ) ); 2 );
 
             // Milliseconds
             Left ( ~processing; 1 ) = "." and Length ( ~processing ) > 1 ; Let (

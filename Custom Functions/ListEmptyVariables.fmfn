@@ -1,0 +1,44 @@
+/*
+ *  CUSTOM FUNCTION
+ *    ListEmptyVariables ( variableNameList )
+ *
+ *  DESCRIPTION
+ *    Accepts a return-delimited list of variable names (local $ or global $$)
+ *    and returns a return-delimited list of only those variable names whose
+ *    evaluated value is empty. Variables that do not exist evaluate as empty
+ *    and are therefore included in the result.
+ *
+ *  PARAMS
+ *    variableNameList: return-delimited list of variable names, e.g.
+ *        "$name¶$$globalID¶$count"
+ *      (a leading "$" or "$$" is optional; "$" is assumed when omitted)
+ *
+ *  RETURNS
+ *    Text: return-delimited list of the variable names that are empty
+ *
+ *  DEPENDENCIES
+ *    --None--
+ *
+ *  CHANGELOG
+ *    2026-08-07: Paul McCudden: Created
+*/
+
+While (
+	[
+		~count  = ValueCount ( variableNameList ) ;
+		~i      = 0 ;
+		~result = ""
+	] ;
+
+	~i < ~count ;
+
+	[
+		~i     = ~i + 1 ;
+		~name  = Trim ( GetValue ( variableNameList ; ~i ) ) ;
+		~var   = If ( Left ( ~name ; 1 ) = "$" ; ~name ; "$" & ~name ) ;
+		~empty = not IsEmpty ( ~name ) and IsEmpty ( Evaluate ( ~var ) ) ;
+		~result = If ( ~empty ; List ( ~result ; ~name ) ; ~result )
+	] ;
+
+	~result
+)

@@ -1,0 +1,703 @@
+/*
+ 
+  Function:	JSONQuery
+ 
+  Purpose:		Returns child values from a JSON object/array which match supplied parameters.
+  
+  Requires:	FMP v16 or later
+  
+  External Dependencies: None
+ 
+  Parameters:
+ 
+  	- Json :			A JSON string
+ 
+  	- TargetPath :		JSON path to a Target Value, relative to a direct child of supplied JSON.
+ 
+  	- Operator:		One of:  { "EQUALS", "EXACT", "LIKE", "IN", "MATCH_ALL" }
+ 
+  	- ComparisonValue:	Value to which the value at TargetPath is compared.
+ 
+  	- ValueType:		Data-type of ComparisonValue and Target Value:  { JSONString, JSONNumber, JSONBoolean, JSONNull }    ( sans quotes; defaults to JSONString )
+ 
+  	- ResultPath:		Optional JSON path, relative to each child, specifying the specific value to return for matches.
+ 
+ 
+  Returns:
+ 
+  	A JSON array/object containing matches, or an aggregate result
+ 
+ 
+ 
+  Operators:
+ 
+  	- EXACT:			case-sensitive string matches; distinguishes between null and "", and 0 and false, and 1 and true.
+ 
+  	- EQUALS:			case-insensitive string matches; considers null and "" equivalent; similarly, 0 and false, and 1 and true are equivalent.
+ 
+  	- LIKE:			case-insensitive "begins-with" match.
+ 
+  	- IN:				case-insensitive string match against up to 20 distinct return-delimited strings.
+ 
+  	- MATCH_ALL:		matches every JSON child.
+ 
+ 
+  	Note:  The LIKE and IN operators only match JSON values which are JSONString data type.
+ 
+ 
+ 
+  Aggregate Functions:
+ 
+	Use the following ResultPath parameter syntax to return an "aggregate" result:
+  	
+  		- "COUNT(*)" 								Returns the Count of matched children:  
+ 
+  		- "COUNT( resultpath.to.target.element )"			Returns the Count of all non-null/non-empty values at a specified path  
+ 
+  		- "SUM( resultpath.to.target.element )"			Returns the Sum of JSONNumber and/or JSONString values at a specified path
+  		
+  		- "SUM#( resultpath.to.target.element )"			Returns the Sum of only JSONNumber values at a specified path
+  		
+  		- "LIST( resultpath.to.target.element )"			Returns a CR-delimited List of values at a specified path
+  		
+  		- "LIST_DISTINCT( resultpath.to.target.element )"	Returns a CR-delimited List of case-sensitive-distinct values at a specified path
+  	
+  		- "LIST( resultpath.to.target.element ; n )"    or:    "LIST_DISTINCT( resultpath.to.target.element ; n )"
+  			
+			Returns a delimited List of values at a specified ResultPath where n = Code( CustomDelimiterString )
+						
+  	Note:
+ 
+  		- SUM converts JSONString values to numbers by wrapping them with GetAsNumber.
+ 
+		- The LIST and LIST_DISTINCT aggregates only include values of type:  JSONNumber, JSONString.
+ 
+ 
+			
+  Version: 20181228_1630
+ 
+  Author: https://community.filemaker.com/people/steve_ssh
+ 
+*/
+ 
+ 
+ 
+Let([
+//=	Get Input =//
+	~input_json = Json ; // json_vals
+	~input_m_path = TargetPath ; // json_keys_esc
+	~params = Operator ; // multiple
+	~input_val = ComparisonValue ; // match_val
+	~input_val_type = ValueType ; // match_val_type
+	~input_r_path = ResultPath ;  // match_strings
+//=	Constants =//
+	_BS = "\\" ;
+	_CR = Char( 13 );
+	_LF = Char( 10 );
+	_LS = Char( 8232 );
+	_LSj = _BS & "u2028";
+	_PS = Char( 8233 );
+	_PSj = _BS & "u2029";
+	_QT = "\"" ;
+	_ESC = "#" ;
+	_ESCe = "#E" ;
+	_BSe = "#B" ;
+	_QTe = "#Q" ;
+	_CRe = "#R" ;
+	_LFe = "#N" ;
+	_LSe = "#S" ;
+	_PSe = "#P" ;
+	_DELIM_RESERVED = "@!@#$%$%^" ;
+	
+//=	Type-Checking Constants =//
+	_INNER_QTE_MARKER = "#M" ;
+	_INNER_R_QTE_MARKER = "#D" ;
+	_TYPE_CHECK_ESC_CHAR = "9" ;
+	_TYPE_CHECK_ESC_CHARe = "91" ;
+	_F_NULL = "92" ;
+	_F_BOOL_TRUE = "93" ;
+	_F_BOOL_FALSE = "94" ;
+	_F_EMPTY_STRING = "95" ;
+	
+//=	Flags =//
+	_F_PROCESS_PATH = "__F_PRCSS_PATH__" ;
+	_F_IN_KEYLIST = "__F_IN_LIST__" ;
+	_F_KEY = "__F_KEY__" ;
+//=	API Constants =//
+	_M_EQUALS = "EQUALS" ;
+	_M_EXACT = "EXACT" ;
+	_M_LIKE = "LIKE" ;
+	_M_IN = "IN" ;
+	_M_ALL = "MATCH_ALL" ;
+	_n_SUM = "SUM#" ;
+	_SUM = "SUM" ;
+	_COUNT = "COUNT" ;
+	_LIST = "LIST" ;
+	_ULIST = "LIST_DISTINCT" ;
+	_ERROR_PREFIX = "?ERROR: " ;
+	_MAX_MATCH_VALS = 21 ;
+	_OPERATORS = List( _M_EQUALS ; _M_EXACT ; _M_LIKE ; _M_IN ; _M_ALL );
+	_OPERATOR_ARG_COUNT = 10 ; // The number of args overloaded into the Operator param
+//=	Code Branching =//	
+	~is_subroutine =
+		~params = _F_PROCESS_PATH or
+		~params = _F_IN_KEYLIST or
+		~params = _F_KEY	
+]; Case( not ~is_subroutine ; Let([
+//=	Determine if this is the first iteration =//
+	~is_initial = ValueCount( ~params ) < 2 ;
+//=	Values that remain constant over all iterations =//
+	~json_esc = Case( ~is_initial ;
+		Let([
+			// FMP JSON functions mis-handle LS and PS chars, so we escape them from the get-go. (This requires first escaping ESC and BS.)
+			~e = Substitute( ~input_json ; [ _ESC ; _ESCe ] ; [ _BS & _BS ; _BSe ] ; [ _LSj ; _LSe ] ; [ _LS ; _LSe ] ; [ _PSj ; _PSe ]; [ _PS ; _PSe ] );
+			~n = JSONGetElement( "[" & ~e & "]" ; 0 )
+		];
+			Substitute( ~n ;
+				// We also escape LF and CR to remove any newlines from JSON, so that we can process JSON values as a CR-list.
+				[ _BS & "r" ; _CRe ] ; [ _BS & "n" ; _LFe ] ;
+				[ _BS & _QT ; _QTe ] ;
+				// Lastly: We insert right-quote markers to identify string values.
+				[ _QT & "}" ; _INNER_R_QTE_MARKER & _QT & "}" ] ; [ _QT & "]" ; _INNER_R_QTE_MARKER & _QT & "]" ] ; [ _QT & "," ; _INNER_R_QTE_MARKER & _QT & "," ] ;
+				// Undo quote escaping; it was just needed for inserting markers
+				[ _QTe ; _BS & _QT ]
+			)
+		)	
+	);
+	~op = GetValue( ~params ; 1 ); // Operator
+	~no_type_check = ( ~op = _M_ALL );
+	~m_val_type = Case( // Match Value Type (Defaults to String)
+		not ~is_initial ; ~input_val_type ;
+		not IsEmpty( ~input_val_type ) ; ~input_val_type ;
+		JSONString
+	);
+	~m_val = Case( // Match (Comparison) Value
+		not ~is_initial ; ~input_val ;
+		~m_val_type = JSONNumber ; GetAsNumber( ~input_val );
+		~op = _M_IN or ~m_val_type = JSONString ;
+			Let([
+				// Apply the same escaping concept as was applied to source JSON; ("IN" operator does not escape returns - they are delimiters.)
+				~e = Substitute( ~input_val ; [ _ESC ; _ESCe ] ; [ _BS ; _BSe ] ; [ _LS ; _LSe ] ; [ _PS ; _PSe ] ; [ _LF ; _LFe ] )
+			];
+				Case(
+					~op = _M_IN ; UniqueValues ( ~e ; 1 ; "Unicode_Raw" );
+					Substitute( ~e ; [ _CR ; _CRe ] ) // String case
+				)
+			);
+		~input_val // Null or Boolean cases
+	);
+	~m_path = Case( // Match Path
+		not ~is_initial ; GetValue( ~params ; 2 );
+		// Apply the same escaping as was applied to source JSON.
+		Substitute( ~input_m_path ; [ _ESC ; _ESCe ] ; [ _BS & _BS ; _BSe ] ; [ _LS ; _LSe ] ; [ _PS ; _PSe ] ; [ _LF ; _LFe ] ; [ _CR ; _CRe ] )
+	);
+	~aggr = Case( // Aggregate
+		not ~is_initial ; GetValue( ~params ; 3 ) ;
+		Let([
+			~s = Substitute( ~input_r_path ; [ " " ; "" ] )
+		];
+			Case(
+				Right( ~s ; 1 ) <> ")" ; "" ;
+				Left( ~s ; Length( _n_SUM ) + 1 ) = _n_SUM & "(" ; _n_SUM ;
+				Left( ~s ; Length( _SUM ) + 1 ) = _SUM & "(" ; _SUM ;
+				Left( ~s ; Length( _COUNT ) + 1 ) = _COUNT & "(" ; _COUNT ;
+				Left( ~s ; Length( _LIST ) + 1 ) = _LIST & "(" ; _LIST ;
+				Left( ~s ; Length( _ULIST ) + 1 ) = _ULIST & "(" ; _ULIST ;
+				""
+			)
+		)
+	);
+	~is_list = ~aggr = _LIST or ~aggr = _ULIST ;
+	~not_aggr = IsEmpty( ~aggr ) or ~is_list ;
+	~is_aggr = not ~not_aggr ;
+	~list_delim = Case(
+		not ~is_initial ; GetValue( ~params ; 10 );
+		not ~is_list ; "" ;
+		Let([
+			~i = Position( ~input_r_path ; ";" ; Length( ~input_r_path ) ; - 1 );
+			~s = Replace( ~input_r_path ; 1 ; ~i ; "" )
+		];
+			Case( ~i = 0 ; "" ; GetAsNumber( ~s ) )
+		)
+	);
+	~r_path_sans_aggr = Case( // Result (Return) Path sans any wrapped aggregate function
+		not ~is_initial ; "" ;
+		IsEmpty( ~aggr ) ; ~input_r_path ;
+		Let([
+			~end_char = Case( IsEmpty( ~list_delim ) ; ")" ; ";" );
+			~start = Position( ~input_r_path ; "(" ; 0 ; 1 ) + 1 ;
+			~stop = Position( ~input_r_path ; ~end_char ; Length( ~input_r_path ) ; -1 )
+		];
+			Trim( Middle( ~input_r_path ; ~start ; ~stop - ~start ))
+		)
+	);
+	~r_path = Case( // Result (Return) Path sans possible wildcard array index
+		not ~is_initial ; GetValue( ~params ; 4 );
+		Let([
+			~has_wildcard_array = Right( Substitute( ~r_path_sans_aggr ; [ " " ; "" ] ) ; 3 ) = "[*]" ;
+			~last_open_bracket_index = Position( ~r_path_sans_aggr ; "["; Length( ~r_path_sans_aggr ) ; -1 );
+			~path = Case(
+				~has_wildcard_array ; Left( ~r_path_sans_aggr ; ~last_open_bracket_index - 1 );
+				~r_path_sans_aggr
+			)
+		];
+			// Apply the same escaping as was applied to source JSON.
+			Substitute( ~path ; [ _ESC ; _ESCe ] ; [ _BS & _BS ; _BSe ] ; [ _LS ; _LSe ] ; [ _PS ; _PSe ] ; [ _LF ; _LFe ] ; [ _CR ; _CRe ] )
+		)
+	);
+	~m_path_for_type_check = Case(
+		~no_type_check ; "" ;
+		not ~is_initial ; GetValue( ~params ; 5 );
+		Let([
+			~path_array = Substitute( ~m_path ; [ "[" ; _CR & "[" ] ; [ "]" ; "]" & _CR ] )
+		];
+			JSONQuery( ~path_array ; "" ; _F_PROCESS_PATH ; "" ; "" ; "" ) // Call to subroutine to process for type detection
+		)
+	);
+	~r_path_for_type_check = Case(
+		~no_type_check and IsEmpty( ~r_path ) ; "" ;
+		not ~is_initial ; GetValue( ~params ; 6 );
+		Let([
+			~path_array = Substitute( ~r_path ; [ "[" ; _CR & "[" ] ; [ "]" ; "]" & _CR ] )
+		];
+			JSONQuery( ~path_array ; "" ; _F_PROCESS_PATH ; "" ; "" ; "" ) // Call to subroutine to process for type detection
+		)	
+	);
+	~split_arrays = Case(
+		not ~is_initial ; GetValue( ~params ; 7 ) ;
+		Right( Substitute( ~r_path_sans_aggr ; [ " " ; "" ] ) ; 3 ) = "[*]" ; True ;
+		False
+	);
+	~output_is_dict = Case(
+		not ~is_initial ; GetValue( ~params ; 8 ) ;
+		not IsEmpty( ~r_path ) ; False ;
+		Left( Trim( ~json_esc ) ; 1 ) = "{" ; True ;
+		False
+	);
+	~m_strings = Case( not ~is_initial ; ~input_r_path ; ~op = _M_ALL ; "" ; // Match Strings
+		Let([
+			~last_path_segment_index = Position( ~m_path ; "." ; Length( ~m_path ) ; -1 );
+			~key = Case( ~last_path_segment_index ; Replace( ~m_path ; 1 ; ~last_path_segment_index ; "" ) ; ~m_path );
+			~val_bool = GetAsBoolean( ~m_val )
+		];
+			Case(
+			// Case: IN operator: We make a call to a subroutine to process a list of EQUALS match strings
+				~op = _M_IN ; JSONQuery( ~m_val ; "" ; _F_IN_KEYLIST ; "" ; "" ; ~key );
+			// Case: Handle all other operators besides IN
+				List(
+					JSONQuery( ~op ; ~key ; _F_KEY ; ~m_val ; ~m_val_type ; "" );
+					If( ~m_val_type = JSONBoolean and ~op = _M_EQUALS ;
+						List(
+							JSONQuery( ~op ; ~key ; _F_KEY ; ~val_bool ; JSONString ; "" );
+							JSONQuery( ~op ; ~key ; _F_KEY ; ~val_bool ; JSONNumber ; "" );
+						)	
+					);
+					If( ~m_val_type = JSONNull and ~op = _M_EQUALS ; JSONQuery( ~op ; ~key ; _F_KEY ; "" ; JSONString ; "" ))
+				)
+			)
+		)
+	);
+	~m_string_count = Case(
+		not ~is_initial ; GetValue( ~params ; 9 );
+		ValueCount( ~m_strings )
+	);
+	
+//=	Values that update =//
+	~json_vals = Case( ~is_initial ; _CR & JSONListValues( ~json_esc ; "" ) & _CR ; ~input_json );
+	~json_keys_esc = Case(
+		not ~is_initial ; ~input_m_path ;
+		not ~output_is_dict ; "" ;
+		JSONListKeys( ~json_esc ; "" )
+	);
+//=	Validation =//
+	~error_msg = Case(
+		not ~is_initial ; "" ;
+		IsEmpty( ~op ) ; "Missing Operator parameter." ;
+		IsEmpty( FilterValues( _OPERATORS ; ~op ) ) ; "Unsupported Operator parameter." ;
+		IsEmpty( ~input_json ) ; "Missing Json parameter." ;
+		Left( ~json_vals ; 2 ) = _CR & "?" ; "Malformed Json parameter supplied." ;
+		IsEmpty( ~input_m_path ) and ~params <> _M_ALL ; "Missing TargetPath parameter." ;
+		Right( ~input_m_path ; 1 ) = "]" ; "Unsupported TargetPath parameter. TargetPath parameters which target an array index at the end of the path are not supported." ;
+		~op = _M_LIKE and IsEmpty( ~m_val ) ; "The \"LIKE\" Operator requires a non-empty ComparisonValue." ;
+		~op = _M_IN and ValueCount( ~m_val ) > _MAX_MATCH_VALS ; "Maximum number of \"IN\" match values exceeded." ;
+		~op <> _M_ALL and IsEmpty( FilterValues( ~m_val_type ; List( JSONString; JSONNumber ; JSONBoolean ; JSONNull ))); "Unsupported ValueType parameter." ;
+		~op = _M_LIKE and ~m_val_type <> JSONString ; "The \"LIKE\" operator only supports ValueType of: JSONString." ;
+		~op = _M_IN and ~m_val_type <> JSONString ; "The \"IN\" operator only supports ValueType of: JSONString." ;
+		~m_val_type = JSONBoolean and ~m_val <> True and ~m_val <> False ;
+			"When specifying a ValueType of JSONBoolean, the ComparisonValue argument must be one of: { True, False, 0, 1 }" ;
+		~m_val_type = JSONNull and not IsEmpty( ~m_val );
+			"When specifying a ValueType of JSONNull, the ComparisonValue argument must be empty." ;
+		~split_arrays and ( ~aggr = _n_SUM or ~aggr = _SUM or ~is_list ) ;
+			"The " & ~aggr & " aggregate does not support ResultPath parameters ending in [*]." ;
+		PatternCount( Substitute( ~input_m_path ; " " ; "" ) ; "[*]" ) ;
+			"The TargetPath parameter does not support wildcard array indices." ;
+		PatternCount( Substitute( ~r_path_sans_aggr ; " " ; "" ) ; "[*]" ) > ~split_arrays ;
+			"The ResultPath parameter supports trailing wildcard array indices only." ;
+		~op = _M_ALL and IsEmpty( Substitute( ~r_path ; [ "." ; "" ] ) ) ;
+			"The \"MATCH_ALL\" operator requires a non-trivial ResultPath parameter." ;
+		IsEmpty( Substitute( ~r_path ; [ "." ; "" ] ) ) and ( ~is_aggr or ~is_list );
+			"Aggregate functions require a non-trivial ResultPath parameter."
+	);
+//=	Next potential match =//
+	~next_match_index = Let([ ~j = ~json_vals ; ~m = ~m_strings ];
+		Case(
+			not IsEmpty( ~error_msg ) ; 0 ;
+			~op = _M_ALL ; 2 ;  // Note: We need to return > 0; we use 2 to skip over the first char, which is a delimiting CR
+			~m_string_count < 1 ; 0 ;  // This should not happen, but keep it, in case above code changes.
+			~m_string_count = 1 ; Position( ~j ; ~m ; 0 ; 1 ) ;
+			~m_string_count < 4 ;  // Some of the Null / Boolean types have up to three match strings
+				Min(
+				// Use Case here to weed out 0 values; We want the lowest value which is > 0
+					Let(~p=Position(~j;GetValue(~m;1);0;1);Case(~p;~p));
+					Let(~p=Position(~j;GetValue(~m;2);0;1);Case(~p;~p));
+					Let(~p=Position(~j;GetValue(~m;3);0;1);Case(~p;~p))
+				);
+			Min( // IN operator case may have up to 20 match strings
+			// Use Case here to weed out 0 values; We want the lowest value which is > 0
+				Let(~p=Position(~j;GetValue(~m;1);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;2);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;3);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;4);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;5);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;6);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;7);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;8);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;9);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;10);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;11);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;12);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;13);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;14);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;15);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;16);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;17);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;18);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;19);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;20);0;1);Case(~p;~p));
+				Let(~p=Position(~j;GetValue(~m;21);0;1);Case(~p;~p))
+			)
+		)
+	);
+	~match = ~next_match_index > 0 ;
+	~continue_seeking_matches = ~match ; // Added for readability near end of function.
+//=	Obtain block of JSON, and target value to test for match =//
+	~target_val_parse_start = Case( ~match ; Position( ~json_vals ; _CR ; ~next_match_index ; -1 ) + 1 );
+	~target_val_parse_stop = Case( ~match ; Position( ~json_vals ; _CR ; ~next_match_index ; 1 ) );	
+	~value_index_of_match = Case( ~match and ~output_is_dict ; PatternCount( Left( ~json_vals ; ~next_match_index ) ; _CR ) );
+	~target_json_block_raw = Case( ~match ; Middle( ~json_vals ; ~target_val_parse_start ; ~target_val_parse_stop - ~target_val_parse_start ) );
+	// Note: In next line, the embedded _INNER_R_QTE_MARKER prevents false-positive with string values that appear to be json.
+	~json_block_is_object_or_array = not IsEmpty( Filter( "}]" ; Right( ~target_json_block_raw ; 1 ))); // This detects any non-object/array values included in main parent.
+	~match_found = ~match and ~json_block_is_object_or_array; // Omit false matches for non-object/array values; we only match against child nodes which are objects or arrays.
+	// Remove quote marker, but leave escaping; escaping is left in place until the very end; it's removed upon returning final result.
+	~target_json_block = Case( ~match_found ; Substitute( ~target_json_block_raw ; [ _INNER_R_QTE_MARKER ; "" ] ));
+	~target_val = Case( ~match_found ; JSONGetElement( ~target_json_block ; ~m_path ));
+//=	Determine JSON node type of value =//
+	~json_for_type_check = Case(
+		~no_type_check and IsEmpty( ~r_path ) ; "" ;
+		not ~match_found ; "" ;
+		Substitute( ~target_json_block ;
+		// These substitutions temporarily escape literal backslash and quote chars
+		// in order to allow us to safely do things like add left-quote earmarks
+		// and escape the empty string, without error.
+			[ _ESC ; _ESCe ] ; [ _BS & _BS ; _BSe ] ; [ _BS & _QT ; _QTe ] ;
+		// These substitutions translate true, false, null, and empty string values to numbers
+		// which we can detect without ambiguity
+			[ _TYPE_CHECK_ESC_CHAR ; _TYPE_CHECK_ESC_CHARe ] ;
+			[ "null" ; _F_NULL ] ;
+			[ "true" ; _F_BOOL_TRUE ] ;
+			[ "false" ; _F_BOOL_FALSE ] ;
+			[ _QT & _QT ; _F_EMPTY_STRING ] ;
+		// These substitution will earmark the quotes surrounding values,
+		// so that we can determine value type, based on the presence or absence of the earmarks.
+			[ ":" & _QT ; ":" & _QT & _INNER_QTE_MARKER ] ;
+			[ "[" & _QT ; "[" & _QT & _INNER_QTE_MARKER ] ;
+			[ _QT & "]" ; _INNER_QTE_MARKER & _QT & "]" ] ;
+			[ _QT & "," ; _INNER_QTE_MARKER & _QT & "," ] ;
+		// These substitutions undo the previous escaping that we did at the start of this sequence
+			[ _QTe ; _BS & _QT ] ; [ _BSe ; _BS & _BS ] ; [ _ESCe ; _ESC ]
+		)
+	);
+	~target_val_type = Case(
+		~no_type_check ; "" ;
+		not ~match_found ; "" ;
+		Let([
+			~target_val_for_type_check =
+				JSONGetElement( ~json_for_type_check ; ~m_path_for_type_check ) ;
+			~target_val_has_string_marker = Case(
+				Left( ~target_val_for_type_check ; Length( _INNER_QTE_MARKER ) ) = _INNER_QTE_MARKER ; True ;
+				Right( ~target_val_for_type_check ; Length( _INNER_QTE_MARKER ) ) = _INNER_QTE_MARKER ; True ;
+				False
+			)
+		];
+			Case(
+				~target_val_for_type_check = _F_EMPTY_STRING ; "EMPTY_STRING" ;
+				~target_val_for_type_check = _F_BOOL_TRUE ; "TRUE" ;
+				~target_val_for_type_check = _F_BOOL_FALSE ; "FALSE" ;
+				~target_val_for_type_check = _F_NULL ; "NULL" ;
+				~target_val_has_string_marker ; "STRING" ;
+				not IsEmpty( ~target_val_for_type_check ) and
+				GetAsNumber( ~target_val_for_type_check ) = ~target_val_for_type_check ; "NUMBER" ;
+				"UNSUPPORTED_VALUE"
+			)
+		)
+	);
+//=	Determine if qualifies as a match =//
+	~target_val_is_a_match = Case(
+		~op = _M_ALL ; True ;
+		not ~match_found ; False ;
+		~op = _M_EQUALS and ~target_val_type = "STRING" and ~m_val_type = JSONString and ~target_val = ~m_val ; True ;
+		~op = _M_EXACT and ~target_val_type = "STRING" and ~m_val_type = JSONString and Exact( ~target_val ; ~m_val ) ; True ;
+		( ~op = _M_EQUALS or ~op = _M_EXACT ) and ~target_val_type = "NUMBER" and ~m_val_type = JSONNumber and ~target_val = ~m_val ; True ;
+		~op = _M_LIKE and ~target_val_type = "STRING" and ~m_val_type = JSONString and Left( ~target_val ; Length( ~m_val ) ) = ~m_val ; True ;
+		~op = _M_EQUALS and ( ~target_val_type = "NULL" or ~target_val_type = "EMPTY_STRING" )
+			and ( ~m_val_type = JSONNull or ~m_val_type = JSONString )
+			and IsEmpty( ~m_val ) ; True ;
+		~op = _M_EXACT and ~target_val_type = "NULL" and ~m_val_type = JSONNull and IsEmpty( ~m_val ) ; True ;
+		~op = _M_EXACT and ~target_val_type = "EMPTY_STRING" and ~m_val_type = JSONString and IsEmpty( ~m_val ) ; True ;
+		~op = _M_EQUALS and ( ~target_val_type = "TRUE" or ~target_val = 1 ) and ~m_val_type = JSONBoolean and ~m_val = True ; True ;
+		~op = _M_EQUALS and ( ~target_val_type = "FALSE" or ~target_val = 0 ) and ~m_val_type = JSONBoolean and ~m_val = False ; True ;
+		~op = _M_EXACT and ~target_val_type = "TRUE" and ~m_val_type = JSONBoolean and ~m_val = True ; True ;
+		~op = _M_EXACT and ~target_val_type = "FALSE" and ~m_val_type = JSONBoolean and ~m_val = False ; True ;
+		~op = _M_IN and not IsEmpty( FilterValues( ~target_val ; ~m_val ) ) ; True ;
+		~op = _M_IN and ( ~target_val_type = "EMPTY_STRING" or ~target_val_type = "NULL" ) and PatternCount( _CR & ~m_val ; _CR & _CR ) ; True ;
+		False
+	);
+//=	Prepare return value to append to results =//
+	~value_to_add_to_results = Case(
+		not ~target_val_is_a_match and ~is_aggr ; 0 ;
+		not ~target_val_is_a_match ; "" ;
+		~output_is_dict ;
+			Let([
+				~target_key = GetValue( ~json_keys_esc ; ~value_index_of_match );
+				~target_key_json_escaped = Let([ ~j = JSONSetElement( "[]" ; 0 ; ~target_key ; JSONString ) ]; Middle( ~j ; 2 ; Length( ~j ) - 2 ))
+			];
+				"," & ~target_key_json_escaped & ":" & ~target_json_block
+			);
+		Trim( ~r_path ) = "*" and ~aggr = _COUNT ; 1 ;
+		IsEmpty( ~r_path ) and ~is_aggr ; 0 ; // This should not happen, but leave it, in case above code changes.
+		IsEmpty( ~r_path ) ; "," & ~target_json_block ;	
+	// Case: A result path has been provided for us to hand-pick a value at a specific path to include with the result.
+		Let([
+			~r_val = JSONGetElement( ~target_json_block ; ~r_path );
+			~r_val_for_type_check =
+				JSONGetElement( ~json_for_type_check ; ~r_path_for_type_check ) ;
+			~r_val_has_string_marker = Case(
+				Left( ~r_val_for_type_check ; Length( _INNER_QTE_MARKER ) ) = _INNER_QTE_MARKER ; True ;
+				Right( ~r_val_for_type_check ; Length( _INNER_QTE_MARKER ) ) = _INNER_QTE_MARKER ; True ;
+				False
+			);
+			~r_val_type = Case(
+				~r_val_for_type_check = _F_EMPTY_STRING ; "EMPTY_STRING" ;
+				~r_val_for_type_check = _F_BOOL_TRUE ; "TRUE" ;
+				~r_val_for_type_check = _F_BOOL_FALSE ; "FALSE" ;
+				~r_val_for_type_check = _F_NULL ; "NULL" ;
+				~r_val_has_string_marker ; "STRING" ;
+				Left( Trim( ~r_val_for_type_check ) ; 1 ) = "[" ; "ARRAY" ;
+				Left( Trim( ~r_val_for_type_check ) ; 1 ) = "{" ; "OBJECT" ;
+				not IsEmpty( ~r_val_for_type_check ) and
+				GetAsNumber( ~r_val_for_type_check ) = ~r_val_for_type_check ; "NUMBER" ;
+				"UNRESOLVED_PATH"
+			);
+			~output_val = Case(
+				~aggr = _COUNT ;
+					Case(
+						~r_val_type = "UNRESOLVED_PATH" ; 0 ;
+						~r_val_type = "EMPTY_STRING" ; 0 ;
+						~r_val_type = "NULL" ; 0 ;
+						~r_val_type = "ARRAY" and ~split_arrays ;
+							ValueCount( JSONListValues( ~r_val ; "" ) );
+						1
+					);
+				~aggr = _n_SUM ;
+					Case(
+						~r_val_type = "NUMBER" ; ~r_val ;
+						0
+					);
+				~aggr = _SUM ;
+					Case(
+						~r_val_type = "NUMBER" ; ~r_val ;
+						~r_val_type = "STRING" ; Let([ // ~r_val still has escaping; undo it before applying GetAsNumber
+							~n = Substitute( ~r_val ; [ _CRe ; _CR ] ; [ _LFe ; _LF ] ;
+								[ _PSe ; _PS ] ; [ _LSe ; _LS ] ;
+								[ _BSe ; _BS ] ; [ _ESCe ; _ESC ])
+						];
+							GetAsNumber( ~n ) + 0
+						);
+						0
+					);
+				~split_arrays and ~r_val_type <> "ARRAY" ; "" ;
+				~is_list and ~r_val_type <> "STRING" and ~r_val_type <> "NUMBER" ; "" ;
+				~r_val_type = "UNRESOLVED_PATH" ; "" ;
+				~r_val_type = "EMPTY_STRING" ; _QT & _QT ;
+				~r_val_type = "NULL" ; "null" ;
+				~r_val_type = "TRUE" ; "true" ;
+				~r_val_type = "FALSE" ; "false" ;
+				~r_val_type = "STRING" ; Let([ ~j = Trim( JSONSetElement( "[]" ; 0 ; ~r_val ; JSONString ) ) ]; Middle( ~j ; 2 ; Length( ~j ) - 2 ));
+			// Strip surrounding [ ] chars if we are supposed to break apart array values.
+				~r_val_type = "ARRAY" and ~split_arrays ; Middle( Trim( ~r_val ) ; 2 ; Length( Trim( ~r_val ) ) - 2 );
+				~r_val
+			)
+		];
+			Case(
+				~is_aggr ; ~output_val ;
+				IsEmpty( ~output_val ) ; "" ;
+				"," & ~output_val
+			)
+		)
+	);
+//=	Update aggregate result =//
+	~updated_aggr_result = Case(
+		~not_aggr ; "" ;
+		~is_initial ; ~value_to_add_to_results ;
+		Let([
+			~previous_aggr = GetValue( ~params ; _OPERATOR_ARG_COUNT + 1 )
+		];
+			GetAsNumber( ~previous_aggr ) + GetAsNumber( ~value_to_add_to_results )
+		)
+	);
+//=	Update input lists for next iteration =//
+	~updated_json_vals = Case( ~continue_seeking_matches ; Replace( ~json_vals ; 1 ; ~target_val_parse_stop - 1 ; "" ));
+	~updated_json_keys_esc = Case( ~continue_seeking_matches and ~output_is_dict ;
+		Let([
+			~truncate_index = Position( ~json_keys_esc ; _CR ; 0 ; ~value_index_of_match )
+		];
+			Replace( ~json_keys_esc ; 1 ; ~truncate_index ; "" )
+		)
+	);
+//=	Determine if another iteration =//
+	~process_another_iteration = ~continue_seeking_matches and Length( ~updated_json_vals ) > 1
+];
+	Case(
+	//=	Case: Input error =//
+		not IsEmpty( ~error_msg ) ; _ERROR_PREFIX & ~error_msg ;
+	//=	Case: Return COUNT(*) for ALL =//
+		~is_initial and Trim( ~r_path ) = "*" and ~aggr = _COUNT and ~op = _M_ALL ;
+		
+			ValueCount( JSONListValues( ~json_esc ; "" ));
+		
+	//=	Case: Process next iteration =//
+		~process_another_iteration ;
+		Let([
+			~params_content = Case(
+				not ~is_initial ; ~params ;
+				// Do not use List() here; it would not delimit empty values.
+				~op & _CR &
+					~m_path & _CR &
+					~aggr & _CR &
+					~r_path & _CR &
+					~m_path_for_type_check & _CR &
+					~r_path_for_type_check & _CR &
+					~split_arrays & _CR &
+					~output_is_dict & _CR &
+					~m_string_count & _CR &
+					~list_delim & _CR
+			);
+			~params_for_next_iteration = Case(
+				~not_aggr ; ~params_content & ~value_to_add_to_results ; // Case: Appending JSON results
+				LeftValues( ~params_content ; _OPERATOR_ARG_COUNT ) & ~updated_aggr_result // Case: Appending updated aggregate value
+			)
+		];
+			JSONQuery( ~updated_json_vals ; ~updated_json_keys_esc ; ~params_for_next_iteration ; ~m_val ; ~m_val_type ; ~m_strings )
+		);
+	//=	Case: Return aggregate result =//
+		~is_aggr ; ~updated_aggr_result ;
+	//=	Case: Return json result =//
+		Let([
+			~json_previous_iterations = Case( ~is_initial ; "" ;
+				Let([
+				// Offset all CR-delimited values, plus one more char to remove leading comma delimiter preceding json results
+					~split_index = Position( ~params ; _CR ; 0 ; _OPERATOR_ARG_COUNT ) + 1
+				];
+					Replace( ~params ; 1 ; ~split_index ; "" )
+				)
+			);
+			~json_this_iteration = Replace( ~value_to_add_to_results ; 1 ; 1 ; "" );
+			~results_string = Case(
+				IsEmpty( ~json_previous_iterations ) ; ~json_this_iteration ;
+				IsEmpty( ~json_this_iteration ) ; ~json_previous_iterations ;
+				~json_previous_iterations & "," & ~json_this_iteration
+			);
+			~final_json_result = Case(
+				~output_is_dict ; "{" & ~results_string & "}" ;
+				"[" & ~results_string & "]"
+			);
+			~validated_output = JSONFormatElements( ~final_json_result );
+			~delim = Case( IsEmpty( ~list_delim ) ; _CR ; Char( ~list_delim ) );
+			~output = Case(
+				~is_list ; Let([
+					~v = JSONListValues( ~validated_output ; "" );
+					~v = Case( ~aggr = _ULIST ; UniqueValues( ~v ; 1 ; "Unicode_Raw" ) ; ~v );
+					~v = Case(  ~aggr = _ULIST and Right( ~v ; 1 ) = _CR ; Left( ~v ; Length( ~v ) - 1 ) ; ~v )
+				];
+					Substitute( ~v ;
+						[ _CR ; _DELIM_RESERVED ] ;
+						[ _CRe ; _CR ] ; [ _LFe ; _LF ] ; [ _PSe ; _PS ] ; [ _LSe ; _LS ] ; [ _BSe ; _BS ] ;
+						[ _ESCe ; _ESC ] ; [ _DELIM_RESERVED ; ~delim ]
+					)
+				);
+				Substitute( ~validated_output ;
+					[ _CRe ; _BS & "r" ] ; [ _LFe ; _BS & "n" ] ;
+					[ _PSe ; _PSj ] ; [ _LSe ; _LSj ] ;
+					[ _BSe ; _BS & _BS ] ; [ _ESCe ; _ESC ]
+				)
+			);
+			~parse_error = Case( Left( ~validated_output ; 1 ) = "?" ; _ERROR_PREFIX & "Unexpected parse error while formatting result: " & ~validated_output )
+		];
+			Case(
+				IsEmpty( ~parse_error ) ; ~output ;
+				~parse_error & _CR & _CR & _CR & ~final_json_result
+			)
+		)
+	)
+);
+//=	Subroutines: Process a list for either: escaping path for type determination, or creating a list of IN match strings =//
+~params = _F_PROCESS_PATH or ~params = _F_IN_KEYLIST ;
+	Let([
+		~subroutine_flag = ~params ;
+		~unprocessed_items = ~input_json ;
+		~processed_items = ~input_m_path ;
+		~key_for_key_list = Case( ~subroutine_flag = _F_IN_KEYLIST ; ~input_r_path );
+		~this_item = GetValue( ~unprocessed_items ; 1 ) ;
+		~remaining_items = Case( ValueCount( ~unprocessed_items ) = 1 ; "" ; Replace( ~unprocessed_items ; 1 ; Length( ~this_item ) + 1 ; "" ) ) ;
+		~this_item_processed = Case(
+			~subroutine_flag = _F_PROCESS_PATH ;
+				Case(
+					Left( ~this_item ; 1 ) = "[" ; ~this_item ; // Case: ~this_item is an array index; we don't escape it.
+					Substitute( ~this_item ; // Case: ~this_item is a path chunk; we escape it.
+						[ _TYPE_CHECK_ESC_CHAR ; _TYPE_CHECK_ESC_CHARe ] ;
+						[ "null" ; _F_NULL ] ;
+						[ "true" ; _F_BOOL_TRUE ] ;
+						[ "false" ; _F_BOOL_FALSE ]
+					)
+				);
+			~subroutine_flag = _F_IN_KEYLIST ; JSONQuery( _M_EQUALS ; ~key_for_key_list ; _F_KEY ; ~this_item ; JSONString ; "" )
+		);
+		~updated_processed_items = Case(
+			~subroutine_flag = _F_PROCESS_PATH ; ~processed_items & ~this_item_processed ;
+			~subroutine_flag = _F_IN_KEYLIST ; List( ~processed_items ; ~this_item_processed )
+		);
+		~should_process_another_iteration = ValueCount( ~remaining_items ) > 0	
+	];
+		Case(
+			~should_process_another_iteration ; JSONQuery( ~remaining_items ; ~updated_processed_items ; ~subroutine_flag ; "" ; "" ; ~key_for_key_list );
+			~updated_processed_items
+		)
+	);
+~params = _F_KEY ;
+	Let([
+		~key = ~input_m_path ;
+		~val = ~input_val ;
+		~type = ~input_val_type ;
+		~op = ~input_json ;
+		~j = Trim( JSONSetElement( "{}" ; ~key ; ~val ; ~type ));
+		~s = Trim( Middle( ~j ; 2 ; Length( ~j ) - 2 )); // Strip {}
+		~l = Length ( ~s )
+	];
+		Case(
+			~op = _M_LIKE ; Replace( ~s ; ~l ; 1 ; "" ); // Remove end quote for LIKE
+			~type = JSONString ; Replace( ~s ; ~l ; 1 ; _INNER_R_QTE_MARKER & _QT );
+			~s // Number, Null, Boolean cases
+		)
+	)
+) // END MAIN CASE
+) // END MAIN LET
