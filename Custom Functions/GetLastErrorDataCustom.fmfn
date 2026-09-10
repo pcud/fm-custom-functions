@@ -1,18 +1,18 @@
 /*
  *  CUSTOM FUNCTION
- *    GetLastErrorDataCustom ( note )
+ *    GetLastErrorDataCustom ( error; description; script; line; step; detail; note )
  *
  *  DESCRIPTION
  *    Stores the GetLastError function results as a JSON but everything can be overridden if desired
  *
  *  PARAMS
- *    note: A developer note that can be attached to the error payload
  *    error: Optional override for Get ( LastError )
  *    detail: Optional override for Get ( LastErrorDetail )
  *    description: Optional override for ErrorDescription ( Abs ( error ) )
  *    script: Optional override for script name from Get ( LastErrorLocation )
  *    step: Optional override for script step from Get ( LastErrorLocation )
  *    line: Optional override for line number from Get ( LastErrorLocation )
+ *    note: A developer note that can be attached to the error payload
  *
  *  RETURNS
  *    A JSONObject

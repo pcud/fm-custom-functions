@@ -21,4 +21,4 @@
  *    2026-09-10: Paul McCudden: Refactored to call GetLastErrorDataCustom
 */
 
-GetLastErrorDataCustom ( note )
+GetLastErrorDataCustom ( ""; ""; ""; ""; ""; ""; note )
