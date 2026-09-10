@@ -1,0 +1,54 @@
+/*
+ *  CUSTOM FUNCTION
+ *    GetLastErrorDataCustom ( note )
+ *
+ *  DESCRIPTION
+ *    Stores the GetLastError function results as a JSON but everything can be overridden if desired
+ *
+ *  PARAMS
+ *    note: A developer note that can be attached to the error payload
+ *    error: Optional override for Get ( LastError )
+ *    detail: Optional override for Get ( LastErrorDetail )
+ *    description: Optional override for ErrorDescription ( Abs ( error ) )
+ *    script: Optional override for script name from Get ( LastErrorLocation )
+ *    step: Optional override for script step from Get ( LastErrorLocation )
+ *    line: Optional override for line number from Get ( LastErrorLocation )
+ *
+ *  RETURNS
+ *    A JSONObject
+ *
+ *  DEPENDENCIES
+ *    ErrorDescription: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/ErrorDescription.fmfn
+ *    JSONGetElementTypeExtended: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONGetElementTypeExtended.fmfn
+ *
+ *  CHANGELOG
+ *    2023-09-28: Paul McCudden: Created
+ *    2024-08-28: Paul McCudden: Split up location information
+ *    2026-08-20: Paul McCudden: Split from GetLastErrorData so things can be more custom defined
+*/
+
+Let (
+	[
+		~location = Get ( LastErrorLocation );
+		~error = If ( IsEmpty ( error ); Get ( LastError ); error );
+		~detail = If ( IsEmpty ( detail ); Get ( LastErrorDetail ); detail );
+		~description = If ( IsEmpty ( description ); ErrorDescription ( Abs (~error ) ); description );
+		~script = If ( IsEmpty ( script ); GetValue ( ~location; 1 ); script );
+		~step = If ( IsEmpty ( step ); GetValue ( ~location; 2 ); step );
+		~line = If ( IsEmpty ( line ); GetValue ( ~location; 3 ); line )
+	];
+
+    JSONSetElement ( "{}"
+        ;["error"; ~error; JSONGetElementTypeExtended ( ~error; "" )] // Should be number, but allow for text if needed
+
+        // Due to developered set Revert transaction LastErrorDetail text, check to see what type this is to set
+        ;["detail"; ~detail; JSONGetElementTypeExtended ( ~detail; "" ) ]
+
+        ;["description"; ~description; JSONString]
+        ;["note"; note; JSONGetElementTypeExtended ( note; "" )]
+        ;["script"; ~script; JSONString]
+        ;["step"; ~step; JSONString]
+        ;["line"; ~line; JSONNumber]
+    )
+
+)

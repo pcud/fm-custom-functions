@@ -23,6 +23,7 @@
  *    2022-05-26: Paul McCudden: Mostly finished time section - Millisecond section incomplete
  *    2025-05-08: Paul McCudden: Completed Millisecond section
  *    2026-08-26: Paul McCudden: Fixed issue where seconds was wrong if there were milliseconds in the timestamp
+ *    2026-08-28: Paul McCudden: Added in h,H for single digit hours and added HH,hh to force 2 digits
 */
 
 While (
@@ -54,8 +55,10 @@ While (
             "    dddd: The full name of the day of the week¶"&
             "    ddddd: The first letter of the day of the week¶"&
             "Hour Codes:¶"&
-            "    HH: The hours on a 24-hour clock¶"&
-            "    hh: The hours on a 12-hour clock¶"&
+            "    HH: The hours as 2 digits on a 24-hour clock¶"&
+            "    hh: The hours as 2 digits on a 12-hour clock¶"&
+            "    H: The hours as 1 or 2 digits on a 24-hour clock¶"&
+            "    h: The hours as 1 or 2 digits on a 12-hour clock¶"&
             "Other Time Codes:¶"&
             "    i: The minutes as 1 or 2 digits¶"&
             "    ii: The minutes as 2 digits¶"&
@@ -182,8 +185,10 @@ While (
             ~processing = "ddddd"; Lower ( Left ( DayName ( ~date ); 1 ) );
 
             // Hours
-            Exact ( ~processing; "HH"  ); Hour ( ~time );
-            Exact ( ~processing; "hh" ); Hour ( ~time ) - If ( Hour ( ~time ) > 12; 12 );
+            Exact ( ~processing; "H"  ); Hour ( ~time );
+            Exact ( ~processing; "h" ); Hour ( ~time ) - If ( Hour ( ~time ) > 12; 12 );
+            Exact ( ~processing; "HH"  ); Right ( "0" & Hour ( ~time ); 2 );
+            Exact ( ~processing; "hh" ); Right ( "0" & ( Hour ( ~time ) - If ( Hour ( ~time ) > 12; 12 ) ); 2 );
 
             // Minutes
             ~processing = "i"; GetAsNumber ( Minute ( ~time ) );

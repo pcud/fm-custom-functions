@@ -4,38 +4,21 @@
  *
  *  DESCRIPTION
  *    Stores the GetLastError function results as a JSON
+ *    (Wrapper that calls GetLastErrorDataCustom with default values)
  *
  *  PARAMS
- *    description: A developer description of the error that happened
+ *    note: A developer note that can be attached to the error payload
  *
  *  RETURNS
  *    A JSONObject
  *
  *  DEPENDENCIES
- *    ErrorDescription: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/ErrorDescription.fmfn
- *    JSONGetElementTypeExtended: https://github.com/pcud/fm-custom-functions/blob/master/Custom%20Functions/JSONGetElementTypeExtended.fmfn
+ *    GetLastErrorDataCustom: Core error data builder with customizable fields
  *
  *  CHANGELOG
  *    2023-09-28: Paul McCudden: Created
  *    2024-08-28: Paul McCudden: Split up location information
+ *    2026-09-10: Paul McCudden: Refactored to call GetLastErrorDataCustom
 */
 
-Let (
-	[
-		~location = Get ( LastErrorLocation )
-	];
-
-    JSONSetElement ( "{}"
-        ;["error"; Get ( LastError ); JSONNumber]
-
-        // Due to developered set Revert transaction LastErrorDetail text, check to see what type this is to set
-        ;["detail"; Get ( LastErrorDetail ); JSONGetElementTypeExtended ( Get ( LastErrorDetail ); "" ) ]
-
-        ;["description"; ErrorDescription ( Get ( LastError ) ); JSONString]
-        ;["note"; note; JSONGetElementTypeExtended ( note; "" ) ]
-        ;["script"; GetValue ( ~location; 1 ); JSONString]
-        ;["step"; GetValue ( ~location; 2 ); JSONString]
-        ;["line"; GetValue ( ~location; 3 ); JSONNumber]
-    )
-
-)
+GetLastErrorDataCustom ( note )
